@@ -4,20 +4,7 @@
  * 무단 수정 및 2차 배포 금지
  */
  
-//상수 선언
-const CTX = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-
-const VERSION = "6.0";
-
-const VERSION_CHECK_URL = "";
-
-const SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
-const RESOURCE_PATH = SD_CARD + "/games/com.mojang/worldedit/";
-const ITEM_PATH = RESOURCE_PATH + "images/items/";
-const ENTITY_PATH = RESOURCE_PATH + "images/entities/";
-const GUI_PATH = RESOURCE_PATH + "images/gui/";
-
-//import
+ //import
 const LinearLayout = android.widget.LinearLayout;
 const RelativeLayout = android.widget.RelativeLayout;
 const Button = android.widget.Button;
@@ -57,6 +44,24 @@ const InputStreamReader = java.io.InputStreamReader;
 const URL = java.net.URL;
 
 const InputType = android.text.InputType;
+
+//상수 선언
+const CTX = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+
+const CURRENT_MAJOR_VERSION = 6;
+const CURRENT_MINOR_VERSION = 0;
+
+const VERSION_CHECK_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/lastest_version.txt";
+const LASTEST_MAJOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[0].split("M_version=")[1]);
+const LASTEST_MINOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[1].split("m_version=")[1]);
+
+const CHANGE_LOG_URL = "";
+
+const SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+const RESOURCE_PATH = SD_CARD + "/games/com.mojang/worldedit/";
+const ITEM_PATH = RESOURCE_PATH + "images/items/";
+const ENTITY_PATH = RESOURCE_PATH + "images/entities/";
+const GUI_PATH = RESOURCE_PATH + "images/gui/";
 
 //GUI 선언
 var shortcutWindow;
@@ -161,11 +166,9 @@ function destroyBlock() {
 /* ---------------------------------------------------------------------------- Custom Functions ---------------------------------------------------------------------------- */
 
 function checkVersion() {
-	var lastestVersion = readURL("https://gist.githubusercontent.com/ToonRaon/f507f0429a56c867e471/raw/504953848929ac86498b7bec90f12c0fc6e063e9/worldedit_version_check.txt");
-
-	if(lastestVersion == "") return; //인터넷 연결 상태 불량
-
-	if(lastestVersion != VERSION) {
+	if(LASTEST_MAJOR_VERSION == "" && LASTEST_MINOR_VERSION == "") return; //인터넷 연결 상태 불량
+	
+	if((CURRENT_MAJOR_VERSION < LASTEST_MAJOR_VERSION) || (CURRENT_MAJOR_VERSION == LASTEST_MAJOR_VERSION && CURRENT_MINOR_VERSION < LASTEST_MINOR_VERSION)) { //최신버전이 아닌 경우
 		var listener = new DialogInterface.OnClickListener({
 			onClick: function(dialog, which) {
 				switch(which) {
@@ -178,7 +181,7 @@ function checkVersion() {
 				}
 			}
 		});
-		alertDialog("알 림", "현재 버전보다 상위버전이 출시되었습니다. 제작자 블로그 또는 MCPE KOREA 카페를 통해 업데이트하는 것을 권장합니다.\n최신버전: " + lastestVersion + "\n사용버전: " + VERSION + "\n\n" + readURL("https://gist.githubusercontent.com/ToonRaon/f507f0429a56c867e471/raw/4d916eef75adaa89425226894d976a502434c3c7/worldedit_change_log.txt"), listener, "제작자 블로그", null, "무시");
+		alertDialog("알 림", "현재 버전보다 상위버전이 출시되었습니다. 제작자 블로그 또는 MCPE KOREA 카페를 통해 업데이트하는 것을 권장합니다.\n최신버전: " + LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION + "\n사용버전: " + CURRENT_MAJOR_VERSION + "," + CURRENT_MINOR_VERSION + "\n\n" + readURL(CHANGE_LOG_URL), listener, "제작자 블로그", null, "무시");
 	} else {
 		alertDialog("알 림", "이미 최신버전입니다.", null, null, null);
 	}
@@ -206,7 +209,7 @@ function toast(message, duration) {
 	}));
 }
 
-function readURL(url) {
+function readURL(url, returnType) {
 	var URLContent = "";
 	var bufferedReader = new BufferedReader(new InputStreamReader(URL(url).openStream()));
 	
@@ -216,7 +219,10 @@ function readURL(url) {
 	}
 	bufferedReader.close();
 	
-	return URLContent;
+	if(returnType == "array") //인자로 배열을 넘긴 경우 배열로 출력
+		return URLContent.split("\n");
+	else //인자로 배열을 지정하지 않은 경우 하나의 string으로 출력
+		return URLContent;
 }
 
 function showWindow(window, gravity, x, y) {
