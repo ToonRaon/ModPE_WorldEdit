@@ -30,6 +30,7 @@ const Color = android.graphics.Color;
 const Rect = android.graphics.Rect;
 const NinePatchDrawable = android.graphics.drawable.NinePatchDrawable;
 
+const Runnable = java.lang.Runnable;
 const Thread = java.lang.Thread;
 
 const File = java.io.File;
@@ -92,6 +93,8 @@ var backupBlock = new Array();
 
 var curProgress = 0;
 
+var threadDelay = 0;
+
 /* ---------------------------------------------------------------------------- ModPE Functions ---------------------------------------------------------------------------- */
 
 //폴더생성
@@ -102,7 +105,7 @@ if(!java.io.File(RESOURCE_PATH).exists())
 makeGUIWindow();
 makeShortcutWindow();
 
-CTX.runOnUiThread(new java.lang.Runnable({
+CTX.runOnUiThread(new Runnable({
 	run: function() {
 		try {
 			var 모장프로그래머들아최적화를제대로안하니까게임나갈때마다팅겨서내가이런버튼까지만들어야하잖아최적화좀제대로해라 = new Button(CTX);
@@ -163,6 +166,7 @@ function destroyBlock() {
 	if(item == 271) //나무도끼
 		preventDefault();
 }
+
 /* ---------------------------------------------------------------------------- Custom Functions ---------------------------------------------------------------------------- */
 
 function checkVersion() {
@@ -200,7 +204,7 @@ function dip2px(dips) {
 }
 
 function toast(message, duration) {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			if(duration == null)
 				duration = 0;
@@ -226,7 +230,7 @@ function readURL(url, returnType) {
 }
 
 function showWindow(window, gravity, x, y) {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				window.showAtLocation(CTX.getWindow().getDecorView(), gravity, x, y);
@@ -238,7 +242,7 @@ function showWindow(window, gravity, x, y) {
 }
 
 function closeWindow(window) {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				if(window.isShowing()) {
@@ -253,7 +257,7 @@ function closeWindow(window) {
 }
 
 function alertDialog(title, content, listener, positive, neutral, negative) {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				var alertDialog = new AlertDialog.Builder(CTX);
@@ -275,7 +279,7 @@ function alertDialog(title, content, listener, positive, neutral, negative) {
 function progressDialog(title, maxProgress, canCancel) {
 	//내가 왜 이딴식으로 프로그래스다이얼로그를 코딩해놨지..
 	
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				curProgress = 0;
@@ -297,7 +301,7 @@ function progressDialog(title, maxProgress, canCancel) {
 				while(true) {
 					Thread.sleep(1);
 					
-					CTX.runOnUiThread(new java.lang.Runnable({
+					CTX.runOnUiThread(new Runnable({
 						run: function() {
 							progressDialog.setMessage(curProgress + "/" + maxProgress);
 						}
@@ -317,7 +321,7 @@ function progressDialog(title, maxProgress, canCancel) {
 */
 
 function makeShortcutWindow() {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				var layout = new LinearLayout(CTX);
@@ -379,7 +383,7 @@ function setPoint(x, y, z, point, block, blockData) {
 }
 
 function makeCommandWindow() {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				if(commandDialog != null) {
@@ -444,6 +448,33 @@ function commandHandler(command) {
 			
 			minPoint = comparePoint(0);
 			maxPoint = comparePoint(1);
+			
+			//선택 영역이 너무 큰 경우 경고 메세지 출력
+			threadDelay = 0;
+			var volume = (maxPoint.x - minPoint.x + 1) * (maxPoint.y - minPoint.y + 1) * (maxPoint.z - minPoint.z + 1);
+			if(volume > 10000) {
+				if(10000 < volume && volume < 50000)
+					threadDelay = 1;
+				else if(50000 <= volume && volume < 1000000)
+					threadDelay = 2;
+				else
+					threadDelay = 3;
+				
+				var listener = new DialogInterface.OnClickListener({
+					onClick: function(dialog, which) {
+						switch(which) {
+							case DialogInterface.BUTTON_POSITIVE:
+								break;
+							
+							case DialogInterface.BUTTON_NEGATIVE:
+								threadDelay = 0;
+								break;
+						}
+					}
+				});
+				
+				alertDialog("경고! 지정된 영역이 너무 큽니다.", "현재 " + volume + "개의 블럭이 선택되었습니다.\n한 번에 너무 많은 블럭을 수정할 경우 블럭 설치 도중 팅길 가능성이 있으며, 팅길 경우 복구도 불가능합니다.\n\n따라서 본 스크립트는 각 블럭마다 설치할 때 딜레이를 줘서 덜 팅기게 만드는 기능이 내장되어있습니다.\n\n딜레이 기능을 사용하시겠습니까?\n\n※ 딜레이 기능을 사용하더라도 팅길 가능성은 여전히 존재합니다.\n※작업 도중 팅김으로 인한 맵 손실은 스크립트 제작자가 책임지지 않습니다.\n※딜레이 기능을 사용하면 작업 시간이 대폭 길어집니다.", listener, "딜레이 사용", null, "무시하고 진행");
+			}
 		}
 		
 		switch(command) {
@@ -466,7 +497,7 @@ function commandHandler(command) {
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
 						if(selectedItemId != null)
-							fill(minPoint, maxPoint, selectedItemId, selectedItemData, true);
+							wall(minPoint, maxPoint, selectedItemId, selectedItemData);
 						
 						selectedItemId = null;
 						selectedItemData = null;
@@ -676,7 +707,7 @@ function commandHandler(command) {
 }
 
 function makeGUIWindow() {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				var rLayout = new RelativeLayout(CTX);
@@ -965,7 +996,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage) {
 }
 
 function radiusSetting() {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				radius = "";
@@ -1007,7 +1038,7 @@ function radiusSetting() {
 }
 
 function cylinderSetting() {
-	CTX.runOnUiThread(new java.lang.Runnable({
+	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
 				radius = "";
@@ -1106,24 +1137,108 @@ function comparePoint(type) {
 	}
 }
 
-function fill(minPoint, maxPoint, id, data, isWall) {
+function fill(minPoint, maxPoint, id, data) {
 	try {
-		var blockCount = 0;
-		for(var x = minPoint.x; x <= maxPoint.x; x++) {
-			for(var y = minPoint.y; y <= maxPoint.y; y++) {
-				for(var z = minPoint.z; z <= maxPoint.z; z++) {
-					if(isWall) if((minPoint.x + 1) <= x && x <= (maxPoint.x - 1) && (minPoint.z + 1) <= z && z <= (maxPoint.z - 1)) continue;
-					Level.setTile(x, y, z, id, data);
-					blockCount++;
+		var progress = ProgressDialog.show(CTX, "dialog title", "dialog message", true, false);
+		
+		new Thread(new Runnable() {
+			run: 	function() {
+				var blockCount = 0;
+				var volume = (maxPoint.x - minPoint.x + 1) * (maxPoint.y - minPoint.y + 1) * (maxPoint.z - minPoint.z + 1);
+				var progressPercentage = 0;
+				for(var x = minPoint.x; x <= maxPoint.x; x++) {
+					for(var y = minPoint.y; y <= maxPoint.y; y++) {
+						for(var z = minPoint.z; z <= maxPoint.z; z++) {
+							Level.setTile(x, y, z, id, data);
+							blockCount++;
+							
+							progressPercentage = blockCount / volume * 100;
+							clientMessage(progressPercentage.toFixed(2));
+							
+							Thread.sleep(threadDelay);
+						}
+					}
 				}
+				
+				clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
+				
+				preventFolding();
+				
+				CTX.runOnUiThread(new Runnable() {
+					run: function() {
+							try {
+								progress.dismiss();
+							} catch(e) {
+								toast(e, 1);
+							}
+					}
+				});
 			}
-		}
-		
-		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
-		
-		preventFolding();
+		}).start();
 	} catch(e) {
 		toast("fill 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
+function wall(minPoint, maxPoint, id, data) {
+	try {
+		var progress = ProgressDialog.show(CTX, "dialog title", "dialog message", true, false);
+		
+		new Thread(new Runnable() {
+			run: 	function() {
+				var blockCount = 0;
+				var volume = (maxPoint.x - minPoint.x + 1) * (maxPoint.y - minPoint.y - 1) * (maxPoint.z - minPoint.z - 1) - (maxPoint.x - minPoint.x - 1) * (maxPoint.y - minPoint.y - 1) * (maxPoint.z - minPoint.z - 1);
+				var progressPercentage = 0;
+				
+				for(var y = minPoint.y; y <= maxPoint.y; y++) {
+					for(var z = minPoint.z; ; z = maxPoint.z) {
+						for(var x = minPoint.x; x <= maxPoint.x; x++) {
+							Level.setTile(x, y, z, id, data);
+							blockCount++;
+							
+							progressPercentage = blockCount / volume * 100;
+							clientMessage(progressPercentage.toFixed(2));
+							
+							Thread.sleep(threadDelay);
+						}
+						
+						if(z == maxPoint.z)
+							break;
+					}
+					
+					for(var x = minPoint.x; ; x = maxPoint.x) {
+						for(var z = minPoint.z; z <= maxPoint.z; z++) {
+							Level.setTile(x, y, z, id, data);
+							blockCount++;
+							
+							progressPercentage = blockCount / volume * 100;
+							clientMessage(progressPercentage.toFixed(2));
+							
+							Thread.sleep(threadDelay);
+						}
+						
+						if(x == maxPoint.x)
+							break;
+					}
+				}
+				
+				clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
+				
+				preventFolding();
+				
+				CTX.runOnUiThread(new Runnable() {
+					run: function() {
+							try {
+								progress.dismiss();
+							} catch(e) {
+								toast(e, 1);
+							}
+					}
+				});
+			}
+		}).start();
+	} catch(e) {
+		toast("wall 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
 }
 
