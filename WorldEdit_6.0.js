@@ -102,7 +102,7 @@ if(!java.io.File(RESOURCE_PATH).exists())
 	java.io.File(RESOURCE_PATH).mkdirs();
 
 //GUI 준비
-makeGUIWindow();
+//makeGUIWindow();
 makeShortcutWindow();
 
 CTX.runOnUiThread(new Runnable({
@@ -148,7 +148,13 @@ function useItem(x, y, z, item, block, side, itemData, blockData) {
 }
 
 function procCmd(command) {
-	//
+	command = command.split(" ");
+	
+	switch(command[0]) {
+		case "채":
+			fill(comparePoint(0), comparePoint(1), parseInt(command[1]), parseInt(command[2]));
+			break;
+	}
 }
 
 function startDestroyBlock(x, y, z, side) {
@@ -479,7 +485,6 @@ function commandHandler(command) {
 		
 		switch(command) {
 			case "채우기":
-				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
 						if(selectedItemId != null)
@@ -1139,13 +1144,23 @@ function comparePoint(type) {
 
 function fill(minPoint, maxPoint, id, data) {
 	try {
-		var progress = ProgressDialog.show(CTX, "dialog title", "dialog message", true, false);
+		var progress;
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+					try {
+						progress = ProgressDialog.show(CTX, "dialog title", "dialog message", true, false);
+					} catch(e) {
+						toast(e, 1);
+					}
+			}
+		});
 		
 		new Thread(new Runnable() {
 			run: 	function() {
 				var blockCount = 0;
 				var volume = (maxPoint.x - minPoint.x + 1) * (maxPoint.y - minPoint.y + 1) * (maxPoint.z - minPoint.z + 1);
 				var progressPercentage = 0;
+				
 				for(var x = minPoint.x; x <= maxPoint.x; x++) {
 					for(var y = minPoint.y; y <= maxPoint.y; y++) {
 						for(var z = minPoint.z; z <= maxPoint.z; z++) {
@@ -1155,13 +1170,16 @@ function fill(minPoint, maxPoint, id, data) {
 							progressPercentage = blockCount / volume * 100;
 							clientMessage(progressPercentage.toFixed(2));
 							
-							Thread.sleep(threadDelay);
+							try {
+								Thread.sleep(threadDelay);
+							} catch(e) {
+								toast(e, 1);
+							}
 						}
 					}
 				}
 				
 				clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
-				
 				preventFolding();
 				
 				CTX.runOnUiThread(new Runnable() {
