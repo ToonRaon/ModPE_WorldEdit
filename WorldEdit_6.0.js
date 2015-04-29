@@ -53,10 +53,14 @@ const CURRENT_MAJOR_VERSION = 6;
 const CURRENT_MINOR_VERSION = 0;
 
 const VERSION_CHECK_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/lastest_version.txt";
-const LASTEST_MAJOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[0].split("M_version=")[1]);
-const LASTEST_MINOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[1].split("m_version=")[1]);
+try {
+	const LASTEST_MAJOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[0].split("M_version=")[1]);
+	const LASTEST_MINOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[1].split("m_version=")[1]);
+} catch(e) {
+	toast("인터넷에 연결할 수 없습니다. 인터넷 연결 상태를 확인해주세요.", 1);
+}
 
-const CHANGE_LOG_URL = "";
+const CHANGE_LOG_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/change_log.txt";
 
 const SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 const RESOURCE_PATH = SD_CARD + "/games/com.mojang/worldedit/";
@@ -91,9 +95,7 @@ var backupLength = new Array(3);
 var backupCount = 0;
 var backupBlock = new Array();
 
-var curProgress = 0;
-
-var threadDelay = 0;
+var progressDialog;
 
 /* ---------------------------------------------------------------------------- ModPE Functions ---------------------------------------------------------------------------- */
 
@@ -102,9 +104,10 @@ if(!java.io.File(RESOURCE_PATH).exists())
 	java.io.File(RESOURCE_PATH).mkdirs();
 
 //GUI 준비
-//makeGUIWindow();
+makeGUIWindow();
 makeShortcutWindow();
 
+/*
 CTX.runOnUiThread(new Runnable({
 	run: function() {
 		try {
@@ -125,6 +128,7 @@ CTX.runOnUiThread(new Runnable({
 		}
 	}
 }));
+*/
 
 function selectLevelHook() {
 	
@@ -148,11 +152,14 @@ function useItem(x, y, z, item, block, side, itemData, blockData) {
 }
 
 function procCmd(command) {
+	clientMessage(command);
 	command = command.split(" ");
 	
 	switch(command[0]) {
 		case "채":
-			fill(comparePoint(0), comparePoint(1), parseInt(command[1]), parseInt(command[2]));
+			selectedItemId = parseInt(command[1]);
+			selectedItemData = parseInt(command[2]);
+			fill(comparePoint(0), comparePoint(1), selectedItemId, selectedItemData);
 			break;
 	}
 }
@@ -281,51 +288,6 @@ function alertDialog(title, content, listener, positive, neutral, negative) {
 	}));
 }
 
-/*
-function progressDialog(title, maxProgress, canCancel) {
-	//내가 왜 이딴식으로 프로그래스다이얼로그를 코딩해놨지..
-	
-	CTX.runOnUiThread(new Runnable({
-		run: function() {
-			try {
-				curProgress = 0;
-				
-				var progressDialog = new ProgressDialog(CTX);
-				progressDialog.setTitle(title.toString());
-				progressDialog.setMessage(curProgress + "/" + maxProgress);
-				progressDialog.setCancelable(canCancel);
-				progressDialog.show();
-			} catch(e) {
-				toast("프로그래스 다이얼로그를 생성하는 과정에서 오류가 발생했습니다.\n" + e, 1);
-			}
-		}
-	}));
-	
-	new Thread({
-		run: function() {
-			try {
-				while(true) {
-					Thread.sleep(1);
-					
-					CTX.runOnUiThread(new Runnable({
-						run: function() {
-							progressDialog.setMessage(curProgress + "/" + maxProgress);
-						}
-					}));
-					
-					if(curProgress == maxProgress) { //작업 종료
-						progressDialog.dismiss();
-						break;
-					}
-				}
-			} catch(e) {
-				toast("프로그래스 다이얼로그를 동기화시키는 도중 오류가 발생했습니다.\n" + e, 1);
-			}
-		}
-	}).start();
-}
-*/
-
 function makeShortcutWindow() {
 	CTX.runOnUiThread(new Runnable({
 		run: function() {
@@ -440,59 +402,34 @@ function makeCommandWindow() {
 
 function commandHandler(command) {
 	try {
-		var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "빈원기둥", "붙여넣기"];
+		var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
 		
 		isPointNecessary = true;
 		for each(var i in unnecessaryPointCommands)
 			if(command == i) isPointNecessary = false;
 		
-		if(isPointNecessary) {
+		if(isPointNecessary) { //영역 지정이 필요한 명령어
 			if(firstPoint.x == null || secondPoint.x == null) return;
 			
 			var minPoint = {x: null, y: null, z: null};
 			var maxPoint = {x: null, y: null, z: null};
 			
-			minPoint = comparePoint(0);
+			minPoint = comparePoint(0); 
 			maxPoint = comparePoint(1);
-			
-			//선택 영역이 너무 큰 경우 경고 메세지 출력
-			threadDelay = 0;
-			var volume = (maxPoint.x - minPoint.x + 1) * (maxPoint.y - minPoint.y + 1) * (maxPoint.z - minPoint.z + 1);
-			if(volume > 10000) {
-				if(10000 < volume && volume < 50000)
-					threadDelay = 1;
-				else if(50000 <= volume && volume < 1000000)
-					threadDelay = 2;
-				else
-					threadDelay = 3;
-				
-				var listener = new DialogInterface.OnClickListener({
-					onClick: function(dialog, which) {
-						switch(which) {
-							case DialogInterface.BUTTON_POSITIVE:
-								break;
-							
-							case DialogInterface.BUTTON_NEGATIVE:
-								threadDelay = 0;
-								break;
-						}
-					}
-				});
-				
-				alertDialog("경고! 지정된 영역이 너무 큽니다.", "현재 " + volume + "개의 블럭이 선택되었습니다.\n한 번에 너무 많은 블럭을 수정할 경우 블럭 설치 도중 팅길 가능성이 있으며, 팅길 경우 복구도 불가능합니다.\n\n따라서 본 스크립트는 각 블럭마다 설치할 때 딜레이를 줘서 덜 팅기게 만드는 기능이 내장되어있습니다.\n\n딜레이 기능을 사용하시겠습니까?\n\n※ 딜레이 기능을 사용하더라도 팅길 가능성은 여전히 존재합니다.\n※작업 도중 팅김으로 인한 맵 손실은 스크립트 제작자가 책임지지 않습니다.\n※딜레이 기능을 사용하면 작업 시간이 대폭 길어집니다.", listener, "딜레이 사용", null, "무시하고 진행");
-			}
 		}
 		
 		switch(command) {
 			case "채우기":
+				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
-						if(selectedItemId != null)
-							fill(minPoint, maxPoint, selectedItemId, selectedItemData, false);
+						if(selectedItemId != null) {
+							fill(minPoint, maxPoint, selectedItemId, selectedItemData);
+						}
 						
-						//selectedItemId = null;
-						//selectedItemData = null;
-						//GUIWindow.setOnDismissListener(null);
+						selectedItemId = null;
+						selectedItemData = null;
+						GUIWindow.setOnDismissListener(null);
 					}
 				}));
 				break;
@@ -712,7 +649,13 @@ function commandHandler(command) {
 }
 
 function makeGUIWindow() {
-	CTX.runOnUiThread(new Runnable({
+	CTX.runOnUiThread(new Runnable() {
+		run: function() {
+			progressDialog = ProgressDialog.show(CTX, "잠시만 기다려주세요..", "GUI를 불러오고 있습니다...", true, false);
+		}
+	});
+	
+	new Thread(new Runnable({
 		run: function() {
 			try {
 				var rLayout = new RelativeLayout(CTX);
@@ -850,11 +793,20 @@ function makeGUIWindow() {
 				GUIWindow = new PopupWindow(rLayout, -1, -1);
 				GUIWindow.setFocusable(true);
 				//GUIWindow.showAtLocation(CTX.getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+				
+				CTX.runOnUiThread(new Runnable() {
+					run: function() {
+						progressDialog.dismiss();
+						progressDilaog = null;
+					}
+				});
+				
+				toast("월드에딧을 사용할 준비가 완료되었습니다.", 0);
 			} catch(e) {
-				toast(e, 1);
+				toast("월드에딧 GUI를 불러오는 데 실패하였습니다.\n" + e, 1);
 			}
 		}
-	}));
+	})).start();
 }
 
 function getAllFiles(path) {
@@ -908,20 +860,24 @@ function makeItemButtons(files, rLayout, vLayout, currentPage) {
 			onClick: function(view) {
 				var fileName = files[parseInt(view.getId())];
 				
-				//toast(view.getId() + " : " + fileName, 1);
-				toast(fileName.replace("-", ":").replace(".png", ""), 0);
+				//toast(fileName.replace("-", ":").replace(".png", ""), 0);
 				selectedItemId = parseInt(fileName.split("-")[0]);
 				selectedItemData = parseInt(fileName.split("-")[1].split(".png")[0]);
 				
 				if(!canItemSelect && selectedItemId > 255) {
 					toast("아이템은 선택할 수 없습니다.", 0);
-					
+					 
 					selectedItemId = null;
 					selectedItemData = null;
 					return;
 				}
 				
-				GUIWindow.dismiss();
+				CTX.runOnUiThread(new Runnable() {
+					run: function() {
+						GUIWindow.dismiss();
+					}
+				});
+				
 			}
 		});
 
@@ -983,6 +939,14 @@ function makeItemButtons(files, rLayout, vLayout, currentPage) {
 					itemLayout.addView(itemText, itemTextLayoutParams);
 					
 					hLayout.addView(itemLayout);
+					
+					CTX.runOnUiThread(new Runnable() {
+						run: function() {
+							try {
+								progressDialog.setMessage(((id / ((Math.floor(files.length / 66) * 66) + (5 * 11) + 10 + 1) * 100)).toFixed(2).toString() + "%");
+							} catch(e) { toast(e, 1); }
+						}
+					});
 				}
 				
 				vLayout[i].addView(hLayout);
@@ -1144,55 +1108,43 @@ function comparePoint(type) {
 
 function fill(minPoint, maxPoint, id, data) {
 	try {
-		var progress;
+		var blockCount = 0;
+		
+		//프로그래스 다이얼로그 시작
+		/*
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
-					try {
-						progress = ProgressDialog.show(CTX, "dialog title", "dialog message", true, false);
-					} catch(e) {
-						toast(e, 1);
-					}
+				progressDialog = ProgressDialog.show(CTX, "잠시만 기다려주세요..", "채우기 작업 중입니다...", true, false);
 			}
 		});
+		*/
 		
-		new Thread(new Runnable() {
-			run: 	function() {
-				var blockCount = 0;
-				var volume = (maxPoint.x - minPoint.x + 1) * (maxPoint.y - minPoint.y + 1) * (maxPoint.z - minPoint.z + 1);
-				var progressPercentage = 0;
-				
-				for(var x = minPoint.x; x <= maxPoint.x; x++) {
-					for(var y = minPoint.y; y <= maxPoint.y; y++) {
-						for(var z = minPoint.z; z <= maxPoint.z; z++) {
-							Level.setTile(x, y, z, id, data);
-							blockCount++;
-							
-							progressPercentage = blockCount / volume * 100;
-							clientMessage(progressPercentage.toFixed(2));
-							
-							try {
-								Thread.sleep(threadDelay);
-							} catch(e) {
-								toast(e, 1);
-							}
-						}
-					}
+		for(var x = minPoint.x; x <= maxPoint.x; x++) {
+			for(var y = minPoint.y; y <= maxPoint.y; y++) {
+				for(var z = minPoint.z; z <= maxPoint.z; z++) {
+					Level.setTile(x, y, z, id, data);
+					blockCount++;
 				}
-				
-				clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
-				preventFolding();
-				
-				CTX.runOnUiThread(new Runnable() {
-					run: function() {
-							try {
-								progress.dismiss();
-							} catch(e) {
-								toast(e, 1);
-							}
-					}
-				});
 			}
-		}).start();
+		}
+		
+		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
+		
+		preventFolding(); //끼임 방지
+		
+		var chunk_x = parseInt(maxPoint.x - minPoint.x), chunk_z = parseInt(maxPoint.z - minPoint.z);
+		if(chunk_x >= 4 || chunk_z >= 4)
+			clientMessage(ChatColor.RED + "[경고!] 넓은 영역을 에딧하여 청크 오류로 맵 저장이 되지 않을 수도 있습니다.");
+		
+		//프로그래스 다이얼로그 종료
+		/*
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDialog = null;
+			}
+		});
+		*/
 	} catch(e) {
 		toast("fill 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1200,61 +1152,49 @@ function fill(minPoint, maxPoint, id, data) {
 
 function wall(minPoint, maxPoint, id, data) {
 	try {
-		var progress = ProgressDialog.show(CTX, "dialog title", "dialog message", true, false);
+		var blockCount = 0;
 		
-		new Thread(new Runnable() {
-			run: 	function() {
-				var blockCount = 0;
-				var volume = (maxPoint.x - minPoint.x + 1) * (maxPoint.y - minPoint.y - 1) * (maxPoint.z - minPoint.z - 1) - (maxPoint.x - minPoint.x - 1) * (maxPoint.y - minPoint.y - 1) * (maxPoint.z - minPoint.z - 1);
-				var progressPercentage = 0;
-				
-				for(var y = minPoint.y; y <= maxPoint.y; y++) {
-					for(var z = minPoint.z; ; z = maxPoint.z) {
-						for(var x = minPoint.x; x <= maxPoint.x; x++) {
-							Level.setTile(x, y, z, id, data);
-							blockCount++;
-							
-							progressPercentage = blockCount / volume * 100;
-							clientMessage(progressPercentage.toFixed(2));
-							
-							Thread.sleep(threadDelay);
-						}
-						
-						if(z == maxPoint.z)
-							break;
-					}
-					
-					for(var x = minPoint.x; ; x = maxPoint.x) {
-						for(var z = minPoint.z; z <= maxPoint.z; z++) {
-							Level.setTile(x, y, z, id, data);
-							blockCount++;
-							
-							progressPercentage = blockCount / volume * 100;
-							clientMessage(progressPercentage.toFixed(2));
-							
-							Thread.sleep(threadDelay);
-						}
-						
-						if(x == maxPoint.x)
-							break;
-					}
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "잠시만 기다려주세요..", "벽을 생성 중입니다...", true, false);
+			}
+		});
+		
+		for(var y = minPoint.y; y <= maxPoint.y; y++) {
+			for(var z = minPoint.z; ; z = maxPoint.z) {
+				for(var x = minPoint.x; x <= maxPoint.x; x++) {
+					Level.setTile(x, y, z, id, data);
+					blockCount++;
 				}
 				
-				clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
-				
-				preventFolding();
-				
-				CTX.runOnUiThread(new Runnable() {
-					run: function() {
-							try {
-								progress.dismiss();
-							} catch(e) {
-								toast(e, 1);
-							}
-					}
-				});
+				if(z == maxPoint.z)
+					break;
 			}
-		}).start();
+			
+			for(var x = minPoint.x; ; x = maxPoint.x) {
+				for(var z = minPoint.z; z <= maxPoint.z; z++) {
+					Level.setTile(x, y, z, id, data);
+					blockCount++;
+				}
+				
+				if(x == maxPoint.x)
+					break;
+			}
+		}
+		
+		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
+		
+		preventFolding(); //끼임 방지
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
+		
 	} catch(e) {
 		toast("wall 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1548,7 +1488,7 @@ function cover(minPoint, maxPoint, id, data) {
 
 function backup(firstPoint, secondPoint) {
 	//if(readData("backup") == "false") return;
-	
+	/*
 	comparePoint(firstPoint, secondPoint);
 	backupPoint[backupCount] = new Array(3);
 	backupLength[backupCount] = new Array(3);
@@ -1570,6 +1510,7 @@ function backup(firstPoint, secondPoint) {
 			}
 		}
 	}
+	*/
 }
 
 function undo() {
