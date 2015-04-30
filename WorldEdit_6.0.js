@@ -64,9 +64,100 @@ const CHANGE_LOG_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEd
 
 const SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 const RESOURCE_PATH = SD_CARD + "/games/com.mojang/worldedit/";
-const ITEM_PATH = RESOURCE_PATH + "images/items/";
-const ENTITY_PATH = RESOURCE_PATH + "images/entities/";
-const GUI_PATH = RESOURCE_PATH + "images/gui/";
+const IMAGE_PATH = RESOURCE_PATH + "images/";
+const GUI_PATH = IMAGE_PATH + "gui/";
+const ITEM_PATH = IMAGE_PATH + "items/";
+const ENTITY_PATH = IMAGE_PATH + "entities/";
+
+const INITIAL = 19; //초성 - ㄱ, ㄲ, ㄴ, ㄷ, ㄸ, ㄹ, ㅁ, ㅂ, ㅃ, ㅅ, ㅆ, ㅇ, ㅈ, ㅉ, ㅊ, ㅋ, ㅌ, ㅍ, ㅎ
+const MEDIAL = 21; //중성 - ㅏ, ㅐ, ㅑ, ㅒ, ㅓ, ㅔ, ㅕ, ㅖ, ㅗ, ㅘ, ㅙ, ㅚ, ㅛ, ㅜ, ㅝ, ㅞ, ㅟ, ㅠ, ㅡ, ㅢ,ㅣ
+const FINAL = 28; //종성 - (없음), ㄱ, ㄲ, ㄳ, ㄴ, ㄵ, ㄶ, ㄷ, ㄹ, ㄺ, ㄻ, ㄼ, ㄽ, ㄾ, ㄿ, ㅀ, ㅁ, ㅂ, ㅄ, ㅅ, ㅆ, ㅇ, ㅈ, ㅊ, ㅋ, ㅌ, ㅍ, ㅎ
+const FIRST_KOREAN_OF_UNICODE = 44032; //유니코드에서 첫번째 한글 문자인 '가'의 고유번호. 44033은 각, 44034는 갂... 과 같은 순서로 55203번째까지 한글이 존재하고있다.
+
+const RESOURCE_FILES_LIST = [
+	//gui 폴더
+	[
+		"main_icon.png",
+		"table.png",
+		"prev_button_on.png",
+		"prev_button_off.png",
+		"next_button_on.png",
+		"next_button_off.png",
+		"slot.png"
+	],
+	//items 폴더
+	[
+		"0-0.png", "1-0.png", "1-1.png", "1-2.png", "1-3.png", "1-4.png", "1-5.png", "1-6.png", "2-0.png", "3-0.png",
+		"3-1.png", "3-2.png", "4-0.png", "5-0.png", "5-1.png", "5-2.png", "5-3.png", "5-4.png", "5-5.png", "6-0.png",
+		"6-1.png", "6-2.png", "6-3.png", "6-4.png", "6-5.png", "7-0.png", "8-0.png", "9-0.png", "10-0.png", "11-0.png",
+		"12-0.png", "12-1.png", "13-0.png", "14-0.png", "15-0.png", "16-0.png", "17-0.png", "17-1.png", "17-2.png", "17-3.png",
+		"18-0.png", "18-1.png", "18-2.png", "18-3.png", "19-0.png", "20-0.png", "21-0.png", "22-0.png", "24-0.png", "24-1.png",
+		"24-2.png", "27-0.png", "27-1.png", "30-0.png", "31-0.png", "31-1.png", "31-2.png", "32-0.png", "35-0.png", "35-1.png",
+		"35-2.png", "35-3.png", "35-4.png", "35-5.png", "35-6.png", "35-7.png", "35-8.png", "35-9.png", "35-10.png", "35-11.png",
+		"35-12.png", "35-13.png", "35-14.png", "35-15.png", "37-0.png", "38-0.png", "38-1.png", "38-2.png", "38-3.png", "38-4.png",
+		"38-5.png", "38-6.png", "38-7.png", "38-8.png", "39-0.png", "40-0.png", "41-0.png", "42-0.png", "43-0.png", "43-1.png",
+		"43-2.png", "43-3.png", "43-4.png", "43-5.png", "43-6.png", "44-0.png", "44-1.png", "44-2.png", "44-3.png", "44-4.png",
+		"44-5.png", "44-6.png", "45-0.png", "46-0.png", "47-0.png", "48-0.png", "49-0.png", "50-0.png", "51-0.png", "52-0.png",
+		"53-0.png", "54-0.png", "56-0.png", "57-0.png", "58-0.png", "59-0.png", "59-1.png", "59-2.png", "59-3.png", "59-4.png",
+		"59-5.png", "59-6.png", "59-7.png", "60-0.png", "60-7.png", "61-0.png", "62-0.png", "63-0.png", "64-0.png", "65-0.png",
+		"66-0.png", "67-0.png", "68-0.png", "71-0.png", "73-0.png", "74-0.png", "78-0.png", "79-0.png", "80-0.png", "81-0.png",
+		"82-0.png", "83-0.png", "85-0.png", "85-1.png", "85-2.png", "85-3.png", "85-4.png", "85-5.png", "86-0.png", "87-0.png",
+		"89-0.png", "91-0.png", "92-0.png", "95-0.png", "96-0.png", "97-0.png", "98-0.png", "99-0.png", "100-0.png", "100-14.png",
+		"101-0.png", "102-0.png", "103-0.png", "104-0.png", "104-1.png", "104-2.png", "104-3.png", "104-4.png", "104-5.png", "104-6.png",
+		"104-7.png", "105-0.png", "105-1.png", "105-2.png", "105-3.png", "105-4.png", "105-5.png", "105-6.png", "105-7.png", "106-0.png",
+		"107-0.png", "108-0.png", "109-0.png", "110-0.png", "111-0.png", "112-0.png", "114-0.png", "120-0.png", "121-0.png", "126-0.png",
+		"127-0.png", "128-0.png", "129-0.png", "133-0.png", "134-0.png", "135-0.png", "136-0.png", "139-0.png", "139-1.png", "141-0.png",
+		"141-1.png", "141-2.png", "141-3.png", "141-4.png", "141-5.png", "141-6.png", "141-7.png", "142-0.png", "142-1.png", "142-2.png",
+		"142-3.png", "142-4.png", "142-5.png", "142-6.png", "142-7.png", "155-0.png", "156-0.png", "157-0.png", "157-1.png", "157-2.png",
+		"157-3.png", "157-4.png", "157-5.png", "158-0.png", "158-1.png", "158-2.png", "158-3.png", "158-4.png", "158-5.png", "159-0.png",
+		"159-1.png", "159-2.png", "159-3.png", "159-4.png", "159-5.png", "159-6.png", "159-7.png", "159-8.png", "159-9.png", "159-10.png",
+		"159-11.png", "159-12.png", "159-13.png", "159-14.png", "159-15.png", "161-0.png", "161-1.png", "162-0.png", "162-1.png", "163-0.png",
+		"164-0.png", "170-0.png", "171-0.png", "171-1.png", "171-2.png", "171-3.png", "171-4.png", "171-5.png", "171-6.png", "171-7.png",
+		"171-8.png", "171-9.png", "171-10.png", "171-11.png", "171-12.png", "171-13.png", "171-14.png", "171-15.png", "172-0.png", "173-0.png",
+		"174-0.png", "183-0.png", "184-0.png", "185-0.png", "186-0.png", "187-0.png", "243-0.png", "244-0.png", "244-1.png", "244-2.png",
+		"244-3.png", "244-4.png", "244-5.png", "244-6.png", "244-7.png", "245-0.png", "246-0.png", "247-0.png", "247-1.png", "247-2.png",
+		"248-0.png", "249-0.png", "255-0.png", "256-0.png", "257-0.png", "258-0.png", "259-0.png", "260-0.png", "261-0.png", "262-0.png",
+		"263-0.png", "263-1.png", "264-0.png", "265-0.png", "266-0.png", "267-0.png", "268-.png", "268-0.png", "269-0.png", "270-0.png",
+		"271-0.png", "272-0.png", "273-0.png", "274-0.png", "275-0.png", "276-0.png", "277-0.png", "278-0.png", "279-0.png", "280-0.png",
+		"281-0.png", "282-0.png", "283-0.png", "284-0.png", "285-0.png", "286-0.png", "287-0.png", "288-0.png", "289-0.png", "290-0.png",
+		"291-0.png", "292-0.png", "293-0.png", "294-0.png", "295-0.png", "296-0.png", "297-0.png", "298-0.png", "299-0.png", "300-0.png",
+		"301-0.png", "302-0.png", "303-0.png", "304-0.png", "305-0.png", "306-0.png", "307-0.png", "308-0.png", "309-0.png", "310-0.png",
+		"311-0.png", "312-0.png", "313-0.png", "314-0.png", "315-0.png", "316-0.png", "317-0.png", "318-0.png", "319-0.png", "320-0.png",
+		"321-0.png", "323-0.png", "324-0.png", "325-0.png", "326-0.png", "327-0.png", "328-0.png", "329-0.png", "330-0.png", "331-0.png",
+		"332-0.png", "334-0.png", "335-0.png", "336-0.png", "337-0.png", "338-0.png", "339-0.png", "340-0.png", "341-0.png", "344-0.png",
+		"345-0.png", "347-0.png", "348-0.png", "351-0.png", "351-1.png", "351-2.png", "351-3.png", "351-4.png", "351-5.png", "351-6.png",
+		"351-7.png", "351-8.png", "351-9.png", "351-10.png", "351-11.png", "351-12.png", "351-13.png", "351-14.png", "351-15.png", "352-0.png",
+		"353-0.png", "354-0.png", "355-0.png", "357-0.png", "359-0.png", "360-0.png", "361-0.png", "362-0.png", "363-0.png", "364-0.png",
+		"365-0.png", "366-0.png", "367-0.png", "383-10.png", "383-12.png", "383-13.png", "383-14.png", "383-15.png", "383-16.png", "383-32.png",
+		"383-33.png", "383-34.png", "383-35.png", "383-36.png", "383-37.png", "383-38.png", "383-39.png", "388-0.png", "391-0.png", "392-0.png",
+		"393-0.png", "400-0.png", "405-0.png", "406-0.png", "457-0.png", "458-0.png", "459-0.png", "no_image.png"
+	],
+	//entites 폴더
+	[
+		"10.png",
+		"11.png",
+		"12.png",
+		"13.png",
+		"14.png",
+		"15.png",
+		"16.png",
+		"32.png",
+		"33.png",
+		"34.png",
+		"35.png",
+		"36.png",
+		"37.png",
+		"38.png",
+		"39.png",
+		"64.png",
+		"65.png",
+		"66.png",
+		"80.png",
+		"81.png",
+		"83.png",
+		"84.png"
+	]
+];
 
 //GUI 선언
 var shortcutWindow;
@@ -80,8 +171,12 @@ var firstPoint = {x: null, y: null, z: null};
 var secondPoint = {x: null, y: null, z: null};
 
 var canItemSelect = false;
-var selectedItemId;
-var selectedItemData;
+var selectedCommand, selectedItemId, selectedItemData;
+var fromId, fromData;
+var toId, toData;
+
+var minPoint = {x: null, y: null, z: null};
+var maxPoint = {x: null, y: null, z: null};
 
 var content;
 
@@ -97,38 +192,25 @@ var backupBlock = new Array();
 
 var progressDialog;
 
+var commandDetector = false;
+
 /* ---------------------------------------------------------------------------- ModPE Functions ---------------------------------------------------------------------------- */
 
 //폴더생성
-if(!java.io.File(RESOURCE_PATH).exists())
+if(!java.io.File(RESOURCE_PATH).exists()) //최상위 리소스 폴더
 	java.io.File(RESOURCE_PATH).mkdirs();
+if(!java.io.File(IMAGE_PATH).exists()) //이미지 리소스 폴더
+	java.io.File(IMAGE_PATH).mkdirs();
+if(!java.io.File(GUI_PATH).exists()) //GUI 리소스 폴더
+	java.io.File(GUI_PATH).mkdirs();
+if(!java.io.File(ITEM_PATH).exists()) //아이템 리소스 폴더
+	java.io.File(ITEM_PATH).mkdirs();
+if(!java.io.File(ENTITY_PATH).exists()) //엔티티 리소스 폴더
+	java.io.File(ENTITY_PATH).mkdirs();
 
 //GUI 준비
 makeGUIWindow();
 makeShortcutWindow();
-
-/*
-CTX.runOnUiThread(new Runnable({
-	run: function() {
-		try {
-			var 모장프로그래머들아최적화를제대로안하니까게임나갈때마다팅겨서내가이런버튼까지만들어야하잖아최적화좀제대로해라 = new Button(CTX);
-			모장프로그래머들아최적화를제대로안하니까게임나갈때마다팅겨서내가이런버튼까지만들어야하잖아최적화좀제대로해라.setOnClickListener(new OnClickListener({
-				onClick: function() {
-					CTX.finish();
-					
-					var  intent = CTX.getPackageManager().getLaunchIntentForPackage("net.zhuoweizhang.mcpelauncher.pro");
-					CTX.startActivity(intent);
-				}
-			}));
-			
-			var windowXP = new PopupWindow(모장프로그래머들아최적화를제대로안하니까게임나갈때마다팅겨서내가이런버튼까지만들어야하잖아최적화좀제대로해라, -2, -2);
-			showWindow(windowXP, Gravity.LEFT | Gravity.TOP, 0, 0);
-		} catch(e) {
-			toast(e, 1);
-		}
-	}
-}));
-*/
 
 function selectLevelHook() {
 	
@@ -157,9 +239,7 @@ function procCmd(command) {
 	
 	switch(command[0]) {
 		case "채":
-			selectedItemId = parseInt(command[1]);
-			selectedItemData = parseInt(command[2]);
-			fill(comparePoint(0), comparePoint(1), selectedItemId, selectedItemData);
+			fill(comparePoint(0), comparePoint(1), parseInt(command[1]), parseInt(command[2]));
 			break;
 	}
 }
@@ -178,6 +258,14 @@ function destroyBlock() {
 	
 	if(item == 271) //나무도끼
 		preventDefault();
+}
+
+function modTick() {
+	if(commandDetector) { //에딧 함수 발동 여부 감지
+		commandDetector = false;
+		
+		commandHandler(selectedCommand);
+	}
 }
 
 /* ---------------------------------------------------------------------------- Custom Functions ---------------------------------------------------------------------------- */
@@ -205,11 +293,7 @@ function checkVersion() {
 }
 
 function checkFiles() {
-	//kasjdlkajskdljaskldjalkjsdkajsdlkajsd
-	//kasjdlkajskdljaskldjalkjsdkajsdlkajsd
-	//kasjdlkajskdljaskldjalkjsdkajsdlkajsd
-	//kasjdlkajskdljaskldjalkjsdkajsdlkajsd
-	//kasjdlkajskdljaskldjalkjsdkajsdlkajsd
+	
 }
 
 function dip2px(dips) {
@@ -388,7 +472,21 @@ function makeCommandWindow() {
 				commandDialog.setItems(content,
 					new android.content.DialogInterface.OnClickListener({
 						onClick: function(dialog, which){
-							commandHandler(content[which].replace(/ /gi, "")); //replaceAll(" ", "");
+							var command = content[which].replace(/ /gi, ""); //replaceAll(" ", "");
+							var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
+							
+							isPointNecessary = true;
+							for each(var i in unnecessaryPointCommands)
+								if(command == i) isPointNecessary = false;
+							
+							if(isPointNecessary) { //영역 지정이 필요한 명령어
+								if(firstPoint.x == null || secondPoint.x == null) return;
+								
+								minPoint = comparePoint(0); 
+								maxPoint = comparePoint(1);
+							}
+							
+							chooseItemOnGUI(command); //GUI 창에서 블럭이나 아이템을 선택
 						}
 					})
 				);
@@ -400,56 +498,41 @@ function makeCommandWindow() {
 	}));
 }
 
-function commandHandler(command) {
+function chooseItemOnGUI(command) {
 	try {
-		var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
-		
-		isPointNecessary = true;
-		for each(var i in unnecessaryPointCommands)
-			if(command == i) isPointNecessary = false;
-		
-		if(isPointNecessary) { //영역 지정이 필요한 명령어
-			if(firstPoint.x == null || secondPoint.x == null) return;
-			
-			var minPoint = {x: null, y: null, z: null};
-			var maxPoint = {x: null, y: null, z: null};
-			
-			minPoint = comparePoint(0); 
-			maxPoint = comparePoint(1);
-		}
-		
+		//자바 소스 상에서 과도한 setTile을 요청할 경우 확률적으로 팅기기 때문에 (Thread와 setTile 사이에 호환성이 좋지않은 것으로 추정됨)
+		//commandDetector를 통해 modTick으로 할 일을 넘긴 후
+		//실질적인 setTile 작업은 commandHandler에서 수행
 		switch(command) {
 			case "채우기":
 				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+				toast("어떤 블럭으로 채우시겠습니까?", 0);
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
-						if(selectedItemId != null) {
-							fill(minPoint, maxPoint, selectedItemId, selectedItemData);
-						}
-						
-						selectedItemId = null;
-						selectedItemData = null;
-						GUIWindow.setOnDismissListener(null);
+							if(selectedItemId != null) {
+								commandDetector = true;
+							}
+							
+							GUIWindow.setOnDismissListener(null);
 					}
 				}));
 				break;
 			
 			case "벽":
 				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+				toast("어떤 블럭으로 벽을 생성하시겠습니까?", 0);
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
 						if(selectedItemId != null)
-							wall(minPoint, maxPoint, selectedItemId, selectedItemData);
+							commandDetector = true;
 						
-						selectedItemId = null;
-						selectedItemData = null;
 						GUIWindow.setOnDismissListener(null);
 					}
 				}));
 				break;
 			
 			case "비우기":
-				fill(minPoint, maxPoint, 0, 0, false);
+				commandDetector = true;
 				break;
 			
 			case "바꾸기":
@@ -457,22 +540,27 @@ function commandHandler(command) {
 				toast("어떤 블럭을 바꾸시겠습니까?", 0);
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
-						if(selectedItemId == null) return;
+						if(selectedItemId == null)
+							return;
 						
-						var fromId = selectedItemId;
-						var fromData = selectedItemData;
+						fromId = selectedItemId;
+						fromData = selectedItemData;
 						
 						showWindow(GUIWindow, Gravity.CENTER, 0, 0);
 						toast("어떤 블럭으로 바꾸시겠습니까?", 0);
 						
 						GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 							onDismiss: function() {
-								if(selectedItemId == null) return;
+								if(selectedItemId == null) {
+									fromId = null;
+									fromData = null;
+									return;
+								}
 								
-								var toId = selectedItemId;
-								var toData = selectedItemData;
+								toId = selectedItemId;
+								toData = selectedItemData;
 								
-								replace(minPoint, maxPoint, fromId, fromData, toId, toData, false);
+								commandDetector = true;
 								
 								selectedItemId = null;
 								selectedItemData = null;
@@ -488,22 +576,30 @@ function commandHandler(command) {
 				toast("어떤 블럭을 바꾸시겠습니까?", 0);
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
-						if(selectedItemId == null) return;
+						if(selectedItemId == null)
+							return;
 						
-						var fromId = selectedItemId;
-						var fromData = selectedItemData;
+						fromId = selectedItemId;
+						fromData = selectedItemData;
+						
+						selectedItemId = null;
+						selectedItemData = null;
 						
 						showWindow(GUIWindow, Gravity.CENTER, 0, 0);
 						toast("어떤 블럭으로 바꾸시겠습니까?", 0);
 						
 						GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 							onDismiss: function() {
-								if(selectedItemId == null) return;
+								if(selectedItemId == null) {
+									fromId = null;
+									fromData = null;
+									return;
+								}
 								
-								var toId = selectedItemId;
-								var toData = selectedItemData;
+								toId = selectedItemId;
+								toData = selectedItemData;
 								
-								replace(minPoint, maxPoint, fromId, fromData, toId, toData, true);
+								commandDetector = true;
 								
 								selectedItemId = null;
 								selectedItemData = null;
@@ -519,22 +615,27 @@ function commandHandler(command) {
 				toast("어떤 블럭을 남기시겠습니까?", 0);
 				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 					onDismiss: function() {
-						if(selectedItemId == null) return;
+						if(selectedItemId == null)
+							return;
 						
-						var preservedId = selectedItemId;
-						var preservedData = selectedItemData;
+						fromId = selectedItemId;
+						fromData = selectedItemData;
 						
 						showWindow(GUIWindow, Gravity.CENTER, 0, 0);
 						toast("어떤 블럭으로 바꾸시겠습니까?", 0);
 						
 						GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
 							onDismiss: function() {
-								if(selectedItemId == null) return;
+								if(selectedItemId == null) {
+									fromId = null;
+									fromData = null;
+									return;
+								}
 								
-								var toId = selectedItemId;
-								var toData = selectedItemData;
+								toId = selectedItemId;
+								toData = selectedItemData;
 								
-								preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData);
+								commandDetector = true;
 								
 								selectedItemId = null;
 								selectedItemData = null;
@@ -543,6 +644,141 @@ function commandHandler(command) {
 						}));
 					}
 				}));
+				break;
+			
+			case "흡수":
+				commandDetector = true;
+				break;
+			
+			case "복사":
+				commandDetector = true;
+				break;
+			
+			case "붙여넣기":
+				commandDetector = true;
+				break;
+			
+			case "구":
+			case "빈구":
+			case "반구":
+			case "빈반구":
+			case "역반구":
+			case "역빈반구":
+				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+				radiusSetting();
+				toast("어떤 블럭으로 조형물을 생성하시겠습니까?", 0);
+				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
+					onDismiss: function() {
+						if(selectedItemId == null)
+							return;
+						
+						commandDetector = true;
+						
+						GUIWindow.setOnDismissListener(null);
+					}
+				}));
+				break;
+			
+			case "원":
+			case "빈원":
+				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+				radiusSetting();
+				toast("어떤 블럭으로 조형물을 생성하시겠습니까?", 0);
+				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
+					onDismiss: function() {
+						if(selectedItemId == null)
+							return;
+						
+						commandDetector = true;
+						
+						GUIWindow.setOnDismissListener(null);
+					}
+				}));
+				break;
+			
+			case "원기둥":
+			case "빈원기둥":
+				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+				cylinderSetting();
+				toast("어떤 블럭으로 조형물을 생성하시겠습니까?", 0);
+				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
+					onDismiss: function() {
+						if(selectedItemId == null)
+							return;
+						
+						selectedItemId;
+						selectedItemData;
+						
+						commandDetector = true;
+						
+						GUIWindow.setOnDismissListener(null);
+					}
+				}));
+				break;
+			
+			case "덮기":
+				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+				toast("어떤 블럭으로 덮으시겠습니까?", 0);
+				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
+					onDismiss: function() {
+						if(selectedItemId == null)
+							return;
+						
+						commandDetector = true;
+						
+						GUIWindow.setOnDismissListener(null);
+					}
+				}));
+				break;
+		}
+		
+		selectedCommand = command;
+	} catch(e) {
+		toast("아이템/블럭 선택창을 띄우는 과정에서 오류가 발생했습니다.\n" + e);
+	}
+}
+
+function commandHandler(command) {
+	try {
+		switch(command) {
+			case "채우기":
+				fill(minPoint, maxPoint, selectedItemId, selectedItemData);
+				selectedItemId = null;
+				selectedItemData = null;
+				break;
+			
+			case "벽":
+				wall(minPoint, maxPoint, selectedItemId, selectedItemData);
+				selectedItemId = null;
+				selectedItemData = null;
+				break;
+			
+			case "비우기":
+				fill(minPoint, maxPoint, 0, 0);
+				break;
+			
+			case "바꾸기":
+				replace(minPoint, maxPoint, fromId, fromData, toId, toData);
+				fromId = null;
+				fromData = null;
+				toId = null;
+				toData = null;
+				break;
+			
+			case "벽바꾸기":
+				wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData);
+				fromId = null;
+				fromData = null;
+				toId = null;
+				toData = null;
+				break;
+			
+			case "남기기":
+				preserve(minPoint, maxPoint, fromId, fromData, toId, toData);
+				fromId = null;
+				fromData = null;
+				toId = null;
+				toData = null;
 				break;
 			
 			case "흡수":
@@ -563,84 +799,33 @@ function commandHandler(command) {
 			case "빈반구":
 			case "역반구":
 			case "역빈반구":
-				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
-				radiusSetting();
-				toast("어떤 블럭으로 바꾸시겠습니까?", 0);
-				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
-					onDismiss: function() {
-						if(selectedItemId == null) return;
-						
-						var id = selectedItemId;
-						var data = selectedItemData;
-						
-						createSphere(command, Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius);
-						
-						selectedItemId = null;
-						selectedItemData = null;
-						GUIWindow.setOnDismissListener(null);
-					}
-				}));
+				createSphere(command, Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), selectedItemId, selectedItemData, radius);
+				selectedItemId = null;
+				selectedItemData = null;
+				radius = 0;
 				break;
 			
 			case "원":
 			case "빈원":
-				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
-				radiusSetting();
-				toast("어떤 블럭으로 바꾸시겠습니까?", 0);
-				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
-					onDismiss: function() {
-						if(selectedItemId == null) return;
-						
-						var id = selectedItemId;
-						var data = selectedItemData;
-						
-						createSphere(command, Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius);
-						
-						selectedItemId = null;
-						selectedItemData = null;
-						GUIWindow.setOnDismissListener(null);
-					}
-				}));
+				createCircle(command, Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), selectedItemId, selectedItemData, radius);
+				selectedItemId = null;
+				selectedItemData = null;
+				radius = 0;
 				break;
 			
 			case "원기둥":
 			case "빈원기둥":
-				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
-				cylinderSetting();
-				toast("어떤 블럭으로 바꾸시겠습니까?", 0);
-				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
-					onDismiss: function() {
-						if(selectedItemId == null) return;
-						
-						var id = selectedItemId;
-						var data = selectedItemData;
-						
-						createCylinder(command, Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius, height);
-						
-						selectedItemId = null;
-						selectedItemData = null;
-						GUIWindow.setOnDismissListener(null);
-					}
-				}));
+				createCylinder(command, Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), selectedItemId, selectedItemData, radius, height);
+				selectedItemId = null;
+				selectedItemData = null;
+				radius = 0;
+				height = 0;
 				break;
 			
 			case "덮기":
-				showWindow(GUIWindow, Gravity.CENTER, 0, 0);
-				toast("어떤 블럭으로 덮으시겠습니까?", 0);
-				GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
-					onDismiss: function() {
-						if(selectedItemId == null) return;
-						
-						var id = selectedItemId;
-						var data = selectedItemData;
-						
-						cover(minPoint, maxPoint, id, data);
-						
-						selectedItemId = null;
-						selectedItemData = null;
-						GUIWindow.setOnDismissListener(null);
-					}
-				}));
+				cover(minPoint, maxPoint, selectedItemId, selectedItemData);
+				selectedItemId = null;
+				selectedItemData = null;
 				break;
 		}
 	} catch(e) {
@@ -860,7 +1045,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage) {
 			onClick: function(view) {
 				var fileName = files[parseInt(view.getId())];
 				
-				//toast(fileName.replace("-", ":").replace(".png", ""), 0);
+				toast(fileName.replace("-", ":").replace(".png", ""), 0);
 				selectedItemId = parseInt(fileName.split("-")[0]);
 				selectedItemData = parseInt(fileName.split("-")[1].split(".png")[0]);
 				
@@ -1074,6 +1259,21 @@ function preventFolding() {
 		Entity.setPosition(entity, x, ++y, z);
 }
 
+function josa(kor, josa) {
+	var finalCode = kor.charCodeAt(kor.legnth - 1) - FIRST_KOREAN_OF_UNICODE; //kor의 마지막 문자의 유니코드 번호
+	
+	if(josa == "이" || josa == "가")
+		josa = (((finalCode - 44032) % (MEDIAL * FINAL)) % FINAL == 0 ? "가" : "이");
+	else if(josa == "은" || josa == "는")
+		josa = (((finalCode - 44032) % (MEDIAL * FINAL)) % FINAL == 0 ? "는" : "은");
+	else if(josa == "을" || josa == "를")
+		josa = (((finalCode - 44032) % (MEDIAL * FINAL)) % FINAL == 0 ? "를" : "을");
+	else if(josa == "와" || josa == "과")
+		josa = (((finalCode - 44032) % (MEDIAL * FINAL)) % FINAL == 0 ? "와" : "과");
+	
+	return (kor + josa);
+}
+
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
 
 function comparePoint(type) {
@@ -1111,13 +1311,11 @@ function fill(minPoint, maxPoint, id, data) {
 		var blockCount = 0;
 		
 		//프로그래스 다이얼로그 시작
-		/*
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "잠시만 기다려주세요..", "채우기 작업 중입니다...", true, false);
+				progressDialog = ProgressDialog.show(CTX, "채우기 작업 중입니다...", "잠시만 기다려주세요...", true, false);
 			}
 		});
-		*/
 		
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
@@ -1137,14 +1335,12 @@ function fill(minPoint, maxPoint, id, data) {
 			clientMessage(ChatColor.RED + "[경고!] 넓은 영역을 에딧하여 청크 오류로 맵 저장이 되지 않을 수도 있습니다.");
 		
 		//프로그래스 다이얼로그 종료
-		/*
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
 				progressDialog = null;
 			}
 		});
-		*/
 	} catch(e) {
 		toast("fill 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1157,7 +1353,7 @@ function wall(minPoint, maxPoint, id, data) {
 		//프로그래스 다이얼로그 시작
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "잠시만 기다려주세요..", "벽을 생성 중입니다...", true, false);
+				progressDialog = ProgressDialog.show(CTX, "벽을 생성 중입니다...", "잠시만 기다려주세요...", true, false);
 			}
 		});
 		
@@ -1200,15 +1396,20 @@ function wall(minPoint, maxPoint, id, data) {
 	}
 }
 
-function replace(minPoint, maxPoint, fromId, fromData, toId, toData, isWall) {
+function replace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 	try {
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "블럭을 바꾸는 중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
 					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
-						if(isWall && (minPoint.x + 1) <= x && x <= (maxPoint.x - 1) && (minPoint.z + 1) <= z && z <= (maxPoint.z - 1)) continue;
-						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
 					}
@@ -1219,13 +1420,80 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData, isWall) {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
 		toast("replace 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
 }
 
-function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, isWall) {
+function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 	try {
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "벽 바꾸기를 실행 중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
+		var blockCount = 0;
+		for(var y = minPoint.y; y <= maxPoint.y; y++) {
+			for(var z = minPoint.z; ; z = maxPoint.z) {
+				for(var x = minPoint.x; x <= maxPoint.x; x++) {
+					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
+						Level.setTile(x, y, z, toId, toData);
+						blockCount++;
+					}
+				}
+				
+				if(z == maxPoint.z)
+					break;
+			}
+			
+			for(var x = minPoint.x; ; x = maxPoint.x) {
+				for(var z = minPoint.z; z <= maxPoint.z; z++) {
+					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
+						Level.setTile(x, y, z, toId, toData);
+						blockCount++;
+					}
+				}
+				
+				if(x == maxPoint.x)
+					break;
+			}
+		}
+		
+		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
+		
+		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
+	} catch(e) {
+		toast("wallReplace 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
+function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData) {
+	try {
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "남기기 작업을 실행 중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
@@ -1241,6 +1509,14 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, 
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
 		toast("preserve 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1248,6 +1524,13 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, 
 
 function drain(minPoint, maxPoint) {
 	try {
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "액체 블럭을 흡수 중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
@@ -1262,13 +1545,28 @@ function drain(minPoint, maxPoint) {
 		}
 		
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
-		toast("replace 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
+		toast("drain 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
 }
 
 function copy(minPoint, maxPoint) {
 	try {
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "지정된 역역을 복사 중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
 		var length = {x: (maxPoint.x - minPoint.x + 1), y: (maxPoint.y - minPoint.y + 1), z: (maxPoint.z - minPoint.z + 1)};
 		
 		var blockCount = 0;
@@ -1288,6 +1586,14 @@ function copy(minPoint, maxPoint) {
 		}
 		
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 복사되었습니다.");
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
 		toast("copy 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1299,6 +1605,13 @@ function paste() {
 			toast("클립보드에 저장된 블럭이 없습니다.", 0);
 			return;
 		}
+		
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "저장된 블럭을 붙여넣는 중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
 		
 		var x = Math.floor(Player.getX());
 		var y = Math.floor(Player.getY() - 1);
@@ -1329,6 +1642,14 @@ function paste() {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 붙여넣어졌습니다.");
 		
 		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
 		toast("paste 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1336,8 +1657,12 @@ function paste() {
 
 function createSphere(type, x, y, z, id, data, radius) {
 	try {
-		//var firstPoint = [x - radius + 1, y - radius + 1, z - radius + 1];
-		//var secondPoint = [x + radius - 1, y + radius - 1, z + radius - 1];
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
 		
 		var blockCount  = 0;
 		for(var i = -radius + 1; i < radius; i++) {
@@ -1390,9 +1715,17 @@ function createSphere(type, x, y, z, id, data, radius) {
 			}
 		}
 		
-		clientMessage(ChatColor.GREEN + type + "(이)가 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
+		clientMessage(ChatColor.GREEN + josa(type, "이") + " 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
 		
 		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
 		toast("createSphere 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1400,8 +1733,15 @@ function createSphere(type, x, y, z, id, data, radius) {
 
 function createCircle(type, x, y, z, id, data, radius) {
 	try {
-		var firstPoint = [x - radius, y, z - radius];
-		var secondPoint = [x + radius, y, z + radius];
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
+		//var firstPoint = [x - radius, y, z - radius];
+		//var secondPoint = [x + radius, y, z + radius];
 		
 		var blockCount  = 0;
 		for(var i = -radius + 1; i < radius; i++) for(var j = -radius + 1; j < radius; j++){
@@ -1421,47 +1761,81 @@ function createCircle(type, x, y, z, id, data, radius) {
 			}
 		}
 		
-		clientMessage(ChatColor.GREEN + type + "이 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
+		clientMessage(ChatColor.GREEN + josa(type, "이") + " 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
 		
 		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
 		toast("createCircle 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
 }
 
 function createCylinder(type, x, y, z, id, radius, height) {
-	var firstPoint = [x - radius, y, z - radius];
-	var secondPoint = [x + radius, y + height, z + radius];
-	
-	var blockCount  = 0;
-	for(var h = 0; h <= height; h++) {
-		for(var i = -radius + 1; i < radius; i++) {
-			for(var j = -radius + 1; j < radius; j++){
-				switch(type) {
-					case "원기둥":
-						if((i * i) + (j * j) <= (radius * radius)) {
-							Level.setTile(x + i, y + h, z + j, id, data);
-							blockCount++;
-						}
-						break;
-					case "빈원기둥":
-						if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
-							Level.setTile(x + i, y + h, z + j, id, data);
-							blockCount++;
-						}
-						break;
+	try {
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
+		//var firstPoint = [x - radius, y, z - radius];
+		//var secondPoint = [x + radius, y + height, z + radius];
+		
+		var blockCount  = 0;
+		for(var h = 0; h <= height; h++) {
+			for(var i = -radius + 1; i < radius; i++) {
+				for(var j = -radius + 1; j < radius; j++){
+					switch(type) {
+						case "원기둥":
+							if((i * i) + (j * j) <= (radius * radius)) {
+								Level.setTile(x + i, y + h, z + j, id, data);
+								blockCount++;
+							}
+							break;
+						case "빈원기둥":
+							if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
+								Level.setTile(x + i, y + h, z + j, id, data);
+								blockCount++;
+							}
+							break;
+					}
 				}
 			}
 		}
+		
+		clientMessage(ChatColor.GREEN + josa(type, "이") + 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
+		
+		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
+	} catch(e) {
+		toast("createCylinder 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
-	
-	clientMessage(ChatColor.GREEN + type + "이 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
-	
-	preventFolding();
 }
 
 function cover(minPoint, maxPoint, id, data) {
 	try {
+		//프로그래스 다이얼로그 시작
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog = ProgressDialog.show(CTX, "지정된 영역을 덮는 중입니다...", "잠시만 기다려주세요...", true, false);
+			}
+		});
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var z = minPoint.z; z <= maxPoint.z; z++) {
@@ -1481,6 +1855,14 @@ function cover(minPoint, maxPoint, id, data) {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding();
+		
+		//프로그래스 다이얼로그 종료
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				progressDialog.dismiss();
+				progressDIlaog = null;
+			}
+		});
 	} catch(e) {
 		toast("cover 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1528,7 +1910,7 @@ function undo() {
 			}
 		}
 	}
-	clientMessage(ChatColor.GREEN + blockCount+"개의 블럭이 복원되었습니다.");
+	clientMessage(ChatColor.GREEN + blockCount + "개의 블럭이 복원되었습니다.");
 	
 	backupBlock.pop(); //마지막 원소 삭제
 }
