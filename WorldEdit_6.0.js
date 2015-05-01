@@ -6,6 +6,7 @@
  */
  
  //import
+const Toast = android.widget.Toast;
 const LinearLayout = android.widget.LinearLayout;
 const RelativeLayout = android.widget.RelativeLayout;
 const Button = android.widget.Button;
@@ -37,6 +38,7 @@ const Thread = java.lang.Thread;
 const URL = java.net.URL;
 
 const Uri = android.net.Uri;
+const ConnectivityManager = android.net.ConnectivityManager;
 
 const File = java.io.File;
 const BufferedReader = java.io.BufferedReader;
@@ -47,6 +49,8 @@ const ProgressDialog = android.app.ProgressDialog;
 const DownloadManager = android.app.DownloadManager;
 
 const DialogInterface = android.content.DialogInterface;
+const BroadcastReceiver = 	android.content.BroadcastReceiver;
+const IntentFilter = 	android.content.IntentFilte;
 
 const InputType = android.text.InputType;
 
@@ -79,7 +83,11 @@ const FINAL = 28; //종성 - (없음), ㄱ, ㄲ, ㄳ, ㄴ, ㄵ, ㄶ, ㄷ, ㄹ, �
 const FIRST_KOREAN_OF_UNICODE = 44032; //유니코드에서 첫번째 한글 문자인 '가'의 고유번호. 44033은 각, 44034는 갂... 과 같은 순서로 55203번째까지 한글이 존재하고있다.
 
 const RESOURCE_FILES_LIST = [
-	//gui 폴더 - index 0
+	//images 폴더 - index 0
+	[
+		".nomedia"
+	],
+	//gui 폴더 - index 1
 	[
 		"main_icon.png",
 		"table.png",
@@ -89,7 +97,7 @@ const RESOURCE_FILES_LIST = [
 		"next_button_off.png",
 		"slot.png"
 	],
-	//items 폴더 - index 1
+	//items 폴더 - index 2
 	[
 		"0-0.png", "1-0.png", "1-1.png", "1-2.png", "1-3.png", "1-4.png", "1-5.png", "1-6.png", "2-0.png", "3-0.png",
 		"3-1.png", "3-2.png", "4-0.png", "5-0.png", "5-1.png", "5-2.png", "5-3.png", "5-4.png", "5-5.png", "6-0.png",
@@ -136,7 +144,7 @@ const RESOURCE_FILES_LIST = [
 		"383-33.png", "383-34.png", "383-35.png", "383-36.png", "383-37.png", "383-38.png", "383-39.png", "388-0.png", "391-0.png", "392-0.png",
 		"393-0.png", "400-0.png", "405-0.png", "406-0.png", "457-0.png", "458-0.png", "459-0.png", "no_image.png"
 	],
-	//entites 폴더 - index 2
+	//entites 폴더 - index 3
 	[
 		"10.png",
 		"11.png",
@@ -194,7 +202,7 @@ var backupLength = new Array(3);
 var backupCount = 0;
 var backupBlock = new Array();
 
-var progressDialog;
+//var progressDialog;
 
 var commandDetector = false;
 
@@ -214,8 +222,6 @@ function selectLevelHook() {
 function newLevel() {
 	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
 			return;
-	
-	checkVersion();
 	
 	showWindow(shortcutWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(35));
 }
@@ -286,40 +292,35 @@ function modTick() {
 
 /* ---------------------------------------------------------------------------- Custom Functions ---------------------------------------------------------------------------- */
 
-/*
 function initialize() {
 	new Thread(new Runnable() {
 		run: function() {
 			try {
 				//폴더 체크
-				toast("폴더체크");
 				checkDirectoris();
 				
 				//파일 체크
-				toast("파일체크");
 				checkFiles(); 
-				//checkFilesThread.join();
+				checkFilesThread.join();
 				
-				//GUI 준비
-				//toast("GUI준비");
-				//if(isScriptable) { //리소스 파일 존재
-					toast("단축버튼");
+				if(isScriptable) { //리소스 파일 존재
+					//단축버튼 생성
 					makeShortcutWindow();
 					
-					toast("GUI윈도우");
-					//makeGUIWindow();
-					//makeGUIWindowThread.join();
-				//}
-				
-				toast("버전체크");
-				//checkVersion();
+					//GUI 생성
+					makeGUIWindow();
+					makeGUIWindowThread.join();
+					
+					//버전 확인
+					checkVersion();
+				}
 			} catch(e) {
 				toast("initialize 과정에서 오류가 발생하였습니다.\n" + e, 1);
 			}
 		}
 	}).start();
 }
-*/
+initialize();
 
 function checkVersion() {
 	if(LASTEST_MAJOR_VERSION == "" && LASTEST_MINOR_VERSION == "") return; //인터넷 연결 상태 불량
@@ -381,22 +382,38 @@ function checkFiles() {
 						}
 					});
 					
-					var isAllowedDownload = false;
+					const NOMEDIA_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[0].length);
+					const GUI_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[1].length);
+					const ITEMS_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[2].length);
+					const ENTITISE_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[3].length);
+					
+					var isDownloadAllowed = false;
 					var threadFreezer = false;
+					var isFilesExisted = true;
 					
 					//파일 다운로드 다이얼로그
 					var listener = new DialogInterface.OnClickListener({
 						onClick: function(dialog, which) {
 							switch(which) {
 								case DialogInterface.BUTTON_POSITIVE:
-									isAllowedDownload = true;
-									threadFreezer = false;
+									if(getInternetStatus() != "Offline") { //온라인 상태
+										isDownloadAllowed = true;
+										threadFreezer = false;
+									} else { //오프라인 상태
+										alertDialog("네트워크 연결 오류!", "현재 네트워크에 연결되어있지 않아 파일을 다운로드 할 수 없습니다.\n네트워크 연결 상태를 다시 확인한 후 시도해주세요.\n파일을 다운로드하지않으면 스크립트 사용이 불가능합니다.", null, "확인", null, null);
+										
+										isDownloadAllowed = false;
+										isScriptable = false;
+										threadFreezer = false;
+										isFilesExisted = false;
+									}
 									break;
 								
 								case DialogInterface.BUTTON_NEGATIVE:
-									isAllowedDownload = false;
+									isDownloadAllowed = false;
 									isScriptable = false;
 									threadFreezer = false;
+									isFilesExisted = false;
 									toast("파일 다운로드가 거부되었습니다.\n월드에딧 스크립트 사용이 불가능합니다.");
 									break;
 							}
@@ -406,43 +423,97 @@ function checkFiles() {
 					var dialog = new AlertDialog.Builder(CTX);
 					dialog.setTitle("누락된 파일이 존재합니다.");
 					dialog.setMessage(
-						"다운로드 되지 않은 리소스 파일(이미지나 소리 파일 등)이 발견 되었습니다!\n" +
+						"다운로드 되지 않은 리소스 파일(이미지나 소리 파일 등)이 발견되었습니다.\n" +
 						"월드에딧 스크립트는 많은 양의 리소스 파일에 의존하고 있습니다.\n" +
 						"따라서 리소스 파일이 없을 경우에 스크립트 사용이 불가능합니다.\n" +
 						"\n" +
-						"파일을 다운로드 받으시겠습니까?\n" +
-						"[경고] 다운로드 전 반드시 자신의 네트워크 상태와 와이파이 사용여부 등을 확인해주세요.\n" +
-						"사용자의 부주의로 인해 LTE 등의 데이터를 통해 파일을 다운로드 하게 되었다고 해도 책임은 유저 본인에게 있습니다.\n"
+						((getInternetStatus() == "Offline") ?
+							//오프라인 상태
+							("현재 인터넷에 연결되어있지 않습니다.\n" +
+							"인터넷 상태를 확인한 후 시도해주세요.") :
+							((getInternetStatus() == "Data") ?
+								//3G, 4G
+								("파일을 다운로드 받으시겠습니까?\n" +
+								"현재 3G 혹은 4G로 인터넷에 연결하고 있습니다.\n" +
+								"이 상태로 파일을 다운로드하시겠습니까?\n" +
+								"\n" +
+								"사용 요금제에 따라 요금이 부과될 수 있습니다.") :
+								//WiFi
+								("파일을 다운로드 받으시겠습니까?\n" +
+								"현재 WiFi로 인터넷에 연결하고 있습니다.\n" +
+								"파일을 다운로드하시겠습니까?")
+							)
+						)
 					);
 					dialog.setPositiveButton("설치", listener);
 					dialog.setNegativeButton("취소", listener);
 					dialog.setCancelable(false);
 					
 					//리소스 파일 리스트
+					var nomediaFile = File(IMAGE_PATH + ".nomedia");
 					var GUIFiles = File(GUI_PATH).list();
 					var itemFiles = File(ITEM_PATH).list();
 					var entityFiles = File(ENTITY_PATH).list();
 					
 					//convert Java string array to javascript string array
 					var convertedGUIFilesArray = new Array();
-					var converteditemFilesArray = new Array();
-					var convertedentityFilesArray = new Array();
+					var convertedItemFilesArray = new Array();
+					var convertedEntityFilesArray = new Array();
 					
 					for each(var i in GUIFiles)
 						convertedGUIFilesArray.push(i + "");
 					for each(var i in itemFiles)
-						converteditemFilesArray.push(i + "");
+						convertedItemFilesArray.push(i + "");
 					for each(var i in entityFiles)
-						convertedentityFilesArray.push(i + "");
+						convertedEntityFilesArray.push(i + "");
 					
+					//.nomedia 파일
+					if(!nomediaFile.exists()) {
+						i = Number(i); //i를 강제형변환하지 않으면 NOMEDIA_FOLDER_LENGTH = 1이고 i = 0일 때 NOMEDIA_FOLDER_LENGTH + i = 10과 같은 결과가 나옴 
+						
+						if(!isDownloadAllowed) { //사용자로부터 다운로드를 허락 받지 못한 상태
+							threadFreezer = true;
+							CTX.runOnUiThread(new Runnable() {
+								run: function() {
+									if(!dialog.create().isShowing()) //isShowing() 메서드는 AlertDialog 객체의 메소드이므로 AlertDialog.Builder를 create() 시켜서 AlertDialog 객체 생성
+									dialog.create().show();
+								}
+							});
+							
+							while(threadFreezer) { //사용자로부터 응답이 올 때까지 쓰레드 프리징
+								Thread.sleep(10);
+							}
+						}
+						
+						if(isDownloadAllowed) { //파일 다운로드 허용
+							CTX.runOnUiThread(new Runnable() {
+									run: function() {
+																				progressDialog.setMessage("파일 다운로드 중... " + ((i / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + ".nomedia");
+									}
+								});
+							downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/" + ".nomedia", IMAGE_PATH, ".nomedia");
+							Thread.sleep(5);
+						} else { //파일 다운로드 거부
+							CTX.runOnUiThread(new Runnable() {
+								run: function() {
+									progressDialog.dismiss();
+									progressDialog = null;
+								}
+							});
+							return;
+						}
+					}
 					//GUI 폴더
-					for each(var i in RESOURCE_FILES_LIST[0]) {
-						if(convertedGUIFilesArray.indexOf(i) == -1) { //gui 폴더에서 누락된 파일 발견 시
-							if(!isAllowedDownload) { //사용자로부터 다운로드를 허락 받지 못한 상태
+					for(var i in RESOURCE_FILES_LIST[1]) {
+						i = Number(i); //i를 강제형변환하지 않으면 NOMEDIA_FOLDER_LENGTH = 1이고 i = 0일 때 NOMEDIA_FOLDER_LENGTH + i = 10과 같은 결과가 나옴 
+						
+						if(convertedGUIFilesArray.indexOf(RESOURCE_FILES_LIST[1][i]) == -1) { //gui 폴더에서 누락된 파일 발견 시
+							if(!isDownloadAllowed) { //사용자로부터 다운로드를 허락 받지 못한 상태
 								threadFreezer = true;
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
-										dialog.show();
+										if(!dialog.create().isShowing())
+											dialog.create().show();
 									}
 								});
 								
@@ -451,20 +522,36 @@ function checkFiles() {
 								}
 							}
 							
-							if(isAllowedDownload) {
-								toast(i + "파일이 누락되어있습니다.\n파일 다운로드를 시작합니다.");
-								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/gui/" + i, GUI_PATH, i);
+							if(isDownloadAllowed) { //파일 다운로드 허용
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+																				progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + i) / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[1][i]);
+									}
+								});
+								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/gui/" + RESOURCE_FILES_LIST[1][i], GUI_PATH, RESOURCE_FILES_LIST[1][i]);
+								Thread.sleep(5);
+							} else { //파일 다운로드 거부
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										progressDialog.dismiss();
+										progressDialog = null;
+									}
+								});
+								return;
 							}
 						}
 					}
 					//items 폴더
-					for each(var i in RESOURCE_FILES_LIST[1]) {
-						if(converteditemFilesArray.indexOf(i) == -1) { //items 폴더에서 누락된 파일 발견 시
-							if(!isAllowedDownload) { //사용자로부터 다운로드를 허락 받지 못한 상태
+					for(var i in RESOURCE_FILES_LIST[2]) {
+						i = Number(i); //i를 강제형변환하지 않으면 NOMEDIA_FOLDER_LENGTH = 1이고 i = 0일 때 NOMEDIA_FOLDER_LENGTH + i = 10과 같은 결과가 나옴 
+						
+						if(convertedItemFilesArray.indexOf(RESOURCE_FILES_LIST[2][i]) == -1) { //items 폴더에서 누락된 파일 발견 시
+							if(!isDownloadAllowed) { //사용자로부터 다운로드를 허락 받지 못한 상태
 								threadFreezer = true;
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
-										dialog.show();
+										if(!dialog.create().isShowing())
+											dialog.create().show();
 									}
 								});
 								
@@ -473,20 +560,36 @@ function checkFiles() {
 								}
 							}
 							
-							if(isAllowedDownload) {
-								toast(i + "파일이 누락되어있습니다.\n파일 다운로드를 시작합니다.");
-								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/items/" + i, ITEM_PATH, i);
+							if(isDownloadAllowed) { //파일 다운로드 허용
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + i) / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[2][i]);
+									}
+								});
+								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/items/" + RESOURCE_FILES_LIST[2][i], ITEM_PATH, RESOURCE_FILES_LIST[2][i]);
+								Thread.sleep(5);
+							} else { //파일 다운로드 거부
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										progressDialog.dismiss();
+										progressDialog = null;
+									}
+								});
+								return;
 							}
 						}
 					}
 					//entities 폴더
-					for each(var i in RESOURCE_FILES_LIST[2]) {
-						if(convertedentityFilesArray.indexOf(i) == -1) { //entities 폴더에서 누락된 파일 발견 시
-							if(!isAllowedDownload) { //사용자로부터 다운로드를 허락 받지 못한 상태
+					for(var i in RESOURCE_FILES_LIST[3]) {
+						i = Number(i); //i를 강제형변환하지 않으면 NOMEDIA_FOLDER_LENGTH = 1이고 i = 0일 때 NOMEDIA_FOLDER_LENGTH + i = 10과 같은 결과가 나옴 
+						
+						if(convertedEntityFilesArray.indexOf(RESOURCE_FILES_LIST[3][i]) == -1) { //entities 폴더에서 누락된 파일 발견 시
+							if(!isDownloadAllowed) { //사용자로부터 다운로드를 허락 받지 못한 상태
 								threadFreezer = true;
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
-										dialog.show();
+										if(!dialog.create().isShowing())
+											dialog.create().show();
 									}
 								});
 								
@@ -495,11 +598,37 @@ function checkFiles() {
 								}
 							}
 							
-							if(isAllowedDownload) {
-								toast(i + "파일이 누락되어있습니다.\n파일 다운로드를 시작합니다.");
-								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/entities/" + i, ENTITY_PATH, i);
+							if(isDownloadAllowed) { //파일 다운로드 허용
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+																				progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + i) / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[3][i]);
+									}
+								});
+								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/entities/" + RESOURCE_FILES_LIST[3][i], ENTITY_PATH, RESOURCE_FILES_LIST[3][i]);
+								Thread.sleep(5);
+							} else { //파일 다운로드 거부
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										progressDialog.dismiss();
+										progressDialog = null;
+									}
+								});
+								return;
 							}
 						}
+					}
+					
+					if(isFilesExisted) { //모든 파일이 존재하는 경우
+						isScriptable = true;
+					}
+					
+					while(isDownloadAllowed) { //파일을 다운로드 하는 경우
+						if((File(ITEM_PATH).list().length == RESOURCE_FILES_LIST[2].length) && (File(GUI_PATH).list().length == RESOURCE_FILES_LIST[1].length) && (File(ENTITY_PATH).list().length == RESOURCE_FILES_LIST[3].length)) { //registerReceiver(ctx, intent)를 통해 다운로드 완료여부를 체크하려고 하였으나 실패하여 로컬 저장소의 파일 개수를 비교하여 다운로드 완료여부 확인
+							Thread.sleep(3000); //안정성을 위해 3초의 텀을 만듦
+							break;
+						}
+						
+						Thread.sleep(10);
 					}
 					
 					CTX.runOnUiThread(new Runnable() {
@@ -521,6 +650,11 @@ function checkFiles() {
 
 function downloadFileFromURL(url, path, fileName) {
 	try {
+		if(getInternetStatus() == "Offline") { //오프라인 상태
+			toast("네트워크에 연결되어 있지않아 인터넷으로부터 파일을 다운로드 받아올 수 없습니다.", 1);
+			return false;
+		}
+		
 		var downloadQueueId;
 		
 		var request = new DownloadManager.Request(Uri.parse(url));
@@ -545,7 +679,7 @@ function toast(message, duration) {
 		run: function() {
 			if(duration == null)
 				duration = 0;
-			new android.widget.Toast(CTX).makeText(CTX, message.toString(), duration).show();
+			new Toast(CTX).makeText(CTX, message.toString(), duration).show();
 		}
 	}));
 }
@@ -1102,9 +1236,10 @@ function makeGUIWindow() {
 				
 				var vLayout = new Array();
 				
+				//아이템, 블럭 버튼 생성
 				var files = getAllFiles(ITEM_PATH);
 				var currentPage = 0;
-				vLayout = makeItemButtons(files, rLayout, vLayout, currentPage);
+				vLayout = makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog);
 				
 				var ButtonOnTouchListener = new  OnTouchListener({
 					onTouch: function(view, event) {
@@ -1279,8 +1414,9 @@ function getAllFiles(path) {
 	}
 }
 
-function makeItemButtons(files, rLayout, vLayout, currentPage) {
+function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 	try {
+		var test;
 		var vLayoutParams = new RelativeLayout.LayoutParams(-2, -2);
 		vLayoutParams.setMargins(dip2px(10), dip2px(15), 0, 0);
 		
@@ -1346,9 +1482,10 @@ function makeItemButtons(files, rLayout, vLayout, currentPage) {
 					itemImage.setId(id);
 					itemImage.setPadding(0, 0, 0, 0);
 					if(files[id] != null) {
-						if(java.io.File(ITEM_PATH + files[id]).exists())
+						if(java.io.File(ITEM_PATH + files[id]).exists()) {
 							itemImage.setImageBitmap(new Bitmap.createScaledBitmap(src, dip2px(50), dip2px(50), true));
-						else
+							test = files[id];
+						} else
 							itemImage.setImageBitmap(new Bitmap.createScaledBitmap(new BitmapFactory.decodeFile(ITEM_PATH + "no_image.png"), dip2px(50), dip2px(50), true));
 						
 						itemImage.setOnLongClickListener(itemButtonOnLongClickListener);
@@ -1390,7 +1527,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage) {
 		
 		return vLayout;
 	} catch(e) {
-		toast("아이템 버튼 생성 도중 오류가 발생했습니다. \n" + e, 1);
+		toast("아이템 버튼 생성 도중 오류가 발생했습니다. \n" + test, 1);
 	}
 }
 
@@ -1505,7 +1642,7 @@ function preventFolding() {
 }
 
 function josa(kor, josa) {
-	var finalCode = kor.charCodeAt(kor.legnth - 1) - FIRST_KOREAN_OF_UNICODE; //kor의 마지막 문자의 유니코드 번호
+	var finalCode = kor.charCodeAt(kor.length - 1) - FIRST_KOREAN_OF_UNICODE; //kor의 마지막 문자의 유니코드 번호
 	
 	if(josa == "이" || josa == "가")
 		josa = (((finalCode - 44032) % (MEDIAL * FINAL)) % FINAL == 0 ? "가" : "이");
@@ -1518,6 +1655,22 @@ function josa(kor, josa) {
 	
 	return (kor + josa);
 }
+
+function getInternetStatus() {
+	var manager = CTX.getSystemService(CTX.CONNECTIVITY_SERVICE);
+	
+	var isData = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();
+	var isWiFi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
+	var isOffline = (!isData && !isWiFi);
+	
+	if(isData) //데이터
+		return "Data";
+	else if(isWiFi) //와이파이
+		return "WiFi";
+	else if(isOffline) //오프라인
+		return "Offline";
+}
+
 
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
 
@@ -1673,7 +1826,7 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -1726,7 +1879,7 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -1764,7 +1917,7 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData) 
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -1801,7 +1954,7 @@ function drain(minPoint, maxPoint) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -1843,7 +1996,7 @@ function copy(minPoint, maxPoint) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -1900,7 +2053,7 @@ function paste() {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -1977,7 +2130,7 @@ function createSphere(type, x, y, z, id, data, radius) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -2024,7 +2177,7 @@ function createCircle(type, x, y, z, id, data, radius) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -2075,7 +2228,7 @@ function createCylinder(type, x, y, z, id, radius, height) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
@@ -2117,7 +2270,7 @@ function cover(minPoint, maxPoint, id, data) {
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
 				progressDialog.dismiss();
-				progressDIlaog = null;
+				progressDialog = null;
 			}
 		});
 	} catch(e) {
