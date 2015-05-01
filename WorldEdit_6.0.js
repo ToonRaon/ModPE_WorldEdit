@@ -43,6 +43,9 @@ const ConnectivityManager = android.net.ConnectivityManager;
 const File = java.io.File;
 const BufferedReader = java.io.BufferedReader;
 const InputStreamReader = java.io.InputStreamReader;
+const FileInputStream = java.io.FileInputStream;
+const FileOutputStream = java.io.FileOutputStream;
+const OutputStreamWriter = java.io.OutputStreamWriter;
 
 const AlertDialog = android.app.AlertDialog;
 const ProgressDialog = android.app.ProgressDialog;
@@ -77,6 +80,9 @@ const IMAGE_PATH = RESOURCE_PATH + "images/";
 const GUI_PATH = IMAGE_PATH + "gui/";
 const ITEM_PATH = IMAGE_PATH + "items/";
 const ENTITY_PATH = IMAGE_PATH + "entities/";
+const OPTION_PATH = RESOURCE_PATH + "option/";
+
+const OPTION_FILE = OPTION_PATH + "options.txt";
 
 const INITIAL = 19; //초성 - ㄱ, ㄲ, ㄴ, ㄷ, ㄸ, ㄹ, ㅁ, ㅂ, ㅃ, ㅅ, ㅆ, ㅇ, ㅈ, ㅉ, ㅊ, ㅋ, ㅌ, ㅍ, ㅎ
 const MEDIAL = 21; //중성 - ㅏ, ㅐ, ㅑ, ㅒ, ㅓ, ㅔ, ㅕ, ㅖ, ㅗ, ㅘ, ㅙ, ㅚ, ㅛ, ㅜ, ㅝ, ㅞ, ㅟ, ㅠ, ㅡ, ㅢ,ㅣ
@@ -348,24 +354,32 @@ function checkVersion() {
 function checkDirectoris() {
 	try {
 		//폴더 생성//최상위 리소스 폴더
-		if(!java.io.File(RESOURCE_PATH).exists())
-			java.io.File(RESOURCE_PATH).mkdirs();
+		if(!File(RESOURCE_PATH).exists())
+			File(RESOURCE_PATH).mkdirs();
 		
 		//이미지 리소스 폴더
-		if(!java.io.File(IMAGE_PATH).exists())
-			java.io.File(IMAGE_PATH).mkdirs();
+		if(!File(IMAGE_PATH).exists())
+			File(IMAGE_PATH).mkdirs();
 		
 		//GUI 리소스 폴더
-		if(!java.io.File(GUI_PATH).exists())
-			java.io.File(GUI_PATH).mkdirs();
+		if(!File(GUI_PATH).exists())
+			File(GUI_PATH).mkdirs();
 		
 		//아이템 리소스 폴더
-		if(!java.io.File(ITEM_PATH).exists())
-			java.io.File(ITEM_PATH).mkdirs();
+		if(!File(ITEM_PATH).exists())
+			File(ITEM_PATH).mkdirs();
 		
 		//엔티티 리소스 폴더
-		if(!java.io.File(ENTITY_PATH).exists())
-			java.io.File(ENTITY_PATH).mkdirs();
+		if(!File(ENTITY_PATH).exists())
+			File(ENTITY_PATH).mkdirs();
+		
+		//옵션 폴더
+		if(!File(OPTION_PATH).exists())
+			File(OPTION_PATH).mkdirs();
+		
+		//옵션 파일
+		if(!File(OPTION_FILE).exists())
+			File(OPTION_FILE).createNewFile(); //options.txt
 	} catch(e) {
 		toast("리소스 폴더를 생성하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1378,7 +1392,7 @@ function makeGUIWindow() {
 function getAllFiles(path) {
 	try {
 		var files = new Array();
-		var list = new java.io.File(path).list();
+		var list = new File(path).list();
 		
 		files.push("");
 		
@@ -1483,7 +1497,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 					itemImage.setId(id);
 					itemImage.setPadding(0, 0, 0, 0);
 					if(files[id] != null) {
-						if(java.io.File(ITEM_PATH + files[id]).exists()) {
+						if(File(ITEM_PATH + files[id]).exists()) {
 							itemImage.setImageBitmap(new Bitmap.createScaledBitmap(src, dip2px(50), dip2px(50), true));
 							test = files[id];
 						} else
@@ -1679,6 +1693,73 @@ function internet(url) {
 	CTX.startActivity(it);
 	} catch(e) {
 		toast("인터넷 창을 띄우는 데에 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
+function saveOption(option, value) {
+	try {
+		var fileInputStream = new FileInputStream(File(OPTION_FILE));
+		var inputStreamReader = new InputStreamReader(fileInputStream);
+		var bufferedReader = new BufferedReader(inputStreamReader);
+		
+		var fileContent = "";
+		while(true) {
+			var temp = bufferedReader.readLine();
+			
+			if(temp == null) //파일 끝
+				break;
+			
+			temp += ""; //자바 -> 자바스크립트 문자열 형변환
+			if(temp.split("=")[0] == option) //이미 밸류가 저장된 경우 무시
+				continue;
+			
+			fileContent += temp + "\n";
+		}
+		
+		fileInputStream.close();
+		inputStreamReader.close();
+		bufferedReader.close();
+		
+		var fileOutputStream = new FileOutputStream(File(OPTION_FILE));
+		var outputStreamWriter = new OutputStreamWriter(fileOutputStream);
+		
+		outputStreamWriter.write(fileContent + option.toString() + "=" + value.toString()); //새로운 데이터 덧붙여 저장
+		
+		outputStreamWriter.close();
+		fileOutputStream.close();
+	} catch(e) {
+		toast("파일을 저장하는 과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
+function loadOption(option) {
+	try {
+		var fileInputStream = new FileInputStream(File(OPTION_FILE));
+		var inputStreamReader = new InputStreamReader(fileInputStream);
+		var bufferedReader = new BufferedReader(inputStreamReader);
+		
+		var value = "";
+		while(true) {
+			var temp = bufferedReader.readLine();
+			
+			if(temp == null) //파일의 끝
+				break;
+			
+			temp += ""; //자바 -> 자바스크립트 문자열 형변환
+			
+			if(temp.split("=")[0] == option) {
+				value = temp.split("=")[1];
+				break;
+			}
+		}
+		
+		fileInputStream.close();
+		inputStreamReader.close();
+		bufferedReader.close();
+		
+		return value;
+	} catch(e) {
+		toast("파일을 불러오는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
 }
 
