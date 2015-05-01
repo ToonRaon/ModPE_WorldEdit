@@ -50,7 +50,8 @@ const DownloadManager = android.app.DownloadManager;
 
 const DialogInterface = android.content.DialogInterface;
 const BroadcastReceiver = 	android.content.BroadcastReceiver;
-const IntentFilter = 	android.content.IntentFilte;
+const IntentFilter = android.content.IntentFilte;
+const Intent = android.content.Intent;
 
 const InputType = android.text.InputType;
 
@@ -330,7 +331,7 @@ function checkVersion() {
 			onClick: function(dialog, which) {
 				switch(which) {
 					case DialogInterface.BUTTON_POSITIVE:
-						toast("아직 미구현", 0);
+						internet("http://blog.naver.com/PostList.nhn?blogId=toonraon&from=postList&categoryNo=26");
 						break;
 					
 					case DialogInterface.BUTTON_NEGATIVE:
@@ -338,9 +339,9 @@ function checkVersion() {
 				}
 			}
 		});
-		alertDialog("알 림", "현재 버전보다 상위버전이 출시되었습니다. 제작자 블로그 또는 MCPE KOREA 카페를 통해 업데이트하는 것을 권장합니다.\n최신버전: " + LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION + "\n사용버전: " + CURRENT_MAJOR_VERSION + "," + CURRENT_MINOR_VERSION + "\n\n" + readURL(CHANGE_LOG_URL), listener, "제작자 블로그", null, "무시");
+		alertDialog("알 림", "현재 버전보다 상위버전이 출시되었습니다. 제작자 블로그 또는 MCPE KOREA 카페를 통해 업데이트하는 것을 권장합니다.\n최신버전: " + LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION + "\n사용버전: " + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "\n\n" + readURL(CHANGE_LOG_URL), listener, "제작자 블로그", null, "무시");
 	} else {
-		alertDialog("알 림", "이미 최신버전입니다.", null, null, null);
+		alertDialog("알 림", "이미 최신버전입니다.");
 	}
 }
 
@@ -1671,6 +1672,15 @@ function getInternetStatus() {
 		return "Offline";
 }
 
+function internet(url) {
+	try {
+	var uri = Uri.parse(url);
+	var it  = new Intent(Intent.ACTION_VIEW, uri);
+	CTX.startActivity(it);
+	} catch(e) {
+		toast("인터넷 창을 띄우는 데에 오류가 발생했습니다.\n" + e, 1);
+	}
+}
 
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
 
