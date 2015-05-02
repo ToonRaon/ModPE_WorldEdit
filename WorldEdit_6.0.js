@@ -65,12 +65,8 @@ const CURRENT_MAJOR_VERSION = 6;
 const CURRENT_MINOR_VERSION = 0;
 
 const VERSION_CHECK_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/lastest_version.txt";
-try {
-	const LASTEST_MAJOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[0].split("M_version=")[1]);
-	const LASTEST_MINOR_VERSION = parseInt(readURL(VERSION_CHECK_URL, "array")[1].split("m_version=")[1]);
-} catch(e) {
-	toast("인터넷에 연결할 수 없습니다. 인터넷 연결 상태를 확인해주세요.", 1);
-}
+const LASTEST_MAJOR_VERSION = (getInternetStatus() != "Offline") ? parseInt(readURL(VERSION_CHECK_URL, "array")[0].split("M_version=")[1]) : null;
+const LASTEST_MINOR_VERSION = (getInternetStatus() != "Offline") ? parseInt(readURL(VERSION_CHECK_URL, "array")[1].split("m_version=")[1]) : null;
 
 const CHANGE_LOG_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/change_log.txt";
 
@@ -330,24 +326,53 @@ function initialize() {
 initialize();
 
 function checkVersion() {
-	if(LASTEST_MAJOR_VERSION == "" && LASTEST_MINOR_VERSION == "") return; //인터넷 연결 상태 불량
-	
-	if((CURRENT_MAJOR_VERSION < LASTEST_MAJOR_VERSION) || (CURRENT_MAJOR_VERSION == LASTEST_MAJOR_VERSION && CURRENT_MINOR_VERSION < LASTEST_MINOR_VERSION)) { //최신버전이 아닌 경우
-		var listener = new DialogInterface.OnClickListener({
-			onClick: function(dialog, which) {
-				switch(which) {
-					case DialogInterface.BUTTON_POSITIVE:
-						internet("http://blog.naver.com/PostList.nhn?blogId=toonraon&from=postList&categoryNo=26");
-						break;
-					
-					case DialogInterface.BUTTON_NEGATIVE:
-						break;
+	try {
+		if(LASTEST_MAJOR_VERSION == null || LASTEST_MINOR_VERSION == null) { //인터넷 연결 상태 불량
+			toast("인터넷에 연결되어있지않아 최신버전의 정보를 불러올 수 없습니다.", 1);
+			return;
+		}
+		
+		if((CURRENT_MAJOR_VERSION < LASTEST_MAJOR_VERSION) || (CURRENT_MAJOR_VERSION == LASTEST_MAJOR_VERSION && CURRENT_MINOR_VERSION < LASTEST_MINOR_VERSION)) { //최신버전이 아닌 경우
+			var listener = new DialogInterface.OnClickListener({
+				onClick: function(dialog, which) {
+					switch(which) {
+						case DialogInterface.BUTTON_POSITIVE: //제작자 블로그
+							internet("http://blog.naver.com/PostList.nhn?blogId=toonraon&from=postList&categoryNo=26");
+							break;
+						
+						case DialogInterface.BUTTON_NEUTRAL: //다시 보지않음
+							saveOption("do_not_show_dialog_new_version_is_launched_anymore", LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION);
+							toast("더이상 새 버전에 대한 알림을 받지않습니다.", 1);
+							break;
+						
+						case DialogInterface.BUTTON_NEGATIVE: //닫기
+							break;
+					}
 				}
-			}
-		});
-		alertDialog("알 림", "현재 버전보다 상위버전이 출시되었습니다. 제작자 블로그 또는 MCPE KOREA 카페를 통해 업데이트하는 것을 권장합니다.\n최신버전: " + LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION + "\n사용버전: " + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "\n\n" + readURL(CHANGE_LOG_URL), listener, "제작자 블로그", null, "무시");
-	} else {
-		alertDialog("알 림", "이미 최신버전입니다.");
+			});
+			
+			if(loadOption("do_not_show_dialog_new_version_is_launched_anymore") != (LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION))
+				alertDialog("알 림", "현재 버전보다 상위버전이 출시되었습니다. 제작자 블로그 또는 MCPE KOREA 카페를 통해 업데이트하는 것을 권장합니다.\n최신버전: " + LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION + "\n사용버전: " + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "\n\n" + readURL(CHANGE_LOG_URL), listener, "제작자 블로그", "다시 보지않음", "닫기");
+		} else {
+			var listener = new DialogInterface.OnClickListener({
+				onClick: function(dialog, which) {
+					switch(which) {
+						case DialogInterface.BUTTON_POSITIVE: //확인
+							break;
+						
+						case DialogInterface.BUTTON_NEGATIVE: //다시 보지않음
+							saveOption("do_not_show_dialog_current_version_is_lastest_anymore", LASTEST_MAJOR_VERSION + "." + LASTEST_MINOR_VERSION);
+							toast("다음 업데이트까지 알림을 끕니다.", 1);
+							break;
+					}
+				}
+			});
+			
+			if(loadOption("do_not_show_dialog_current_version_is_lastest_anymore") != (CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION))
+				alertDialog("알 림", "이미 최신버전입니다.\n현재버전: " + CURRENT_MAJOR_VERSION + "." +  CURRENT_MINOR_VERSION, listener, "확인", null, "다시 보지않음");
+		}
+	} catch(e) {
+		toast("버전을 불러오는 데 실패하였습니다.\n" + e, 1);
 	}
 }
 
@@ -700,6 +725,11 @@ function toast(message, duration) {
 }
 
 function readURL(url, returnType) {
+	if(getInternetStatus() == "Offline") { //오프라인
+		toast("인터넷 연결 상태를 확인해주세요.", 1);
+		return null;
+	}
+	
 	var URLContent = "";
 	var bufferedReader = new BufferedReader(new InputStreamReader(URL(url).openStream()));
 	
