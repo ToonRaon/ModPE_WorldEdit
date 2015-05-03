@@ -70,6 +70,8 @@ const LASTEST_MINOR_VERSION = (getInternetStatus() != "Offline") ? parseInt(read
 
 const CHANGE_LOG_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/change_log.txt";
 
+const NOTICE_FILE_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/notice.txt";
+
 const SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 const RESOURCE_PATH = SD_CARD + "/games/com.mojang/worldedit/";
 const IMAGE_PATH = RESOURCE_PATH + "images/";
@@ -226,6 +228,10 @@ function newLevel() {
 	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
 			return;
 	
+	//공지사항
+	notice();
+	
+	//단축버튼
 	showWindow(shortcutWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(35));
 }
 
@@ -727,7 +733,7 @@ function toast(message, duration) {
 function readURL(url, returnType) {
 	if(getInternetStatus() == "Offline") { //오프라인
 		toast("인터넷 연결 상태를 확인해주세요.", 1);
-		return null;
+		return "";
 	}
 	
 	var URLContent = "";
@@ -1790,6 +1796,33 @@ function loadOption(option) {
 		return value;
 	} catch(e) {
 		toast("파일을 불러오는 과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
+function notice() {
+	try { 
+		if(getInternetStatus() != "Offline") {
+			var noticeSerialNumber = readURL(NOTICE_FILE_URL).split("\n", 2)[0];
+			var noticeContent = readURL(NOTICE_FILE_URL).split("\n", 2)[1];
+			if(noticeContent != "" && (noticeSerialNumber != loadOption("notice_serial_number"))) {
+				var listener = new DialogInterface.OnClickListener({
+					onClick: function(dialog, which) {
+						switch(which) {
+							case DialogInterface.BUTTON_POSITIVE:
+								break;
+							
+							case DialogInterface.BUTTON_NEGATIVE:
+								saveOption("notice_serial_number", noticeSerialNumber);
+								break;
+						}
+					}
+				});
+				
+				alertDialog("공지사항", noticeContent, listener, "확인", null, "다시 보지않음");
+			}
+		}
+	} catch(e) {
+		//toast("공지사항을 불러오는데 오류가 발생했습니다.\n" + e, 1);
 	}
 }
 
