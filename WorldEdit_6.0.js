@@ -987,7 +987,7 @@ function makeCommandWindow() {
 					new android.content.DialogInterface.OnClickListener({
 						onClick: function(dialog, which){
 							var command = content[which].replace(/ /gi, ""); //replaceAll(" ", "");
-							var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
+							var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "원기둥", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
 							
 							isPointNecessary = true;
 							for each(var i in unnecessaryPointCommands)
@@ -1220,14 +1220,15 @@ function chooseItemOnGUI(command) {
 						if(selectedItemId == null)
 							return;
 						
-						selectedItemId;
-						selectedItemData;
-						
 						commandDetector = true;
 						
 						GUIWindow.setOnDismissListener(null);
 					}
 				}));
+				break;
+			
+			case "길이": //setTile()과 GUI창을 쓰지않는 명령어
+				commandDetector = true;
 				break;
 			
 			case "덮기":
@@ -1334,6 +1335,10 @@ function commandHandler(command) {
 				selectedItemData = null;
 				radius = 0;
 				height = 0;
+				break;
+			
+			case "길이":
+				getAreaLength(minPoint, maxPoint);
 				break;
 			
 			case "덮기":
@@ -1718,7 +1723,7 @@ function cylinderSetting() {
 				height = "";
 				
 				var layout = new LinearLayout(CTX);
-				layout.setOrientatoin(1);
+				layout.setOrientation(1);
 				
 				var radiusEdit = new EditText(CTX);
 				radiusEdit.setHint("반지름을 입력하세요.");
@@ -1741,6 +1746,7 @@ function cylinderSetting() {
 								
 								radius = parseInt(radiusEdit.getText());
 								height = parseInt(heightEdit.getText());
+								toast(radius + " " + height);
 								break;
 							
 							case DialogInterface.BUTTON_NEGATIVE:
@@ -2425,7 +2431,7 @@ function createCircle(type, x, y, z, id, data, radius) {
 	}
 }
 
-function createCylinder(type, x, y, z, id, radius, height) {
+function createCylinder(type, x, y, z, id, data, radius, height) {
 	try {
 		//프로그래스 다이얼로그 시작
 		var progressDialog;
@@ -2441,7 +2447,7 @@ function createCylinder(type, x, y, z, id, radius, height) {
 		var blockCount  = 0;
 		for(var h = 0; h <= height; h++) {
 			for(var i = -radius + 1; i < radius; i++) {
-				for(var j = -radius + 1; j < radius; j++){
+				for(var j = -radius + 1; j < radius; j++) {
 					switch(type) {
 						case "원기둥":
 							if((i * i) + (j * j) <= (radius * radius)) {
@@ -2449,6 +2455,7 @@ function createCylinder(type, x, y, z, id, radius, height) {
 								blockCount++;
 							}
 							break;
+						
 						case "빈원기둥":
 							if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
 								Level.setTile(x + i, y + h, z + j, id, data);
@@ -2476,6 +2483,19 @@ function createCylinder(type, x, y, z, id, radius, height) {
 	}
 }
 
+function getAreaLength(minPoint, maxPoint) {
+	try {
+		var xLength = (maxPoint.x - minPoint.x + 1);
+		var yLength = (maxPoint.y - minPoint.y + 1);
+		var zLength = (maxPoint.z - minPoint.z + 1);
+		var volum = (xLength * yLength * zLength);
+		
+		clientMessage(ChatColor.GREEN + "[길이] x축 길이는 " + xLength + ", y축 길이는 " + yLength + ", z축 길이는 " + zLength + ", 총 블럭 개수는 " + volum + "개 입니다.");
+	} catch(e) {
+		toast("getAreaLength 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
 function cover(minPoint, maxPoint, id, data) {
 	try {
 		//프로그래스 다이얼로그 시작
@@ -2491,7 +2511,7 @@ function cover(minPoint, maxPoint, id, data) {
 			for(var z = minPoint.z; z <= maxPoint.z; z++) {
 				for(var y = minPoint.y; y <= maxPoint.y; y++) {
 					var block = Level.getTile(x, y, z);
-					var topBlock = Level.getTile(x, y, z);
+					var topBlock = Level.getTile(x, y + 1, z);
 					
 					if(block != 0 && topBlock == 0) {
 						Level.setTile(x, ++y, z, id, data);
