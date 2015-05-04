@@ -27,6 +27,7 @@ const OnTouchListener = android.view.View.OnTouchListener;
 
 const Bitmap = android.graphics.Bitmap;
 const BitmapFactory = android.graphics.BitmapFactory;
+const Drawable = android.graphics.drawable.Drawable;
 const BitmapDrawable = android.graphics.drawable.BitmapDrawable;
 const Color = android.graphics.Color;
 const Rect = android.graphics.Rect;
@@ -176,6 +177,10 @@ const RESOURCE_FILES_LIST = [
 	]
 ];
 
+const AXE_BUTTON_ID = 100;
+const CMD_BUTTON_ID = 101;
+const TABLE_ID = 1000;
+
 //GUI 선언
 var shortcutWindow;
 
@@ -232,7 +237,7 @@ function newLevel() {
 	notice();
 	
 	//단축버튼
-	showWindow(shortcutWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(35));
+	showWindow(shortcutWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(70));
 }
 
 function leaveGame() {
@@ -802,23 +807,106 @@ function makeShortcutWindow() {
 	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
-				var layout = new LinearLayout(CTX);
-				layout.setOrientation(1);
+				var layout = new RelativeLayout(CTX);
 				
-				var buttonParams = new LinearLayout.LayoutParams(dip2px(35), dip2px(35));
+				//도끼버튼 속성
+				var axeButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				axeButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
+				axeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+				axeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
+				//도끼버튼
 				var axeButton = new Button(CTX);
-				axeButton.setText("나무\n도끼");
-				axeButton.setTextSize(SP, 10);
-				axeButton.setPadding(0, 0, 0, 0);
-				layout.addView(axeButton, buttonParams);
+				//axeButton.setText("나무\n도끼");
+				//axeButton.setTextSize(SP, 10);
+				//axeButton.setPadding(0, 0, 0, 0);
+				axeButton.setAlpha(0.7);
+				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
+				axeButton.setId(AXE_BUTTON_ID);
+				layout.addView(axeButton, axeButtonParams);
 				
+				//도끼버튼 팝업설명 속성
+				var axeButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				axeButtonPopupParams.addRule(RelativeLayout.LEFT_OF, axeButton.getId());
+				axeButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, axeButton.getId());
+				
+				//도끼버튼 팝업 설명
+				var axeButtonPopup = new TextView(CTX);
+				axeButtonPopup.setText("[나무 도끼]\n현재 들고 있는 아이템을 나무도끼로 변경합니다.\n아무런 아이템도 쥐고있지 않은 경우 효과가 없습니다.");
+				axeButtonPopup.setTextSize(SP, 10);
+				axeButtonPopup.setAlpha(0);
+				axeButtonPopup.setBackgroundColor(Color.BLACK);
+				axeButtonPopup.setClickable(false);
+				axeButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				layout.addView(axeButtonPopup, axeButtonPopupParams);
+				
+				//커맨드버튼 속성
+				var cmdButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				cmdButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
+				cmdButtonParams.addRule(RelativeLayout.BELOW, AXE_BUTTON_ID);
+				cmdButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+				//커맨드버튼
 				var cmdButton = new Button(CTX);
-				cmdButton.setText("명령어");
-				cmdButton.setTextSize(SP, 10);
-				cmdButton.setPadding(0, 0, 0, 0);
-				layout.addView(cmdButton, buttonParams);
+				//cmdButton.setText("명령어");
+				//cmdButton.setTextSize(SP, 10);
+				//cmdButton.setPadding(0, 0, 0, 0);f\
+				cmdButton.setAlpha(0.7);
+				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
+				cmdButton.setId(CMD_BUTTON_ID);
+				layout.addView(cmdButton, cmdButtonParams);
 				
+				//커맨드버튼 팝업 설명 속성
+				var cmdButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				cmdButtonPopupParams.addRule(RelativeLayout.LEFT_OF, AXE_BUTTON_ID);
+				cmdButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, AXE_BUTTON_ID);
+				
+				//커맨드버튼 팝업 설명
+				var cmdButtonPopup = new TextView(CTX);
+				cmdButtonPopup.setText("[명령어 버튼]\n명령어를 GUI를 통해서 쉽게 사용할 수 있습니다.");
+				cmdButtonPopup.setTextSize(SP, 10);
+				cmdButtonPopup.setAlpha(0);
+				cmdButtonPopup.setBackgroundColor(Color.BLACK);
+				cmdButtonPopup.setClickable(false);
+				cmdButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				layout.addView(cmdButtonPopup, cmdButtonPopupParams);
+				
+				//버튼 터치 리스너
+				var buttonOnTouchListener = new OnTouchListener({
+					onTouch: function(view, event) {
+						switch(event.action) {
+							//버튼 다운
+							case MotionEvent.ACTION_DOWN:
+							case MotionEvent.ACTION_MOVE:
+								if(view == axeButton) {
+									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_off.png"));
+									axeButtonPopup.setAlpha(1);
+								}
+								else if(view == cmdButton) {
+									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_off.png"));
+									cmdButtonPopup.setAlpha(1);
+								}
+								break;
+							
+							//버튼 업
+							case MotionEvent.ACTION_UP:
+								if(view == axeButton) {
+									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
+									axeButtonPopup.setAlpha(0);
+								}
+								else if(view == cmdButton) {
+									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
+									cmdButtonPopup.setAlpha(0);
+								}
+								break;
+						}
+						return false;
+					}
+				});
+				axeButton.setOnTouchListener(buttonOnTouchListener);
+				cmdButton.setOnTouchListener(buttonOnTouchListener);
+				
+				//버튼 온클릭 리스너
 				var buttonOnClickListener = new OnClickListener({
 					onClick: function(view) {
 						switch(view) {
@@ -836,8 +924,6 @@ function makeShortcutWindow() {
 				cmdButton.setOnClickListener(buttonOnClickListener);
 				
 				shortcutWindow = new PopupWindow(layout, -2, -2);
-				
-				return false;
 			} catch(e) {
 				toast("단축 버튼 윈도우를 생성하는 과정에서 오류가 발생했습니다,\n" + e, 1);
 			}
@@ -1282,7 +1368,7 @@ function makeGUIWindow() {
 				var table = new ImageView(CTX);
 				var source = new BitmapFactory.decodeFile(GUI_PATH + "table.png");
 				table.setImageBitmap(new Bitmap.createScaledBitmap(source, dip2px(630), dip2px(350), true));
-				table.setId(1000);
+				table.setId(TABLE_ID);
 				rLayout.addView(table, tableParams);
 				
 				var vLayout = new Array();
@@ -1352,8 +1438,8 @@ function makeGUIWindow() {
 				var lastPage = Math.floor(files.length / 66);
 				
 				var pageTextParams = new RelativeLayout.LayoutParams(-2, -2);
-				pageTextParams.addRule(RelativeLayout.ALIGN_BOTTOM, 1000);
-				pageTextParams.addRule(RelativeLayout.ALIGN_RIGHT, 1000);
+				pageTextParams.addRule(RelativeLayout.ALIGN_BOTTOM, TABLE_ID);
+				pageTextParams.addRule(RelativeLayout.ALIGN_RIGHT, TABLE_ID);
 				pageTextParams.setMargins(0, 0, dip2px(60), dip2px(5));
 				
 				var pageText = new TextView(CTX);
