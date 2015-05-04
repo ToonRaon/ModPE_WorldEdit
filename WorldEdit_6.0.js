@@ -179,10 +179,13 @@ const RESOURCE_FILES_LIST = [
 
 const AXE_BUTTON_ID = 100;
 const CMD_BUTTON_ID = 101;
+const UNDO_BUTTON_ID = 102;
+const REDO_BUTTON_ID = 103;
+
 const TABLE_ID = 1000;
 
 //GUI 선언
-var shortcutWindow;
+var hotkeyWindow;
 
 var commandDialog;
 
@@ -207,19 +210,27 @@ var clipboard;
 var radius = 0;
 var height = 0;
 
-var backupPoint = new Array(3);
-var backupLength = new Array(3);
-var backupCount = 0;
-var backupBlock = new Array();
-
-//var progressDialog;
-
 var commandDetector = false;
 
 var isScriptable = false;
 
 var checkFilesThread;
 var makeGUIWindowThread;
+
+var currentWorldDir = "";
+
+/*
+ === backupArray 구조도 ===
+ backupArray = [
+	["월드1", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
+	["월드2", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
+	["월드3", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
+	...
+ ];
+ */
+var backupArray = new Array();
+var backupIndex = new Array();
+var backupWorldNumber;
 
 /* ---------------------------------------------------------------------------- ModPE Functions ---------------------------------------------------------------------------- */
 
@@ -237,14 +248,20 @@ function newLevel() {
 	notice();
 	
 	//단축버튼
-	showWindow(shortcutWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(70));
+	showWindow(hotkeyWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(70));
+	
+	//월드디렉토리
+	currentWorldDir = Level.getWorldDir();
+	
+	//백업 세팅
+	backupSetting();
 }
 
 function leaveGame() {
 	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
 			return;
 	
-	closeWindow(shortcutWindow);
+	closeWindow(hotkeyWindow);
 }
 
 function useItem(x, y, z, item, block, side, itemData, blockData) {
@@ -267,6 +284,14 @@ function procCmd(command) {
 	switch(command[0]) {
 		case "채":
 			fill(comparePoint(0), comparePoint(1), parseInt(command[1]), parseInt(command[2]));
+			break;
+		
+		case "u":
+			undo();
+			break;
+		
+		case "r":
+			redo();
 			break;
 	}
 }
@@ -319,7 +344,7 @@ function initialize() {
 				
 				if(isScriptable) { //리소스 파일 존재
 					//단축버튼 생성
-					makeShortcutWindow();
+					makeHotkeyWindow();
 					
 					//GUI 생성
 					makeGUIWindow();
@@ -803,7 +828,7 @@ function alertDialog(title, content, listener, positive, neutral, negative) {
 	}));
 }
 
-function makeShortcutWindow() {
+function makeHotkeyWindow() {
 	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
@@ -817,9 +842,6 @@ function makeShortcutWindow() {
 				
 				//도끼버튼
 				var axeButton = new Button(CTX);
-				//axeButton.setText("나무\n도끼");
-				//axeButton.setTextSize(SP, 10);
-				//axeButton.setPadding(0, 0, 0, 0);
 				axeButton.setAlpha(0.7);
 				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
 				axeButton.setId(AXE_BUTTON_ID);
@@ -827,8 +849,8 @@ function makeShortcutWindow() {
 				
 				//도끼버튼 팝업설명 속성
 				var axeButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
-				axeButtonPopupParams.addRule(RelativeLayout.LEFT_OF, axeButton.getId());
-				axeButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, axeButton.getId());
+				axeButtonPopupParams.addRule(RelativeLayout.LEFT_OF, AXE_BUTTON_ID);
+				axeButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, AXE_BUTTON_ID);
 				
 				//도끼버튼 팝업 설명
 				var axeButtonPopup = new TextView(CTX);
@@ -848,9 +870,6 @@ function makeShortcutWindow() {
 				
 				//커맨드버튼
 				var cmdButton = new Button(CTX);
-				//cmdButton.setText("명령어");
-				//cmdButton.setTextSize(SP, 10);
-				//cmdButton.setPadding(0, 0, 0, 0);f\
 				cmdButton.setAlpha(0.7);
 				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
 				cmdButton.setId(CMD_BUTTON_ID);
@@ -858,8 +877,8 @@ function makeShortcutWindow() {
 				
 				//커맨드버튼 팝업 설명 속성
 				var cmdButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
-				cmdButtonPopupParams.addRule(RelativeLayout.LEFT_OF, AXE_BUTTON_ID);
-				cmdButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, AXE_BUTTON_ID);
+				cmdButtonPopupParams.addRule(RelativeLayout.LEFT_OF, CMD_BUTTON_ID);
+				cmdButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, CMD_BUTTON_ID);
 				
 				//커맨드버튼 팝업 설명
 				var cmdButtonPopup = new TextView(CTX);
@@ -871,6 +890,62 @@ function makeShortcutWindow() {
 				cmdButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
 				layout.addView(cmdButtonPopup, cmdButtonPopupParams);
 				
+				//되돌리기버튼 속성
+				var undoButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				undoButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
+				undoButtonParams.addRule(RelativeLayout.BELOW, CMD_BUTTON_ID);
+				undoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+				//되돌리기버튼
+				var undoButton = new Button(CTX);
+				undoButton.setAlpha(0.7);
+				undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_on.png"));
+				undoButton.setId(UNDO_BUTTON_ID);
+				layout.addView(undoButton, undoButtonParams);
+				
+				//되돌리기버튼 팝업 설명 속성
+				var undoButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				undoButtonPopupParams.addRule(RelativeLayout.LEFT_OF, UNDO_BUTTON_ID);
+				undoButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, UNDO_BUTTON_ID);
+				
+				//되돌리기버튼 팝업 설명
+				var undoButtonPopup = new TextView(CTX);
+				undoButtonPopup.setText("[되돌리기 버튼]\n최근 작업을 취소합니다.");
+				undoButtonPopup.setTextSize(SP, 10);
+				undoButtonPopup.setAlpha(0);
+				undoButtonPopup.setBackgroundColor(Color.BLACK);
+				undoButtonPopup.setClickable(false);
+				undoButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				layout.addView(undoButtonPopup, undoButtonPopupParams);
+				
+				//다시실행버튼 속성
+				var redoButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				redoButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
+				redoButtonParams.addRule(RelativeLayout.BELOW, UNDO_BUTTON_ID);
+				redoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+				//다시실행버튼
+				var redoButton = new Button(CTX);
+				redoButton.setAlpha(0.7);
+				redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_on.png"));
+				redoButton.setId(REDO_BUTTON_ID);
+				layout.addView(redoButton, redoButtonParams);
+				
+				//다시실행버튼 팝업 설명 속성
+				var redoButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				redoButtonPopupParams.addRule(RelativeLayout.LEFT_OF, REDO_BUTTON_ID);
+				redoButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, REDO_BUTTON_ID);
+				
+				//다시실행버튼 팝업 설명
+				var redoButtonPopup = new TextView(CTX);
+				redoButtonPopup.setText("[다시실행 버튼]\n최근 작업을 다시 실행합니다.");
+				redoButtonPopup.setTextSize(SP, 10);
+				redoButtonPopup.setAlpha(0);
+				redoButtonPopup.setBackgroundColor(Color.BLACK);
+				redoButtonPopup.setClickable(false);
+				redoButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				layout.addView(redoButtonPopup, redoButtonPopupParams);
+				
 				//버튼 터치 리스너
 				var buttonOnTouchListener = new OnTouchListener({
 					onTouch: function(view, event) {
@@ -881,10 +956,15 @@ function makeShortcutWindow() {
 								if(view == axeButton) {
 									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_off.png"));
 									axeButtonPopup.setAlpha(1);
-								}
-								else if(view == cmdButton) {
+								} else if(view == cmdButton) {
 									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_off.png"));
 									cmdButtonPopup.setAlpha(1);
+								} else if(view == undoButton) {
+									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_off.png"));
+									undoButtonPopup.setAlpha(1);
+								} else if(view == redoButton) {
+									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_off.png"));
+									redoButtonPopup.setAlpha(1);
 								}
 								break;
 							
@@ -893,10 +973,15 @@ function makeShortcutWindow() {
 								if(view == axeButton) {
 									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
 									axeButtonPopup.setAlpha(0);
-								}
-								else if(view == cmdButton) {
+								} else if(view == cmdButton) {
 									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
 									cmdButtonPopup.setAlpha(0);
+								} else if(view == undoButton) {
+									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_on.png"));
+									undoButtonPopup.setAlpha(0);
+								} else if(view == redoButton) {
+									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_on.png"));
+									redoButtonPopup.setAlpha(0);
 								}
 								break;
 						}
@@ -905,6 +990,8 @@ function makeShortcutWindow() {
 				});
 				axeButton.setOnTouchListener(buttonOnTouchListener);
 				cmdButton.setOnTouchListener(buttonOnTouchListener);
+				undoButton.setOnTouchListener(buttonOnTouchListener);
+				redoButton.setOnTouchListener(buttonOnTouchListener);
 				
 				//버튼 온클릭 리스너
 				var buttonOnClickListener = new OnClickListener({
@@ -917,13 +1004,23 @@ function makeShortcutWindow() {
 							case cmdButton:
 								makeCommandWindow();
 								break;
+							
+							case undoButton:
+								undo();
+								break;
+								
+							case redoButton:
+								redo();
+								break;
 						}
 					}
 				});
 				axeButton.setOnClickListener(buttonOnClickListener);
 				cmdButton.setOnClickListener(buttonOnClickListener);
+				undoButton.setOnClickListener(buttonOnClickListener);
+				redoButton.setOnClickListener(buttonOnClickListener);
 				
-				shortcutWindow = new PopupWindow(layout, -2, -2);
+				hotkeyWindow = new PopupWindow(layout, -2, -2);
 			} catch(e) {
 				toast("단축 버튼 윈도우를 생성하는 과정에서 오류가 발생했습니다,\n" + e, 1);
 			}
@@ -2309,6 +2406,17 @@ function paste() {
 
 function createSphere(type, x, y, z, id, data, radius) {
 	try {
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		//프로그래스 다이얼로그 시작
 		var progressDialog;
 		CTX.runOnUiThread(new Runnable() {
@@ -2323,43 +2431,67 @@ function createSphere(type, x, y, z, id, data, radius) {
 				for(var k = -radius + 1; k < radius; k++) {
 					switch(type) {
 						case "구":
-						if((i * i) + (j * j) + (k * k) <= (radius * radius)) {
-							Level.setTile(x + i, y + j, z + k, id, data);
-							blockCount++;
-						}
-						break;
+							if((i * i) + (j * j) + (k * k) <= (radius * radius)) {
+								if(backupOption) //백업
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
+								Level.setTile(x + i, y + j, z + k, id, data);
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
+								blockCount++;
+							}
+							break;
 						
 						case "반구":
+							if(backupOption) //백업
+								backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && j >= 0) {
 								Level.setTile(x + i, y + j, z + k, id, data);
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
 								blockCount++;
 							}
 							break;
 						
 						case "빈구":
+							if(backupOption) //백업
+								backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && (i * i) + (j * j) + (k * k) >= (radius - 1) * (radius - 1)) {
 								Level.setTile(x + i, y + j, z + k, id, data);
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
 								blockCount++;
 							}
 							break;
 						
 						case "빈반구":
+							if(backupOption) //백업
+								backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && (i * i) + (j * j) + (k * k) >= (radius - 1) * (radius - 1) && j >= 0) {
 								Level.setTile(x + i, y + j, z + k, id, data);
-								blockCount++;
-							}
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
+									blockCount++;
+								}
 							break;
 						
 						case "역반구":
+							if(backupOption) //백업
+								backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && j <= 0) {
 								Level.setTile(x + i, y + j, z + k, id, data);
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
 								blockCount++;
 							}
 							break;
 						
 						case "역빈반구":
+							if(backupOption) //백업
+								backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && (i * i) + (j * j) + (k * k) >= (radius - 1) * (radius - 1) && j <= 0) {
 								Level.setTile(x + i, y + j, z + k, id, data);
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
 								blockCount++;
 							}
 							break;
@@ -2371,6 +2503,8 @@ function createSphere(type, x, y, z, id, data, radius) {
 		clientMessage(ChatColor.GREEN + josa(type, "이") + " 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
 		
 		preventFolding();
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2393,9 +2527,6 @@ function createCircle(type, x, y, z, id, data, radius) {
 				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
 			}
 		});
-		
-		//var firstPoint = [x - radius, y, z - radius];
-		//var secondPoint = [x + radius, y, z + radius];
 		
 		var blockCount  = 0;
 		for(var i = -radius + 1; i < radius; i++) for(var j = -radius + 1; j < radius; j++){
@@ -2440,9 +2571,6 @@ function createCylinder(type, x, y, z, id, data, radius, height) {
 				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
 			}
 		});
-		
-		//var firstPoint = [x - radius, y, z - radius];
-		//var secondPoint = [x + radius, y + height, z + radius];
 		
 		var blockCount  = 0;
 		for(var h = 0; h <= height; h++) {
@@ -2538,49 +2666,82 @@ function cover(minPoint, maxPoint, id, data) {
 	}
 }
 
-function backup(firstPoint, secondPoint) {
-	//if(readData("backup") == "false") return;
-	/*
-	comparePoint(firstPoint, secondPoint);
-	backupPoint[backupCount] = new Array(3);
-	backupLength[backupCount] = new Array(3);
-	
-	for(var i = 0; i <= 2; i++) {
-		backupPoint[backupCount][i] = minPos[i];
-		backupLength[backupCount][i] = maxPos[i]-minPos[i]+1;
-	}
-	
-	backupBlock[backupCount] = new Array();
-	
-	for(var i = 0; i < backupLength[backupCount][0]; i++) {
-		backupBlock[backupCount][i] = new Array();
-		for(var j = 0; j < backupLength[backupCount][1]; j++) {
-			backupBlock[backupCount][i][j] = new Array();
-			for(var k = 0; k < backupLength[backupCount][2]; k++) {
-				backupBlock[backupCount][i][j][k] = {id: Level.getTile(minPoint.x + i, minPoint.y + j, minPoint.z + k), data: Level.getData(minPoint.x + i, minPoint.y + j, minPoint.z + k)};
-				backupCount++;
-			}
+function backupSetting() {
+	try {
+		if(loadOption("backup") == "false") //백업 안 함 옵션
+			return;
+		
+		if(backupArray.length == 0) { //백업 최초 실행
+			backupArray[0] = new Array();
+			backupArray[0].push(currentWorldDir);
+			backupWorldNumber = 0;
+			backupIndex[backupWorldNumber] = 1;
+		} else { //백업한 흔적이 있는 경우
+			backupWorldNumber = backupArray.length; //backupArray에 없는 새로운 월드인 경우
+			for(var i in backupArray)
+				if(backupArray[i][0] == currentWorldDir) { //backupArray에 이미 있는 월드인 경우
+					backupWorldNumber = i;
+					break;
+				}
 		}
+	} catch(e) {
+		toast("백업을 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
-	*/
 }
 
 function undo() {
-	//if(readData("backup") == "false") return;
-	
-	backupCount --;
-	if(backupCount < 0) return;
-	
-	var blockCount = 0;
-	for(var i = 0; i < backupLength[backupCount][0]; i++) {
-		for(var j = 0; j < backupLength[backupCount][1]; j++) {
-			for(var k = 0; k < backupLength[backupCount][2]; k++) {
-				Level.setTile(backupPos[backupCount][0] + i, backupPos[backupCount][1] + j, backupPos[backupCount][2] + k, backupBlock[backupCount][i][j][k].id, backupBlock[backupCount][i][j][k].data);
-				blockCount++;
-			}
+	try {
+		if(loadOption("backup") == "false") //백업 안 함 옵션
+			return;
+		
+		if(backupIndex[backupWorldNumber] <= 1) //백업 없음
+			return;
+		
+		backupIndex[backupWorldNumber]--;
+		
+		var blockCount = 0;
+		for(var i in backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]) {
+			var x = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][0];
+			var y = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][1];
+			var z = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][2];
+			var id = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][3];
+			var data = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][4];
+			
+			Level.setTile(x, y, z, id, data);
+			
+			blockCount++;
 		}
+		clientMessage(ChatColor.GREEN + blockCount + "개의 블럭이 복원되었습니다.");
+	} catch(e) {
+		toast("되돌리기를 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
-	clientMessage(ChatColor.GREEN + blockCount + "개의 블럭이 복원되었습니다.");
-	
-	backupBlock.pop(); //마지막 원소 삭제
+}
+
+function redo() {
+	try {
+		if(loadOption("backup") == "false") //백업 안 함 옵션
+			return;
+		try {
+			if(backupIndex[backupWorldNumber] + 1 >= backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].length) //되돌릴 것 없음
+				return;
+		} catch(e) { return; }
+		
+		backupIndex[backupWorldNumber]++;
+		
+		var blockCount = 0;
+		for(var i in backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]) {
+			var x = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][0];
+			var y = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][1];
+			var z = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][2];
+			var id = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][3];
+			var data = backupArray[backupWorldNumber][backupIndex[backupWorldNumber]][i][4];
+			
+			Level.setTile(x, y, z, id, data);
+			
+			blockCount++;
+		}
+		clientMessage(ChatColor.GREEN + blockCount + "개의 블럭이 복원되었습니다.");
+	} catch(e) {
+		toast("다시실행 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
 }
