@@ -101,6 +101,14 @@ const RESOURCE_FILES_LIST = [
 		"prev_button_off.png",
 		"next_button_on.png",
 		"next_button_off.png",
+		"axe_button_on.png",
+		"axe_button_off.png",
+		"command_button_on.png",
+		"command_button_off.png",
+		"undo_button_on.png",
+		"undo_button_off.png",
+		"redo_button_on.png",
+		"redo_button_off.png",
 		"slot.png"
 	],
 	//items 폴더 - index 2
@@ -2059,11 +2067,28 @@ function fill(minPoint, maxPoint, id, data) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
+					if(backupOption) //백업
+					backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x, y, z, Level.getTile(x, y, z), Level.getData(x, y, z)]);
+					
 					Level.setTile(x, y, z, id, data);
 					blockCount++;
+					
+					if(backupOption) //for redo
+					backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, id, data]);
 				}
 			}
 		}
@@ -2075,6 +2100,8 @@ function fill(minPoint, maxPoint, id, data) {
 		var chunk_x = parseInt(maxPoint.x - minPoint.x), chunk_z = parseInt(maxPoint.z - minPoint.z);
 		if(chunk_x >= 4 || chunk_z >= 4)
 			clientMessage(ChatColor.RED + "[경고!] 넓은 영역을 에딧하여 청크 오류로 맵 저장이 되지 않을 수도 있습니다.");
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2100,11 +2127,28 @@ function wall(minPoint, maxPoint, id, data) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		for(var y = minPoint.y; y <= maxPoint.y; y++) {
 			for(var z = minPoint.z; ; z = maxPoint.z) {
 				for(var x = minPoint.x; x <= maxPoint.x; x++) {
+					if(backupOption) //백업
+					backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x, y, z, Level.getTile(x, y, z), Level.getData(x, y, z)]);
+					
 					Level.setTile(x, y, z, id, data);
 					blockCount++;
+					
+					if(backupOption) //for redo
+						backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, id, data]);
 				}
 				
 				if(z == maxPoint.z)
@@ -2125,6 +2169,8 @@ function wall(minPoint, maxPoint, id, data) {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding(); //끼임 방지
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2149,13 +2195,30 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
 					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
+						if(backupOption) //백업
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x, y, z, Level.getTile(x, y, z), Level.getData(x, y, z)]);
+						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
+						
+						if(backupOption) //for redo
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, toId, toData]);
 					}
 				}
 			}
@@ -2164,6 +2227,8 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding();
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2187,13 +2252,30 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var blockCount = 0;
 		for(var y = minPoint.y; y <= maxPoint.y; y++) {
 			for(var z = minPoint.z; ; z = maxPoint.z) {
 				for(var x = minPoint.x; x <= maxPoint.x; x++) {
 					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
+						if(backupOption) //백업
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x, y, z, Level.getTile(x, y, z), Level.getData(x, y, z)]);
+						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
+						
+						if(backupOption) //for redo
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, toId, toData]);
 					}
 				}
 				
@@ -2218,6 +2300,8 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 		
 		preventFolding();
 		
+		backupIndex[backupWorldNumber]++;
+		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
@@ -2240,13 +2324,30 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData) 
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
 					if(Level.getTile(x, y, z) != preservedId || Level.getData(x, y, z) != preservedData) {
+						if(backupOption) //백업
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x, y, z, Level.getTile(x, y, z), Level.getData(x, y, z)]);
+						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
+						
+						if(backupOption) //for redo
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, toId, toData]);
 					}
 				}
 			}
@@ -2255,6 +2356,8 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData) 
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding();
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2278,20 +2381,39 @@ function drain(minPoint, maxPoint) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
 					var block = Level.getTile(x, y, z);
 					if(block == 8 || block == 9 || block == 10 || block == 11) {
+						if(backupOption) //백업
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x, y, z, Level.getTile(x, y, z), Level.getData(x, y, z)]);
+						
 						Level.setTile(x, y, z, 0);
 						blockCount++;
+						
+						if(backupOption) //for redo
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, id, data]);
 					}
 				}
 			}
 		}
 		
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2362,6 +2484,17 @@ function paste() {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var x = Math.floor(Player.getX());
 		var y = Math.floor(Player.getY() - 1);
 		var z = Math.floor(Player.getZ());
@@ -2382,8 +2515,14 @@ function paste() {
 		for (var i = 0; i < clipboard.length; i++) {
 			for (var j = 0; j < clipboard[0].length; j++) {
 				for (var k = 0; k < clipboard[0][0].length; k++) {
+					if(backupOption) //백업
+						backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
+					
 					Level.setTile(x + i, y + j, z + k, clipboard[i][j][k].id, clipboard[i][j][k].data);
 					blockCount++;
+					
+					if(backupOption) //for redo
+						backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, clipboard[i][j][k].id, clipboard[i][j][k].data]);
 				}
 			}
 		}
@@ -2391,6 +2530,8 @@ function paste() {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 붙여넣어졌습니다.");
 		
 		preventFolding();
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2528,19 +2669,42 @@ function createCircle(type, x, y, z, id, data, radius) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var blockCount  = 0;
 		for(var i = -radius + 1; i < radius; i++) for(var j = -radius + 1; j < radius; j++){
 			switch(type) {
 					case "원":
 					if((i * i) + (j * j) <= (radius * radius)) {
+						if(backupOption) //백업
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y, z + j, Level.getTile(x + i, y, z + j), Level.getData(x + i, y, z + j)]);
+						
 						Level.setTile(x + i, y, z + j, id, data);
 						blockCount++;
+						
+						if(backupOption) //for redo
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y, z + j, id, data]);
 					}
 					break;
 				case "빈원":
 					if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
+						if(backupOption) //백업
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y, z + j, Level.getTile(x + i, y, z + j), Level.getData(x + i, y, z + j)]);
+						
 						Level.setTile(x + i, y, z + j, id, data);
 						blockCount++;
+						
+						if(backupOption) //for redo
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y, z + j, id, data]);
 					}
 					break;
 			}
@@ -2549,6 +2713,8 @@ function createCircle(type, x, y, z, id, data, radius) {
 		clientMessage(ChatColor.GREEN + josa(type, "이") + " 생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
 		
 		preventFolding();
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2572,6 +2738,17 @@ function createCylinder(type, x, y, z, id, data, radius, height) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var blockCount  = 0;
 		for(var h = 0; h <= height; h++) {
 			for(var i = -radius + 1; i < radius; i++) {
@@ -2579,15 +2756,27 @@ function createCylinder(type, x, y, z, id, data, radius, height) {
 					switch(type) {
 						case "원기둥":
 							if((i * i) + (j * j) <= (radius * radius)) {
+								if(backupOption) //백업
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
+								
 								Level.setTile(x + i, y + h, z + j, id, data);
 								blockCount++;
+								
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
 							}
 							break;
 						
 						case "빈원기둥":
 							if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
+								if(backupOption) //백업
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
+								
 								Level.setTile(x + i, y + h, z + j, id, data);
 								blockCount++;
+								
+								if(backupOption) //for redo
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
 							}
 							break;
 					}
@@ -2598,6 +2787,8 @@ function createCylinder(type, x, y, z, id, data, radius, height) {
 		clientMessage(ChatColor.GREEN + josa(type, "이") + "생성되었습니다. 총 " + blockCount + "개의 블럭이 변경되었습니다.");
 		
 		preventFolding();
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
@@ -2634,6 +2825,17 @@ function cover(minPoint, maxPoint, id, data) {
 			}
 		});
 		
+		//백업
+		var backupOption = (loadOption("backup") != "false" ? true : false);
+		if(backupOption) {
+			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
+				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
+			backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1] = new Array();
+			
+			//현재 인덱스의 뒤의 원소들 모두 삭제
+			backupArray[backupWorldNumber].splice([backupIndex[backupWorldNumber]] + 2, backupArray[backupWorldNumber].length - (backupIndex[backupWorldNumber] + 2));
+		}
+		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var z = minPoint.z; z <= maxPoint.z; z++) {
@@ -2642,9 +2844,15 @@ function cover(minPoint, maxPoint, id, data) {
 					var topBlock = Level.getTile(x, y + 1, z);
 					
 					if(block != 0 && topBlock == 0) {
+						if(backupOption) //백업
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x, y, z, Level.getTile(x, y, z), Level.getData(x, y, z)]);
+						
 						Level.setTile(x, ++y, z, id, data);
 						blockCount++;
 						//break;
+						
+						if(backupOption) //for redo
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, id, data]);
 					}
 				}
 			}
@@ -2653,6 +2861,8 @@ function cover(minPoint, maxPoint, id, data) {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding();
+		
+		backupIndex[backupWorldNumber]++;
 		
 		//프로그래스 다이얼로그 종료
 		CTX.runOnUiThread(new Runnable() {
