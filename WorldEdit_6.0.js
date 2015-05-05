@@ -484,10 +484,10 @@ function checkFiles() {
 					const NOMEDIA_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[0].length);
 					const GUI_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[1].length);
 					const ITEMS_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[2].length);
-					const ENTITISE_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[3].length);
-					const FONTS_FOLDER_LEGNTH = Number(RESOURCE_FILES_LIST[4].length);
+					const ENTITIES_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[3].length);
+					const FONTS_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[4].length);
 					
-					const WHOLE_FOLDER_LEGNTH = NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH + FONTS_FOLDER_LEGNTH;
+					const WHOLE_FOLDER_LENGTH = NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITIES_FOLDER_LENGTH + FONTS_FOLDER_LENGTH;
 					
 					var isDownloadAllowed = false;
 					var threadFreezer = false;
@@ -745,11 +745,11 @@ function checkFiles() {
 							if(isDownloadAllowed) { //파일 다운로드 허용
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
-										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH + i) / WHOLE_FOLDER_LENGTH) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[4][i]);
+										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITIES_FOLDER_LENGTH + i) / WHOLE_FOLDER_LENGTH) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[4][i]);
 									}
 								});
 								downloadFileFromURL("https://github.com/ToonRaon/ModPE_WorldEdit/raw/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/fonts/" + RESOURCE_FILES_LIST[4][i], FONT_PATH, RESOURCE_FILES_LIST[4][i]);
-								Thread.sleep(5);
+								Thread.sleep(3000);
 							} else { //파일 다운로드 거부
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
@@ -767,7 +767,7 @@ function checkFiles() {
 					}
 					
 					while(isDownloadAllowed) { //파일을 다운로드 하는 경우
-						if((File(ITEM_PATH).list().length == RESOURCE_FILES_LIST[2].length) && (File(GUI_PATH).list().length == RESOURCE_FILES_LIST[1].length) && (File(ENTITY_PATH).list().length == RESOURCE_FILES_LIST[3].length)) { //registerReceiver(ctx, intent)를 통해 다운로드 완료여부를 체크하려고 하였으나 실패하여 로컬 저장소의 파일 개수를 비교하여 다운로드 완료여부 확인
+						if((File(FONT_PATH).list().length == RESOURCE_FILES_LIST[4].length)(File(ITEM_PATH).list().length == RESOURCE_FILES_LIST[2].length) && (File(GUI_PATH).list().length == RESOURCE_FILES_LIST[1].length) && (File(ENTITY_PATH).list().length == RESOURCE_FILES_LIST[3].length)) { //registerReceiver(ctx, intent)를 통해 다운로드 완료여부를 체크하려고 하였으나 실패하여 로컬 저장소의 파일 개수를 비교하여 다운로드 완료여부 확인
 							Thread.sleep(3000); //안정성을 위해 3초의 텀을 만듦
 							break;
 						}
@@ -1737,7 +1737,6 @@ function getAllFiles(path) {
 
 function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 	try {
-		var test;
 		var vLayoutParams = new RelativeLayout.LayoutParams(-2, -2);
 		vLayoutParams.setMargins(dip2px(10), dip2px(15), 0, 0);
 		
@@ -1805,7 +1804,6 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 					if(files[id] != null) {
 						if(File(ITEM_PATH + files[id]).exists()) {
 							itemImage.setImageBitmap(new Bitmap.createScaledBitmap(src, dip2px(50), dip2px(50), true));
-							test = files[id];
 						} else
 							itemImage.setImageBitmap(new Bitmap.createScaledBitmap(new BitmapFactory.decodeFile(ITEM_PATH + "no_image.png"), dip2px(50), dip2px(50), true));
 						
@@ -1848,7 +1846,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 		
 		return vLayout;
 	} catch(e) {
-		toast("아이템 버튼 생성 도중 오류가 발생했습니다. \n" + test, 1);
+		toast("아이템 버튼 생성 도중 오류가 발생했습니다. \n" + e, 1);
 	}
 }
 
