@@ -274,6 +274,10 @@ function newLevel() {
 	
 	//백업 세팅
 	backupSetting();
+	
+	//초기화
+	firstPoint = {x: null, y: null, z: null};
+	secondPoint = {x: null, y: null, z: null};
 }
 
 function leaveGame() {
@@ -1015,6 +1019,7 @@ function makeHotkeyWindow() {
 						switch(view) {
 							case axeButton:
 								Entity.setCarriedItem(Player.getEntity(), 271, 1, 0); //나무도끼 지급
+								toast("블럭을 짧게 터치 : 지점1 설정\n블럭을 꾹~ 터치 : 지점2 설정");
 								break;
 							
 							case cmdButton:
@@ -1051,7 +1056,7 @@ function makeHotkeyWindow() {
 				
 				//도끼버튼 팝업 설명
 				var axeButtonPopup = new TextView(CTX);
-				axeButtonPopup.setText("[나무 도끼]\n현재 들고 있는 아이템을 나무도끼로 변경합니다.\n아무런 아이템도 쥐고있지 않은 경우 효과가 없습니다.");
+				axeButtonPopup.setText("[나무 도끼]\n현재 들고 있는 아이템을 나무도끼로 변경합니다.\n아무런 아이템도 쥐고있지 않은 경우 효과가 없습니다.\n\n나무도끼를 들고 블럭을 짧게 터치하면 해당 블럭의 위치가 지점1로,\n블럭을 (마치 부수는 것처럼) 길게 터치하면 해당 블럭의 위치가 지점2로 설정됩니다.");
 				axeButtonPopup.setTextSize(SP, 10);
 				axeButtonPopup.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
 				axeButtonPopup.setAlpha(0);
@@ -1177,7 +1182,10 @@ function makeCommandWindow() {
 								if(command == i) isPointNecessary = false;
 							
 							if(isPointNecessary) { //영역 지정이 필요한 명령어
-								if(firstPoint.x == null || secondPoint.x == null) return;
+								if(firstPoint.x == null || secondPoint.x == null) {
+									clientMessage(ChatColor.RED + "먼저 나무도끼로 두 지점을 지정해주세요.");
+									return;
+								}
 								
 								minPoint = comparePoint(0); 
 								maxPoint = comparePoint(1);
