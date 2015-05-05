@@ -17,6 +17,7 @@ const EditText = android.widget.EditText;
 
 const SP = android.util.TypedValue.COMPLEX_UNIT_SP;
 
+const View = android.view.View;
 const Gravity = android.view.Gravity;
 const MotionEvent =	android.view.MotionEvent;
 
@@ -32,6 +33,7 @@ const BitmapDrawable = android.graphics.drawable.BitmapDrawable;
 const Color = android.graphics.Color;
 const Rect = android.graphics.Rect;
 const NinePatchDrawable = android.graphics.drawable.NinePatchDrawable;
+const Typeface = android.graphics.Typeface;
 
 const Runnable = java.lang.Runnable;
 const Thread = java.lang.Thread;
@@ -80,8 +82,11 @@ const GUI_PATH = IMAGE_PATH + "gui/";
 const ITEM_PATH = IMAGE_PATH + "items/";
 const ENTITY_PATH = IMAGE_PATH + "entities/";
 const OPTION_PATH = RESOURCE_PATH + "option/";
+const FONT_PATH = RESOURCE_PATH + "fonts/";
 
 const OPTION_FILE = OPTION_PATH + "options.txt";
+
+const NANUM_GOTHIC_FILE = FONT_PATH + "NanumGothic.ttf";
 
 const INITIAL = 19; //초성 - ㄱ, ㄲ, ㄴ, ㄷ, ㄸ, ㄹ, ㅁ, ㅂ, ㅃ, ㅅ, ㅆ, ㅇ, ㅈ, ㅉ, ㅊ, ㅋ, ㅌ, ㅍ, ㅎ
 const MEDIAL = 21; //중성 - ㅏ, ㅐ, ㅑ, ㅒ, ㅓ, ㅔ, ㅕ, ㅖ, ㅗ, ㅘ, ㅙ, ㅚ, ㅛ, ㅜ, ㅝ, ㅞ, ㅟ, ㅠ, ㅡ, ㅢ,ㅣ
@@ -182,6 +187,10 @@ const RESOURCE_FILES_LIST = [
 		"81.png",
 		"83.png",
 		"84.png"
+	],
+	//fonts 폴더 - index 4
+	[
+		"NanumGothic.ttf"
 	]
 ];
 
@@ -194,6 +203,7 @@ const TABLE_ID = 1000;
 
 //GUI 선언
 var hotkeyWindow;
+var hotkeyPopupWindow;
 
 var commandDialog;
 
@@ -257,6 +267,7 @@ function newLevel() {
 	
 	//단축버튼
 	showWindow(hotkeyWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(70));
+	showWindow(hotkeyPopupWindow, Gravity.RIGHT | Gravity.TOP, 0 + dip2px(36), dip2px(70));
 	
 	//월드디렉토리
 	currentWorldDir = Level.getWorldDir();
@@ -449,6 +460,10 @@ function checkDirectoris() {
 		//옵션 파일
 		if(!File(OPTION_FILE).exists())
 			File(OPTION_FILE).createNewFile(); //options.txt
+		
+		//폰트 폴더
+		if(!File(FONT_PATH).exists())
+			File(FONT_PATH).mkdirs();
 	} catch(e) {
 		toast("리소스 폴더를 생성하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -470,6 +485,9 @@ function checkFiles() {
 					const GUI_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[1].length);
 					const ITEMS_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[2].length);
 					const ENTITISE_FOLDER_LENGTH = Number(RESOURCE_FILES_LIST[3].length);
+					const FONTS_FOLDER_LEGNTH = Number(RESOURCE_FILES_LIST[4].length);
+					
+					const WHOLE_FOLDER_LEGNTH = NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH + FONTS_FOLDER_LEGNTH;
 					
 					var isDownloadAllowed = false;
 					var threadFreezer = false;
@@ -538,11 +556,13 @@ function checkFiles() {
 					var GUIFiles = File(GUI_PATH).list();
 					var itemFiles = File(ITEM_PATH).list();
 					var entityFiles = File(ENTITY_PATH).list();
+					var fontFiles = File(FONT_PATH).list();
 					
 					//convert Java string array to javascript string array
 					var convertedGUIFilesArray = new Array();
 					var convertedItemFilesArray = new Array();
 					var convertedEntityFilesArray = new Array();
+					var convertedFontFilesArray = new Array();
 					
 					for each(var i in GUIFiles)
 						convertedGUIFilesArray.push(i + "");
@@ -550,6 +570,8 @@ function checkFiles() {
 						convertedItemFilesArray.push(i + "");
 					for each(var i in entityFiles)
 						convertedEntityFilesArray.push(i + "");
+					for each(var i in fontFiles)
+						convertedFontFilesArray.push(i + "");
 					
 					//.nomedia 파일
 					if(!nomediaFile.exists()) {
@@ -572,7 +594,7 @@ function checkFiles() {
 						if(isDownloadAllowed) { //파일 다운로드 허용
 							CTX.runOnUiThread(new Runnable() {
 									run: function() {
-																				progressDialog.setMessage("파일 다운로드 중... " + ((i / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + ".nomedia");
+										progressDialog.setMessage("파일 다운로드 중... " + ((i / WHOLE_FOLDER_LENGTH) * 100).toFixed(2) + "%\n" + ".nomedia");
 									}
 								});
 							downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/" + ".nomedia", IMAGE_PATH, ".nomedia");
@@ -609,7 +631,7 @@ function checkFiles() {
 							if(isDownloadAllowed) { //파일 다운로드 허용
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
-																				progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + i) / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[1][i]);
+										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + i) / WHOLE_FOLDER_LENGTH) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[1][i]);
 									}
 								});
 								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/gui/" + RESOURCE_FILES_LIST[1][i], GUI_PATH, RESOURCE_FILES_LIST[1][i]);
@@ -647,7 +669,7 @@ function checkFiles() {
 							if(isDownloadAllowed) { //파일 다운로드 허용
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
-										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + i) / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[2][i]);
+										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + i) / WHOLE_FOLDER_LENGTH) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[2][i]);
 									}
 								});
 								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/items/" + RESOURCE_FILES_LIST[2][i], ITEM_PATH, RESOURCE_FILES_LIST[2][i]);
@@ -685,10 +707,48 @@ function checkFiles() {
 							if(isDownloadAllowed) { //파일 다운로드 허용
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
-																				progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + i) / (NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH)) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[3][i]);
+										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + i) / WHOLE_FOLDER_LENGTH) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[3][i]);
 									}
 								});
 								downloadFileFromURL("https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/images/entities/" + RESOURCE_FILES_LIST[3][i], ENTITY_PATH, RESOURCE_FILES_LIST[3][i]);
+								Thread.sleep(5);
+							} else { //파일 다운로드 거부
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										progressDialog.dismiss();
+										progressDialog = null;
+									}
+								});
+								return;
+							}
+						}
+					}
+					//fonts 폴더
+					for(var i in RESOURCE_FILES_LIST[4]) {
+						i = Number(i); //i를 강제형변환하지 않으면 NOMEDIA_FOLDER_LENGTH = 1이고 i = 0일 때 NOMEDIA_FOLDER_LENGTH + i = 10과 같은 결과가 나옴 
+						
+						if(convertedFontFilesArray.indexOf(RESOURCE_FILES_LIST[4][i]) == -1) { //entities 폴더에서 누락된 파일 발견 시
+							if(!isDownloadAllowed) { //사용자로부터 다운로드를 허락 받지 못한 상태
+								threadFreezer = true;
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										if(!dialog.create().isShowing())
+											dialog.create().show();
+									}
+								});
+								
+								while(threadFreezer) { //사용자로부터 응답이 올 때까지 쓰레드 프리징
+									Thread.sleep(10);
+								}
+							}
+							
+							if(isDownloadAllowed) { //파일 다운로드 허용
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										progressDialog.setMessage("파일 다운로드 중... " + (((NOMEDIA_FOLDER_LENGTH + GUI_FOLDER_LENGTH + ITEMS_FOLDER_LENGTH + ENTITISE_FOLDER_LENGTH + i) / WHOLE_FOLDER_LENGTH) * 100).toFixed(2) + "%\n" + RESOURCE_FILES_LIST[4][i]);
+									}
+								});
+								downloadFileFromURL("https://github.com/ToonRaon/ModPE_WorldEdit/raw/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/fonts/" + RESOURCE_FILES_LIST[4][i], FONT_PATH, RESOURCE_FILES_LIST[4][i]);
 								Thread.sleep(5);
 							} else { //파일 다운로드 거부
 								CTX.runOnUiThread(new Runnable() {
@@ -840,119 +900,63 @@ function makeHotkeyWindow() {
 	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
-				var layout = new RelativeLayout(CTX);
+				//---------- Hotkey Button 부분 ----------//
+				
+				var hotkeyButtonLayout = new LinearLayout(CTX);
+				hotkeyButtonLayout.setOrientation(1);
+				//hotkeyButtonLayout.setBackgroundColor(Color.WHITE);
 				
 				//도끼버튼 속성
-				var axeButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				var axeButtonParams = new LinearLayout.LayoutParams(dip2px(30), dip2px(30));
 				axeButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
-				axeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-				axeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				//axeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+				//axeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 				//도끼버튼
 				var axeButton = new Button(CTX);
 				axeButton.setAlpha(0.7);
 				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
 				axeButton.setId(AXE_BUTTON_ID);
-				layout.addView(axeButton, axeButtonParams);
-				
-				//도끼버튼 팝업설명 속성
-				var axeButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
-				axeButtonPopupParams.addRule(RelativeLayout.LEFT_OF, AXE_BUTTON_ID);
-				axeButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, AXE_BUTTON_ID);
-				
-				//도끼버튼 팝업 설명
-				var axeButtonPopup = new TextView(CTX);
-				axeButtonPopup.setText("[나무 도끼]\n현재 들고 있는 아이템을 나무도끼로 변경합니다.\n아무런 아이템도 쥐고있지 않은 경우 효과가 없습니다.");
-				axeButtonPopup.setTextSize(SP, 10);
-				axeButtonPopup.setAlpha(0);
-				axeButtonPopup.setBackgroundColor(Color.BLACK);
-				axeButtonPopup.setClickable(false);
-				axeButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
-				layout.addView(axeButtonPopup, axeButtonPopupParams);
+				hotkeyButtonLayout.addView(axeButton, axeButtonParams);
 				
 				//커맨드버튼 속성
-				var cmdButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				var cmdButtonParams = new LinearLayout.LayoutParams(dip2px(30), dip2px(30));
 				cmdButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
-				cmdButtonParams.addRule(RelativeLayout.BELOW, AXE_BUTTON_ID);
-				cmdButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				//cmdButtonParams.addRule(RelativeLayout.BELOW, AXE_BUTTON_ID);
+				//cmdButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 				//커맨드버튼
 				var cmdButton = new Button(CTX);
 				cmdButton.setAlpha(0.7);
 				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
 				cmdButton.setId(CMD_BUTTON_ID);
-				layout.addView(cmdButton, cmdButtonParams);
-				
-				//커맨드버튼 팝업 설명 속성
-				var cmdButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
-				cmdButtonPopupParams.addRule(RelativeLayout.LEFT_OF, CMD_BUTTON_ID);
-				cmdButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, CMD_BUTTON_ID);
-				
-				//커맨드버튼 팝업 설명
-				var cmdButtonPopup = new TextView(CTX);
-				cmdButtonPopup.setText("[명령어 버튼]\n명령어를 GUI를 통해서 쉽게 사용할 수 있습니다.");
-				cmdButtonPopup.setTextSize(SP, 10);
-				cmdButtonPopup.setAlpha(0);
-				cmdButtonPopup.setBackgroundColor(Color.BLACK);
-				cmdButtonPopup.setClickable(false);
-				cmdButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
-				layout.addView(cmdButtonPopup, cmdButtonPopupParams);
+				hotkeyButtonLayout.addView(cmdButton, cmdButtonParams);
 				
 				//되돌리기버튼 속성
-				var undoButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				var undoButtonParams = new LinearLayout.LayoutParams(dip2px(30), dip2px(30));
 				undoButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
-				undoButtonParams.addRule(RelativeLayout.BELOW, CMD_BUTTON_ID);
-				undoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				//undoButtonParams.addRule(RelativeLayout.BELOW, CMD_BUTTON_ID);
+				//undoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 				//되돌리기버튼
 				var undoButton = new Button(CTX);
 				undoButton.setAlpha(0.7);
 				undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_on.png"));
 				undoButton.setId(UNDO_BUTTON_ID);
-				layout.addView(undoButton, undoButtonParams);
-				
-				//되돌리기버튼 팝업 설명 속성
-				var undoButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
-				undoButtonPopupParams.addRule(RelativeLayout.LEFT_OF, UNDO_BUTTON_ID);
-				undoButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, UNDO_BUTTON_ID);
-				
-				//되돌리기버튼 팝업 설명
-				var undoButtonPopup = new TextView(CTX);
-				undoButtonPopup.setText("[되돌리기 버튼]\n최근 작업을 취소합니다.");
-				undoButtonPopup.setTextSize(SP, 10);
-				undoButtonPopup.setAlpha(0);
-				undoButtonPopup.setBackgroundColor(Color.BLACK);
-				undoButtonPopup.setClickable(false);
-				undoButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
-				layout.addView(undoButtonPopup, undoButtonPopupParams);
+				hotkeyButtonLayout.addView(undoButton, undoButtonParams);
 				
 				//다시실행버튼 속성
-				var redoButtonParams = new RelativeLayout.LayoutParams(dip2px(30), dip2px(30));
+				var redoButtonParams = new LinearLayout.LayoutParams(dip2px(30), dip2px(30));
 				redoButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
-				redoButtonParams.addRule(RelativeLayout.BELOW, UNDO_BUTTON_ID);
-				redoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				//redoButtonParams.addRule(RelativeLayout.BELOW, UNDO_BUTTON_ID);
+				//redoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 				//다시실행버튼
 				var redoButton = new Button(CTX);
 				redoButton.setAlpha(0.7);
 				redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_on.png"));
 				redoButton.setId(REDO_BUTTON_ID);
-				layout.addView(redoButton, redoButtonParams);
-				
-				//다시실행버튼 팝업 설명 속성
-				var redoButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
-				redoButtonPopupParams.addRule(RelativeLayout.LEFT_OF, REDO_BUTTON_ID);
-				redoButtonPopupParams.addRule(RelativeLayout.ALIGN_TOP, REDO_BUTTON_ID);
-				
-				//다시실행버튼 팝업 설명
-				var redoButtonPopup = new TextView(CTX);
-				redoButtonPopup.setText("[다시실행 버튼]\n최근 작업을 다시 실행합니다.");
-				redoButtonPopup.setTextSize(SP, 10);
-				redoButtonPopup.setAlpha(0);
-				redoButtonPopup.setBackgroundColor(Color.BLACK);
-				redoButtonPopup.setClickable(false);
-				redoButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
-				layout.addView(redoButtonPopup, redoButtonPopupParams);
+				hotkeyButtonLayout.addView(redoButton, redoButtonParams);
 				
 				//버튼 터치 리스너
 				var buttonOnTouchListener = new OnTouchListener({
@@ -1028,7 +1032,77 @@ function makeHotkeyWindow() {
 				undoButton.setOnClickListener(buttonOnClickListener);
 				redoButton.setOnClickListener(buttonOnClickListener);
 				
-				hotkeyWindow = new PopupWindow(layout, -2, -2);
+				hotkeyWindow = new PopupWindow(hotkeyButtonLayout, -2, -2);
+				
+				
+				
+				//---------- Hotkey Popup 부분 ----------//
+				
+				var hotkeyPopupLayout = new RelativeLayout(CTX);
+				
+				//도끼버튼 팝업설명 속성
+				var axeButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				axeButtonPopupParams.setMargins(0, 0, 0, 0);
+				axeButtonPopupParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+				//도끼버튼 팝업 설명
+				var axeButtonPopup = new TextView(CTX);
+				axeButtonPopup.setText("[나무 도끼]\n현재 들고 있는 아이템을 나무도끼로 변경합니다.\n아무런 아이템도 쥐고있지 않은 경우 효과가 없습니다.");
+				axeButtonPopup.setTextSize(SP, 10);
+				axeButtonPopup.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+				axeButtonPopup.setAlpha(0);
+				axeButtonPopup.setBackgroundColor(Color.BLACK);
+				axeButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				hotkeyPopupLayout.addView(axeButtonPopup, axeButtonPopupParams);
+				
+				
+				//커맨드버튼 팝업 설명 속성
+				var cmdButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				cmdButtonPopupParams.setMargins(0, dip2px(33), 0, 0);
+				cmdButtonPopupParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+				//커맨드버튼 팝업 설명
+				var cmdButtonPopup = new TextView(CTX);
+				cmdButtonPopup.setText("[명령어 버튼]\n명령어를 GUI를 통해서 쉽게 사용할 수 있습니다.");
+				cmdButtonPopup.setTextSize(SP, 10);
+				cmdButtonPopup.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+				cmdButtonPopup.setAlpha(0);
+				cmdButtonPopup.setBackgroundColor(Color.BLACK);
+				cmdButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				hotkeyPopupLayout.addView(cmdButtonPopup, cmdButtonPopupParams);
+				
+				//되돌리기버튼 팝업 설명 속성
+				var undoButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				undoButtonPopupParams.setMargins(0, dip2px(33) * 2, 0, 0);
+				undoButtonPopupParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+				//되돌리기버튼 팝업 설명
+				var undoButtonPopup = new TextView(CTX);
+				undoButtonPopup.setText("[되돌리기 버튼]\n최근 작업을 취소합니다.");
+				undoButtonPopup.setTextSize(SP, 10);
+				undoButtonPopup.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+				undoButtonPopup.setAlpha(0);
+				undoButtonPopup.setBackgroundColor(Color.BLACK);
+				undoButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				hotkeyPopupLayout.addView(undoButtonPopup, undoButtonPopupParams);
+				
+				//다시실행버튼 팝업 설명 속성
+				var redoButtonPopupParams = new RelativeLayout.LayoutParams(-2, -2);
+				redoButtonPopupParams.setMargins(0, dip2px(33) * 3, 0, 0);
+				redoButtonPopupParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				
+				//다시실행버튼 팝업 설명
+				var redoButtonPopup = new TextView(CTX);
+				redoButtonPopup.setText("[다시실행 버튼]\n최근 작업을 다시 실행합니다.");
+				redoButtonPopup.setTextSize(SP, 10);
+				redoButtonPopup.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+				redoButtonPopup.setAlpha(0);
+				redoButtonPopup.setBackgroundColor(Color.BLACK);
+				redoButtonPopup.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+				hotkeyPopupLayout.addView(redoButtonPopup, redoButtonPopupParams);
+				
+				hotkeyPopupWindow = new PopupWindow(hotkeyPopupLayout, -2, -2);
+				hotkeyPopupWindow.setTouchable(false);
 			} catch(e) {
 				toast("단축 버튼 윈도우를 생성하는 과정에서 오류가 발생했습니다,\n" + e, 1);
 			}
