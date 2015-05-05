@@ -298,24 +298,174 @@ function useItem(x, y, z, item, block, side, itemData, blockData) {
 }
 
 function procCmd(command) {
-	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
-			return;
-	
-	clientMessage(command);
-	command = command.split(" ");
-	
-	switch(command[0]) {
-		case "채":
-			fill(comparePoint(0), comparePoint(1), parseInt(command[1]), parseInt(command[2]));
-			break;
+	try {
+		if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
+				return;
 		
-		case "u":
-			undo();
-			break;
+		clientMessage("<" + Player.getName(Player.getEntity()) + "> /" + command);
+		command = command.split(" ");
 		
-		case "r":
-			redo();
-			break;
+		var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "원기둥", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
+		var isPointNecessary = true;
+		for each(var i in unnecessaryPointCommands)
+			if(command[0] == i) isPointNecessary = false;
+		
+		if(isPointNecessary) { //영역 지정이 필요한 명령어
+			if(firstPoint.x == null || secondPoint.x == null) {
+				clientMessage(ChatColor.RED + "먼저 나무도끼로 두 지점을 지정해주세요.");
+				return;
+			}
+			
+			minPoint = comparePoint(0); 
+			maxPoint = comparePoint(1);
+		}
+		
+		switch(command[0]) {
+			case "채우기":
+				if(command[1] == "" || command[1] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /채우기 <아이디:데이터>");
+					return;
+				} else {
+					var id = parseInt(command[1].split(":")[0]);
+					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					fill(minPoint, maxPoint, id, data);
+				}
+				break;
+			
+			case "벽":
+				if(command[1] == "" || command[1] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /벽 <아이디:데이터>");
+					return;
+				} else {
+					var id = parseInt(command[1].split(":")[0]);
+					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					wall(minPoint, maxPoint, id, data);
+				}
+				break;
+			
+			case "비우기":
+				fill(minPoint, maxPoint, 0, 0);
+				break;
+			
+			case "바꾸기":
+				if(command[1] == "" || command[1] == undefined || command[2] == "" || command[2] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /바꾸기 <바뀔아이디:바뀔데이터> <바꿀아이디:바꿀데이터>");
+					return;
+				} else {
+					var fromId = parseInt(command[1].split(":")[0]);
+					var fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					var toId = parseInt(command[2].split(":")[0]);
+					var toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
+					
+					replace(minPoint, maxPoint, fromId, fromData, toId, toData);
+				}
+				break;
+			
+			case "벽바꾸기":
+				if(command[1] == "" || command[1] == undefined || command[2] == "" || command[2] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /벽바꾸기 <바뀔아이디:바뀔데이터> <바꿀아이디:바꿀데이터>");
+					return;
+				} else {
+					var fromId = parseInt(command[1].split(":")[0]);
+					var fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					var toId = parseInt(command[2].split(":")[0]);
+					var toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
+					
+					wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData);
+				}
+				break;
+			
+			case "남기기":
+				if(command[1] == "" || command[1] == undefined || command[2] == "" || command[2] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /남기기 <남길아이디:남길데이터> <바꿀아이디:바꿀데이터>");
+					return;
+				} else {
+					var fromId = parseInt(command[1].split(":")[0]);
+					var fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					var toId = parseInt(command[2].split(":")[0]);
+					var toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
+					
+					preserve(minPoint, maxPoint, fromId, fromData, toId, toData);
+				}
+				break;
+			
+			case "흡수":
+				drain(minPoint, maxPoint);
+				break;
+			
+			case "복사":
+				copy(minPoint, maxPoint);
+				break;
+			
+			case "붙여넣기":
+				paste();
+				break;
+			
+			case "구":
+			case "빈구":
+			case "반구":
+			case "빈반구":
+			case "역반구":
+			case "역빈반구":
+				if(command[1] == "" || command[1] == undefined || command[2] == "" || command[2] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /" + command[1] + " <아이디:데이터> <반지름>");
+					return;
+				} else {
+					var id = parseInt(command[1].split(":")[0]);
+					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					var radius = parseInt(command[2]);
+					
+					createSphere(command[0], Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius);
+				}
+				break;
+			
+			case "원":
+			case "빈원":
+				if(command[1] == "" || command[1] == undefined || command[2] == "" || command[2] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /" + command[1] + " <아이디:데이터> <반지름>");
+					return;
+				} else {
+					var id = parseInt(command[1].split(":")[0]);
+					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					var radius = parseInt(command[2]);
+					
+					createCircle(command[0], Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius);
+				}
+				break;
+			
+			case "원기둥":
+			case "빈원기둥":
+				if(command[1] == "" || command[1] == undefined || command[2] == "" || command[2] == undefined || command[3] == "" || command[3] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /" + command[1] + " <아이디:데이터> <반지름> <높이>");
+					return;
+				} else {
+					var id = parseInt(command[1].split(":")[0]);
+					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					var radius = parseInt(command[2]);
+					var height = parseInt(command[3]);
+					
+					createCylinder(command[0], Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius, height);
+				}
+				break;
+			
+			case "길이":
+				getAreaLength(minPoint, maxPoint);
+				break;
+			
+			case "덮기":
+				if(command[1] == "" || command[1] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /덮기 <아이디:데이터>");
+					return;
+				} else {
+					var id = parseInt(command[1].split(":")[0]);
+					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					
+					cover(minPoint, maxPoint, id, data);
+				}
+				break;
+		}
+	} catch(e) {
+		toast(e, 1);
 	}
 }
 
@@ -1129,9 +1279,12 @@ function setPoint(x, y, z, point, block, blockData) {
 	new Thread({
 		run: function() {
 			try{
-			Level.setTile(x, y, z, 159, 14);
-			Thread.sleep(300);
-			Level.setTile(x, y, z, block, blockData);}catch(e){toast(e, 1);}
+				Level.setTile(x, y, z, 159, 14);
+				Thread.sleep(300);
+				Level.setTile(x, y, z, block, blockData);
+			} catch(e) {
+				toast(e, 1);
+			}
 		}
 	}).start();
 }
@@ -1177,7 +1330,7 @@ function makeCommandWindow() {
 							var command = content[which].replace(/ /gi, ""); //replaceAll(" ", "");
 							var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "원기둥", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
 							
-							isPointNecessary = true;
+							var isPointNecessary = true;
 							for each(var i in unnecessaryPointCommands)
 								if(command == i) isPointNecessary = false;
 							
@@ -2489,7 +2642,7 @@ function drain(minPoint, maxPoint) {
 						blockCount++;
 						
 						if(backupOption) //for redo
-							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, id, data]);
+							backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x, y, z, 0, 0]);
 					}
 				}
 			}
@@ -2834,33 +2987,33 @@ function createCylinder(type, x, y, z, id, data, radius, height) {
 		}
 		
 		var blockCount  = 0;
-		for(var h = 0; h <= height; h++) {
+		for(var h = 0; h < height; h++) {
 			for(var i = -radius + 1; i < radius; i++) {
 				for(var j = -radius + 1; j < radius; j++) {
 					switch(type) {
 						case "원기둥":
 							if((i * i) + (j * j) <= (radius * radius)) {
 								if(backupOption) //백업
-									backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + h, z + j, Level.getTile(x + i, y + h, z + j), Level.getData(x + i, y + h, z + j)]);
 								
 								Level.setTile(x + i, y + h, z + j, id, data);
 								blockCount++;
 								
 								if(backupOption) //for redo
-									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + h, z + j, id, data]);
 							}
 							break;
 						
 						case "빈원기둥":
 							if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
 								if(backupOption) //백업
-									backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + j, z + k, Level.getTile(x + i, y + j, z + k), Level.getData(x + i, y + j, z + k)]);
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].push([x + i, y + h, z + j, Level.getTile(x + i, y + h, z + j), Level.getData(x + i, y + h, z + j)]);
 								
 								Level.setTile(x + i, y + h, z + j, id, data);
 								blockCount++;
 								
 								if(backupOption) //for redo
-									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + j, z + k, id, data]);
+									backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y + h, z + j, id, data]);
 							}
 							break;
 					}
