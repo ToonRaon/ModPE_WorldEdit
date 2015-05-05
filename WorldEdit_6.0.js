@@ -477,7 +477,7 @@ function checkFiles() {
 					var progressDialog;
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
-							progressDialog = ProgressDialog.show(CTX, "파일을 체크 중입니다...", "잠시만 기다려주세요...", true, false);
+							progressDialog = ProgressDialog.show(CTX, "상단바에 다운로드 현황이 나옵니다.", "잠시만 기다려주세요...", true, false);
 						}
 					});
 					
@@ -587,7 +587,7 @@ function checkFiles() {
 							});
 							
 							while(threadFreezer) { //사용자로부터 응답이 올 때까지 쓰레드 프리징
-								Thread.sleep(10);
+								Thread.sleep(1);
 							}
 						}
 						
@@ -624,7 +624,7 @@ function checkFiles() {
 								});
 								
 								while(threadFreezer) { //사용자로부터 응답이 올 때까지 쓰레드 프리징
-									Thread.sleep(10);
+									Thread.sleep(1);
 								}
 							}
 							
@@ -662,7 +662,7 @@ function checkFiles() {
 								});
 								
 								while(threadFreezer) { //사용자로부터 응답이 올 때까지 쓰레드 프리징
-									Thread.sleep(10);
+									Thread.sleep(1);
 								}
 							}
 							
@@ -700,7 +700,7 @@ function checkFiles() {
 								});
 								
 								while(threadFreezer) { //사용자로부터 응답이 올 때까지 쓰레드 프리징
-									Thread.sleep(10);
+									Thread.sleep(1);
 								}
 							}
 							
@@ -738,7 +738,7 @@ function checkFiles() {
 								});
 								
 								while(threadFreezer) { //사용자로부터 응답이 올 때까지 쓰레드 프리징
-									Thread.sleep(10);
+									Thread.sleep(1);
 								}
 							}
 							
@@ -749,7 +749,7 @@ function checkFiles() {
 									}
 								});
 								downloadFileFromURL("https://github.com/ToonRaon/ModPE_WorldEdit/raw/version-" + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION + "/fonts/" + RESOURCE_FILES_LIST[4][i], FONT_PATH, RESOURCE_FILES_LIST[4][i]);
-								Thread.sleep(3000);
+								Thread.sleep(5);
 							} else { //파일 다운로드 거부
 								CTX.runOnUiThread(new Runnable() {
 									run: function() {
@@ -766,13 +766,17 @@ function checkFiles() {
 						isScriptable = true;
 					}
 					
+					//RESOURCE_FILES_LIST의 마지막 원소의 용량을 체크하여
+					//파일 다운로드 완료 여부를 확인하기 때문에 마지막 원소의 파일이
+					//제대로 되었는지 확인을 위한 디버깅용 코드입니다.
+					if(RESOURCE_FILES_LIST[RESOURCE_FILES_LIST.length - 1][RESOURCE_FILES_LIST[RESOURCE_FILES_LIST.length - 1].length - 1] != "NanumGothic.ttf")
+						toast("나눔고딕이 마지막 파일이 아닙니다. 제작자는 시급히 본 코드를 수정하세요.", 1);
+					
 					while(isDownloadAllowed) { //파일을 다운로드 하는 경우
-						if((File(FONT_PATH).list().length == RESOURCE_FILES_LIST[4].length)(File(ITEM_PATH).list().length == RESOURCE_FILES_LIST[2].length) && (File(GUI_PATH).list().length == RESOURCE_FILES_LIST[1].length) && (File(ENTITY_PATH).list().length == RESOURCE_FILES_LIST[3].length)) { //registerReceiver(ctx, intent)를 통해 다운로드 완료여부를 체크하려고 하였으나 실패하여 로컬 저장소의 파일 개수를 비교하여 다운로드 완료여부 확인
-							Thread.sleep(3000); //안정성을 위해 3초의 텀을 만듦
+						if(File(NANUM_GOTHIC_FILE).length() == 4343844) //나눔고딕 4343844 바이트
 							break;
-						}
 						
-						Thread.sleep(10);
+						Thread.sleep(1);
 					}
 					
 					CTX.runOnUiThread(new Runnable() {
