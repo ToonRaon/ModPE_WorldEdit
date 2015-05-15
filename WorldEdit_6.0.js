@@ -238,7 +238,7 @@ var makeGUIWindowThread;
 var currentWorldDir = "";
 
 /*
- === backupArray 구조도 ===
+ === backupArray 4차원 배열 구조도 ===
  backupArray = [
 	["월드1", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
 	["월드2", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
@@ -461,6 +461,17 @@ function procCmd(command) {
 					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
 					
 					cover(minPoint, maxPoint, id, data);
+				}
+				break;
+			
+			case "회전":
+				if(command[1] == "" || command[1] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /회전 <회전각도>");
+					return;
+				} else {
+					var degree = parseInt(command[1]);
+					
+					rotate(degree);
 				}
 				break;
 		}
@@ -1319,7 +1330,8 @@ function makeCommandWindow() {
 					"원기둥",
 					"빈 원기둥",
 					"길이",
-					"덮기"
+					"덮기",
+					"회전 90"
 				];
 				
 				commandDialog = new AlertDialog.Builder(CTX);
@@ -1328,7 +1340,7 @@ function makeCommandWindow() {
 					new android.content.DialogInterface.OnClickListener({
 						onClick: function(dialog, which){
 							var command = content[which].replace(/ /gi, ""); //replaceAll(" ", "");
-							var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "원기둥", "빈원기둥", "붙여넣기"]; //영역을 지정해줄 필요가 없는 명령어
+							var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "원기둥", "빈원기둥", "붙여넣기", "회전90"]; //영역을 지정해줄 필요가 없는 명령어
 							
 							var isPointNecessary = true;
 							for each(var i in unnecessaryPointCommands)
@@ -1589,6 +1601,10 @@ function chooseItemOnGUI(command) {
 					}
 				}));
 				break;
+			
+			case "회전90":
+				commandDetector = true;
+				break;
 		}
 		
 		selectedCommand = command;
@@ -1689,6 +1705,10 @@ function commandHandler(command) {
 				cover(minPoint, maxPoint, selectedItemId, selectedItemData);
 				selectedItemId = null;
 				selectedItemData = null;
+				break;
+			
+			case "회전90":
+				rotate(90);
 				break;
 		}
 	} catch(e) {
@@ -3190,5 +3210,51 @@ function redo() {
 		clientMessage(ChatColor.GREEN + blockCount + "개의 블럭이 복원되었습니다.");
 	} catch(e) {
 		toast("다시실행 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
+function rotate(degree) {
+	try {
+		if(loadOption("backup") == "false") //백업 안 함
+			return;
+			
+		if(clipboard == null) {
+			clientMessage(ChatColor.RED + "먼저 영역을 복사해주세요.");
+			return;
+		}
+		
+		if(degree % 90 != 0 || degree >= 360 || degree <= 0) {
+			clientMessage(ChatColor.RED + "회전각도는 90, 180, 270 중 하나이여야 합니다.");
+			return;
+		}
+		
+		var tempArray = new Array(clipboard[0][0].length);
+		for(var i = 0; i < tempArray.length; i++) {
+			tempArray[i] = new Array(clipboard[0].length);
+			for(var j = 0; j < tempArray[0].length; j++) {
+				tempArray[i][j] = new Array(clipboard.length);
+				for(var k = 0; k < tempArray[0][0].length; k++)
+					tempArray[i][j][k] = 0;
+			}
+		}
+		
+		for(var h = 1;  h <= degree / 90; h++) { //회전변환한 도형이 3, 4분면일 경우를 따지기 않기 위해 그냥 pi/2 회전변환을 반복시킨다.
+			for(var i = 0; i < clipboard.length; i++) {
+				for(var j = 0; j < clipboard[0].length; j++) {
+					for(var k = 0; k < clipboard[0][0].length; k++) {
+						var x = i, y = j, z = k;
+						var _x = -z, _y = y, _z = x; //각 Θ = pi/2일 때 회전변환
+						_x += clipboard[0][0].length - 1; //제 2사분면을 제 1사분면으로 평행이동
+						tempArray[_x][_y][_z] = clipboard[x][y][z];
+					}
+				}
+			}
+			
+			clipboard = tempArray;
+		}
+		
+		toast(degree + "도 회전하였습니다.");
+	} catch(e) {
+		toast("회전 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
 }
