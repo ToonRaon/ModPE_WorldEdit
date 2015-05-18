@@ -103,18 +103,18 @@ const RESOURCE_FILES_LIST = [
 	[
 		"main_icon.png",
 		"table.png",
-		"prev_button_on.png",
-		"prev_button_off.png",
-		"next_button_on.png",
-		"next_button_off.png",
-		"axe_button_on.png",
-		"axe_button_off.png",
-		"command_button_on.png",
-		"command_button_off.png",
-		"undo_button_on.png",
-		"undo_button_off.png",
-		"redo_button_on.png",
-		"redo_button_off.png",
+		"prev_button_normal.png",
+		"prev_button_pressed.png",
+		"next_button_normal.png",
+		"next_button_pressed.png",
+		"axe_button_normal.png",
+		"axe_button_pressed.png",
+		"command_button_normal.png",
+		"command_button_pressed.png",
+		"undo_button_normal.png",
+		"undo_button_pressed.png",
+		"redo_button_normal.png",
+		"redo_button_pressed.png",
 		"slot.png"
 	],
 	//items 폴더 - index 2
@@ -1125,7 +1125,7 @@ function makeHotkeyWindow() {
 				//도끼버튼
 				var axeButton = new Button(CTX);
 				axeButton.setAlpha(0.7);
-				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
+				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_normal.png"));
 				axeButton.setId(ViewID.AXE_BUTTON);
 				hotkeyButtonLayout.addView(axeButton, axeButtonParams);
 				
@@ -1138,7 +1138,7 @@ function makeHotkeyWindow() {
 				//커맨드버튼
 				var cmdButton = new Button(CTX);
 				cmdButton.setAlpha(0.7);
-				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
+				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_normal.png"));
 				cmdButton.setId(ViewID.CMD_BUTTON);
 				hotkeyButtonLayout.addView(cmdButton, cmdButtonParams);
 				
@@ -1151,7 +1151,7 @@ function makeHotkeyWindow() {
 				//되돌리기버튼
 				var undoButton = new Button(CTX);
 				undoButton.setAlpha(0.7);
-				undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_on.png"));
+				undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_normal.png"));
 				undoButton.setId(ViewID.UNDO_BUTTON);
 				hotkeyButtonLayout.addView(undoButton, undoButtonParams);
 				
@@ -1164,7 +1164,7 @@ function makeHotkeyWindow() {
 				//다시실행버튼
 				var redoButton = new Button(CTX);
 				redoButton.setAlpha(0.7);
-				redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_on.png"));
+				redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_normal.png"));
 				redoButton.setId(ViewID.REDO_BUTTON);
 				hotkeyButtonLayout.addView(redoButton, redoButtonParams);
 				
@@ -1176,16 +1176,16 @@ function makeHotkeyWindow() {
 							case MotionEvent.ACTION_DOWN:
 							case MotionEvent.ACTION_MOVE:
 								if(view == axeButton) {
-									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_off.png"));
+									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_pressed.png"));
 									axeButtonPopup.setAlpha(1);
 								} else if(view == cmdButton) {
-									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_off.png"));
+									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_pressed.png"));
 									cmdButtonPopup.setAlpha(1);
 								} else if(view == undoButton) {
-									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_off.png"));
+									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_pressed.png"));
 									undoButtonPopup.setAlpha(1);
 								} else if(view == redoButton) {
-									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_off.png"));
+									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_pressed.png"));
 									redoButtonPopup.setAlpha(1);
 								}
 								break;
@@ -1193,16 +1193,16 @@ function makeHotkeyWindow() {
 							//버튼 업
 							case MotionEvent.ACTION_UP:
 								if(view == axeButton) {
-									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
+									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_normal.png"));
 									axeButtonPopup.setAlpha(0);
 								} else if(view == cmdButton) {
-									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
+									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_normal.png"));
 									cmdButtonPopup.setAlpha(0);
 								} else if(view == undoButton) {
-									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_on.png"));
+									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_normal.png"));
 									undoButtonPopup.setAlpha(0);
 								} else if(view == redoButton) {
-									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_on.png"));
+									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_normal.png"));
 									redoButtonPopup.setAlpha(0);
 								}
 								break;
@@ -1746,16 +1746,16 @@ function makeGUIWindow() {
 							case MotionEvent.ACTION_DOWN:
 							case MotionEvent.ACTION_MOVE:
 								if(view == prevButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_off.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_pressed.png");
 								else if(view == nextButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "next_button_off.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "next_button_pressed.png");
 								break;
 							
 							case MotionEvent.ACTION_UP:
 								if(view == prevButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_on.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_normal.png");
 								else if(view == nextButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "next_button_on.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "next_button_normal.png");
 								break;
 						}
 						
@@ -1822,14 +1822,14 @@ function makeGUIWindow() {
 				var prevButton = new Button(CTX);
 				prevButton.setOnTouchListener(ButtonOnTouchListener);
 				prevButton.setOnClickListener(ButtonOnClickListener);
-				var prevButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_on.png");
+				var prevButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_normal.png");
 				prevButton.setBackground(new BitmapDrawable(prevButtonSource));
 				arrowLayout.addView(prevButton, arrowButtonParams);
 				
 				var nextButton = new Button(CTX);
 				nextButton.setOnTouchListener(ButtonOnTouchListener);
 				nextButton.setOnClickListener(ButtonOnClickListener);
-				var nextButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "next_button_on.png");
+				var nextButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "next_button_normal.png");
 				nextButton.setBackground(new BitmapDrawable(nextButtonSource));
 				arrowLayout.addView(nextButton, arrowButtonParams);
 				
