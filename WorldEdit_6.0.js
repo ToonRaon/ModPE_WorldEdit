@@ -21,6 +21,7 @@ const SP = android.util.TypedValue.COMPLEX_UNIT_SP;
 const View = android.view.View;
 const Gravity = android.view.Gravity;
 const MotionEvent = android.view.MotionEvent;
+const ViewGroup = android.view.ViewGroup;
 
 //const View = android.view.View;
 const OnClickListener = android.view.View.OnClickListener;
@@ -115,7 +116,12 @@ const RESOURCE_FILES_LIST = [
 		"undo_button_pressed.png",
 		"redo_button_normal.png",
 		"redo_button_pressed.png",
-		"slot.png"
+		"slot.png",
+		"close_button_normal.png",
+		"close_button_pressed.png",
+		"title_bar.png",
+		"item_background_normal.png",
+		"item_background_pressed.png"
 	],
 	//items 폴더 - index 2
 	[
@@ -200,7 +206,7 @@ const ViewID = {
 	CMD_BUTTON: 101,
 	UNDO_BUTTON: 102,
 	REDO_BUTTON: 103,
-	EXIT_BUTTON: 104,
+	CLOSE_BUTTON: 104,
 	TABLE: 1000
 };
 
@@ -208,9 +214,9 @@ const ViewID = {
 var hotkeyWindow;
 var hotkeyPopupWindow;
 
-var commandDialog;
-
 var GUIWindow;
+
+var commandCustomDialogWindow;
 
 //변수 선언
 var firstPoint = {x: null, y: null, z: null};
@@ -571,9 +577,12 @@ function initialize() {
 					//단축버튼 생성
 					makeHotkeyWindow();
 					
+					//커맨드 커스텀 다이얼로그 윈도우 생성
+					commandCustomDialogWindow = commandCustomDialog(false);
+					
 					//GUI 생성
-					//makeGUIWindow();
-					//makeGUIWindowThread.join();
+					makeGUIWindow();
+					makeGUIWindowThread.join();
 					
 					//버전 확인
 					checkVersion();
@@ -585,6 +594,54 @@ function initialize() {
 	}).start();
 }
 initialize();
+
+function createButton(text, size, font, fontColor, width, height, backgroundNormal, backgroundPressed) {
+	var button = new Button(CTX);
+	if(text != null)
+		button.setText(text);
+	if(size != null)
+		button.setTextSize(SP, size);
+	if(font != null)
+		button.setTypeface(new Typeface.createFromFile(font));
+	if(fontColor != null)
+		button.setTextColor(fontColor);
+	if(backgroundNormal != null)
+		button.setBackground(Drawable.createFromPath(GUI_PATH + backgroundNormal));
+	if(backgroundPressed != null) {
+		button.setOnTouchListener(new OnTouchListener() {
+			onTouch: function(view, event) {
+				switch(event.action) {
+					//버튼 다운
+					case MotionEvent.ACTION_DOWN:
+					case MotionEvent.ACTION_MOVE:	
+						CTX.runOnUiThread(new Runnable() {
+							run: function() {
+								button.setBackground(Drawable.createFromPath(GUI_PATH + backgroundPressed));
+							}
+						});
+						break;
+					
+					//버튼 업
+					case MotionEvent.ACTION_UP:
+					case MotionEvent.ACTION_CANCEL:
+						CTX.runOnUiThread(new Runnable() {
+							run: function() {
+								button.setBackground(Drawable.createFromPath(GUI_PATH + backgroundNormal));
+							}
+						});
+						break;
+				}
+				
+				return false;
+			}
+		});
+	}
+	
+	var buttonParams = new ViewGroup.MarginLayoutParams(width, height);
+	button.setLayoutParams(buttonParams);
+	
+	return button;
+}
 
 function checkVersion() {
 	try {
@@ -1345,12 +1402,7 @@ function makeCommandWindow() {
 	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
-				if(commandDialog != null) {
-					commandDialog.show();
-					return;
-				}
-				
-				showWindow(commandCustomDialog(true), Gravity.CENTER, 0, 0);
+				showWindow(commandCustomDialogWindow, Gravity.CENTER, 0, 0);
 				
 			} catch(e) {
 				toast("커맨드 윈도우를 생성하는 과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -2278,11 +2330,8 @@ function commandCustomDialogItems(dialogWindow, contentLayout) {
 		layoutArray[i] = new LinearLayout(CTX);
 		layoutArray[i].setOrientation(1);
 		
-		var commandNameText = new TextView(CTX);
-		commandNameText.setText(commands[i]);
-		commandNameText.setTextSize(SP, 20);
-		commandNameText.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
-		commandNameText.setPadding(dip2px(10), dip2px(10), dip2px(10), dip2px(10));
+		var commandNameButton = createButton(commands[i], 20, NANUM_GOTHIC_FILE, Color.WHITE, -1, -2, "item_background_normal.png", "item_background_pressed.png");
+		commandNameButton.setPadding(dip2px(10), dip2px(10), dip2px(10), dip2px(10));
 		
 		var nameViewListener = new OnClickListener() {
 			onClick: function(view) {
@@ -2312,8 +2361,8 @@ function commandCustomDialogItems(dialogWindow, contentLayout) {
 				});
 			}
 		}
-		commandNameText.setOnClickListener(nameViewListener);
-		layoutArray[i].addView(commandNameText, new LinearLayout.LayoutParams(-1, -2));
+		commandNameButton.setOnClickListener(nameViewListener);
+		layoutArray[i].addView(commandNameButton);
 		
 		if(Number(i) != Number(commands.length - 1)) {
 			var horizontalLine = new View(CTX);
@@ -2335,7 +2384,7 @@ function commandCustomDialog(outsideTouchable) {
 		var window = new PopupWindow(parentLayout, -1, -1);
 		
 		var backgroundLayout = new RelativeLayout(CTX);
-		backgroundLayout.setBackgroundColor(Color.argb(128, 128, 128, 128));
+		backgroundLayout.setBackgroundColor(Color.argb(128, 0, 0, 0));
 		backgroundLayout.setOnClickListener(new OnClickListener() {
 			onClick: function() {
 				CTX.runOnUiThread(new Runnable() {
@@ -2354,25 +2403,36 @@ function commandCustomDialog(outsideTouchable) {
 		
 		var mainLayout = new LinearLayout(CTX);
 		mainLayout.setOrientation(1);
-		mainLayout.setBackgroundColor(Color.BLACK);
+		mainLayout.setBackgroundColor(Color.DKGRAY);
+		mainLayout.setOnClickListener(null);
+		mainLayout.setPadding(dip2px(3), dip2px(3), dip2px(3), dip2px(3));
 		parentLayout.addView(mainLayout, mainLayoutParams);
 		
 		var titleLayout = new RelativeLayout(CTX);
 		titleLayout.setBackgroundColor(Color.GREEN);
 		
-		var exitButtonParams = new RelativeLayout.LayoutParams(-2, -2);
-		exitButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		exitButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		var closeButton = createButton(null, null, null, null, dip2px(50), dip2px(50), "close_button_normal.png", "close_button_pressed.png");
+		closeButton.setId(ViewID.CLOSE_BUTTON);
 		
-		var exitButton = new Button(CTX);
-		exitButton.setText("X");
-		exitButton.setBackgroundColor(Color.RED);
-		exitButton.setId(ViewID.EXIT_BUTTON);
+		var closeButtonParams = new RelativeLayout.LayoutParams(dip2px(50), dip2px(50));
+		closeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		closeButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 		
-		titleLayout.addView(exitButton, exitButtonParams);
+		var closeButtonOnClickListener = new OnClickListener() {
+			onClick: function() {
+				CTX.runOnUiThread(new Runnable() {
+					run: function() {
+						window.dismiss();
+					}
+				});
+			}
+		}
+		closeButton.setOnClickListener(closeButtonOnClickListener);
 		
-		var titleTextParams = new RelativeLayout.LayoutParams(-1, -2);
-		titleTextParams.addRule(RelativeLayout.LEFT_OF, ViewID.EXIT_BUTTON);
+		titleLayout.addView(closeButton, closeButtonParams);
+		
+		var titleTextParams = new RelativeLayout.LayoutParams(-1, dip2px(50));
+		titleTextParams.addRule(RelativeLayout.LEFT_OF, ViewID.CLOSE_BUTTON);
 		titleTextParams.addRule(RelativeLayout.CENTER_VERTICAL);
 		
 		var titleText = new TextView(CTX);
@@ -2381,7 +2441,7 @@ function commandCustomDialog(outsideTouchable) {
 		titleText.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
 		titleText.setTypeface(Typeface.DEFAULT_BOLD);
 		titleText.setGravity(Gravity.CENTER);
-		titleText.setBackgroundColor(Color.BLACK);
+		titleText.setBackground(Drawable.createFromPath(GUI_PATH + "title_bar.png"));
 		titleLayout.addView(titleText, titleTextParams);
 		
 		mainLayout.addView(titleLayout);
@@ -2402,14 +2462,6 @@ function commandCustomDialog(outsideTouchable) {
 		toast(e, 1);
 	}
 }
-
-/*
-CTX.runOnUiThread(new Runnable() {
-	run: function() {
-		showWindow(commandCustomDialog(true), Gravity.CENTER, 0, 0);
-	}
-});
-*/
 
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
 
