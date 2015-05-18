@@ -14,12 +14,13 @@ const PopupWindow = android.widget.PopupWindow;
 const ImageView = android.widget.ImageView;
 const TextView = android.widget.TextView;
 const EditText = android.widget.EditText;
+const ScrollView = android.widget.ScrollView;
 
 const SP = android.util.TypedValue.COMPLEX_UNIT_SP;
 
 const View = android.view.View;
 const Gravity = android.view.Gravity;
-const MotionEvent =	android.view.MotionEvent;
+const MotionEvent = android.view.MotionEvent;
 
 //const View = android.view.View;
 const OnClickListener = android.view.View.OnClickListener;
@@ -194,12 +195,14 @@ const RESOURCE_FILES_LIST = [
 	]
 ];
 
-const AXE_BUTTON_ID = 100;
-const CMD_BUTTON_ID = 101;
-const UNDO_BUTTON_ID = 102;
-const REDO_BUTTON_ID = 103;
-
-const TABLE_ID = 1000;
+const ViewID = {
+	AXE_BUTTON: 100,
+	CMD_BUTTON: 101,
+	UNDO_BUTTON: 102,
+	REDO_BUTTON: 103,
+	EXIT_BUTTON: 104,
+	TABLE: 1000
+};
 
 //GUI 선언
 var hotkeyWindow;
@@ -249,6 +252,44 @@ var currentWorldDir = "";
 var backupArray = new Array();
 var backupIndex = new Array();
 var backupWorldNumber;
+
+var getScreenSize = {
+	width: ((CTX.getWindowManager().getDefaultDisplay().getRotation() % 2 == 0) ? CTX.getWindowManager().getDefaultDisplay().getHeight() : CTX.getWindowManager().getDefaultDisplay().getWidth()),
+	height: ((CTX.getWindowManager().getDefaultDisplay().getRotation() % 2 == 0) ? CTX.getWindowManager().getDefaultDisplay().getWidth() : CTX.getWindowManager().getDefaultDisplay().getHeight()),
+	
+	
+	getWidth: function() {
+		return this.width;
+	},
+	getHeight: function() {
+		return this.height;
+	}
+}
+
+var commands = [
+	"채우기",
+	"벽",
+	"비우기",
+	"바꾸기",
+	"벽 바꾸기",
+	"남기기",
+	"흡수",
+	"복사",
+	"붙여넣기",
+	"구",
+	"반구",
+	"빈 구",
+	"빈 반구",
+	"역 반구",
+	"역 빈 반구",
+	"원",
+	"빈 원",
+	"원기둥",
+	"빈 원기둥",
+	"길이",
+	"덮기",
+	"회전 90"
+];
 
 /* ---------------------------------------------------------------------------- ModPE Functions ---------------------------------------------------------------------------- */
 
@@ -531,8 +572,8 @@ function initialize() {
 					makeHotkeyWindow();
 					
 					//GUI 생성
-					makeGUIWindow();
-					makeGUIWindowThread.join();
+					//makeGUIWindow();
+					//makeGUIWindowThread.join();
 					
 					//버전 확인
 					checkVersion();
@@ -1085,46 +1126,46 @@ function makeHotkeyWindow() {
 				var axeButton = new Button(CTX);
 				axeButton.setAlpha(0.7);
 				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_on.png"));
-				axeButton.setId(AXE_BUTTON_ID);
+				axeButton.setId(ViewID.AXE_BUTTON);
 				hotkeyButtonLayout.addView(axeButton, axeButtonParams);
 				
 				//커맨드버튼 속성
 				var cmdButtonParams = new LinearLayout.LayoutParams(dip2px(30), dip2px(30));
 				cmdButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
-				//cmdButtonParams.addRule(RelativeLayout.BELOW, AXE_BUTTON_ID);
+				//cmdButtonParams.addRule(RelativeLayout.BELOW, ViewID.AXE_BUTTON);
 				//cmdButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 				//커맨드버튼
 				var cmdButton = new Button(CTX);
 				cmdButton.setAlpha(0.7);
 				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_on.png"));
-				cmdButton.setId(CMD_BUTTON_ID);
+				cmdButton.setId(ViewID.CMD_BUTTON);
 				hotkeyButtonLayout.addView(cmdButton, cmdButtonParams);
 				
 				//되돌리기버튼 속성
 				var undoButtonParams = new LinearLayout.LayoutParams(dip2px(30), dip2px(30));
 				undoButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
-				//undoButtonParams.addRule(RelativeLayout.BELOW, CMD_BUTTON_ID);
+				//undoButtonParams.addRule(RelativeLayout.BELOW, ViewID.CMD_BUTTON);
 				//undoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 				//되돌리기버튼
 				var undoButton = new Button(CTX);
 				undoButton.setAlpha(0.7);
 				undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_on.png"));
-				undoButton.setId(UNDO_BUTTON_ID);
+				undoButton.setId(ViewID.UNDO_BUTTON);
 				hotkeyButtonLayout.addView(undoButton, undoButtonParams);
 				
 				//다시실행버튼 속성
 				var redoButtonParams = new LinearLayout.LayoutParams(dip2px(30), dip2px(30));
 				redoButtonParams.setMargins(0, 0, dip2px(3), dip2px(3));
-				//redoButtonParams.addRule(RelativeLayout.BELOW, UNDO_BUTTON_ID);
+				//redoButtonParams.addRule(RelativeLayout.BELOW, ViewID.UNDO_BUTTON);
 				//redoButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				
 				//다시실행버튼
 				var redoButton = new Button(CTX);
 				redoButton.setAlpha(0.7);
 				redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_on.png"));
-				redoButton.setId(REDO_BUTTON_ID);
+				redoButton.setId(ViewID.REDO_BUTTON);
 				hotkeyButtonLayout.addView(redoButton, redoButtonParams);
 				
 				//버튼 터치 리스너
@@ -1309,58 +1350,8 @@ function makeCommandWindow() {
 					return;
 				}
 				
-				var content = [
-					"채우기",
-					"벽",
-					"비우기",
-					"바꾸기",
-					"벽 바꾸기",
-					"남기기",
-					"흡수",
-					"복사",
-					"붙여넣기",
-					"구",
-					"반구",
-					"빈 구",
-					"빈 반구",
-					"역 반구",
-					"역 빈 반구",
-					"원",
-					"빈 원",
-					"원기둥",
-					"빈 원기둥",
-					"길이",
-					"덮기",
-					"회전 90"
-				];
+				showWindow(commandCustomDialog(true), Gravity.CENTER, 0, 0);
 				
-				commandDialog = new AlertDialog.Builder(CTX);
-				commandDialog.setTitle("명령어 목록");
-				commandDialog.setItems(content,
-					new android.content.DialogInterface.OnClickListener({
-						onClick: function(dialog, which){
-							var command = content[which].replace(/ /gi, ""); //replaceAll(" ", "");
-							var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "원기둥", "빈원기둥", "붙여넣기", "회전90"]; //영역을 지정해줄 필요가 없는 명령어
-							
-							var isPointNecessary = true;
-							for each(var i in unnecessaryPointCommands)
-								if(command == i) isPointNecessary = false;
-							
-							if(isPointNecessary) { //영역 지정이 필요한 명령어
-								if(firstPoint.x == null || secondPoint.x == null) {
-									clientMessage(ChatColor.RED + "먼저 나무도끼로 두 지점을 지정해주세요.");
-									return;
-								}
-								
-								minPoint = comparePoint(0); 
-								maxPoint = comparePoint(1);
-							}
-							
-							chooseItemOnGUI(command); //GUI 창에서 블럭이나 아이템을 선택
-						}
-					})
-				);
-				commandDialog.show();
 			} catch(e) {
 				toast("커맨드 윈도우를 생성하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 			}
@@ -1737,7 +1728,7 @@ function makeGUIWindow() {
 				var table = new ImageView(CTX);
 				var source = new BitmapFactory.decodeFile(GUI_PATH + "table.png");
 				table.setImageBitmap(new Bitmap.createScaledBitmap(source, dip2px(630), dip2px(350), true));
-				table.setId(TABLE_ID);
+				table.setId(ViewID.TABLE);
 				rLayout.addView(table, tableParams);
 				
 				var vLayout = new Array();
@@ -1807,8 +1798,8 @@ function makeGUIWindow() {
 				var lastPage = Math.floor(files.length / 66);
 				
 				var pageTextParams = new RelativeLayout.LayoutParams(-2, -2);
-				pageTextParams.addRule(RelativeLayout.ALIGN_BOTTOM, TABLE_ID);
-				pageTextParams.addRule(RelativeLayout.ALIGN_RIGHT, TABLE_ID);
+				pageTextParams.addRule(RelativeLayout.ALIGN_BOTTOM, ViewID.TABLE);
+				pageTextParams.addRule(RelativeLayout.ALIGN_RIGHT, ViewID.TABLE);
 				pageTextParams.setMargins(0, 0, dip2px(60), dip2px(5));
 				
 				var pageText = new TextView(CTX);
@@ -2279,6 +2270,146 @@ function notice() {
 		//toast("공지사항을 불러오는데 오류가 발생했습니다.\n" + e, 1);
 	}
 }
+
+function commandCustomDialogItems(dialogWindow, contentLayout) {
+	var layoutArray = new Array(commands.length);
+		
+	for(var i in commands) {
+		layoutArray[i] = new LinearLayout(CTX);
+		layoutArray[i].setOrientation(1);
+		
+		var commandNameText = new TextView(CTX);
+		commandNameText.setText(commands[i]);
+		commandNameText.setTextSize(SP, 20);
+		commandNameText.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+		commandNameText.setPadding(dip2px(10), dip2px(10), dip2px(10), dip2px(10));
+		
+		var nameViewListener = new OnClickListener() {
+			onClick: function(view) {
+				var command = (view.getText().toString() + "").replace(/ /gi, "");
+				var unnecessaryPointCommands = ["구", "반구", "빈구", "빈반구", "역반구", "역빈반구", "원", "빈원", "원기둥", "빈원기둥", "붙여넣기", "회전90"]; //영역을 지정해줄 필요가 없는 명령어
+				
+				var isPointNecessary = true;
+				for each(var i in unnecessaryPointCommands)
+					if(command == i) isPointNecessary = false;
+				
+				if(isPointNecessary) { //영역 지정이 필요한 명령어
+					if(firstPoint.x == null || secondPoint.x == null) {
+						clientMessage(ChatColor.RED + "먼저 나무도끼로 두 지점을 지정해주세요.");
+						return;
+					}
+					
+					minPoint = comparePoint(0); 
+					maxPoint = comparePoint(1);
+				}
+				
+				chooseItemOnGUI(command); //GUI 창에서 블럭이나 아이템을 선택
+				
+				CTX.runOnUiThread(new Runnable() {
+					run: function() {
+						dialogWindow.dismiss();
+					}
+				});
+			}
+		}
+		commandNameText.setOnClickListener(nameViewListener);
+		layoutArray[i].addView(commandNameText, new LinearLayout.LayoutParams(-1, -2));
+		
+		if(Number(i) != Number(commands.length - 1)) {
+			var horizontalLine = new View(CTX);
+			horizontalLine.setBackgroundColor(Color.GRAY);
+			layoutArray[i].addView(horizontalLine, new LinearLayout.LayoutParams(-1, dip2px(1)));
+		}
+		
+		contentLayout.addView(layoutArray[i]);
+	}
+	
+	//return contentLayout;
+}
+
+function commandCustomDialog(outsideTouchable) {
+	try {
+		//최상위 레이아웃
+		var parentLayout = new RelativeLayout(CTX);
+		
+		var window = new PopupWindow(parentLayout, -1, -1);
+		
+		var backgroundLayout = new RelativeLayout(CTX);
+		backgroundLayout.setBackgroundColor(Color.argb(128, 128, 128, 128));
+		backgroundLayout.setOnClickListener(new OnClickListener() {
+			onClick: function() {
+				CTX.runOnUiThread(new Runnable() {
+					run: function() {
+						if(outsideTouchable)
+							window.dismiss();
+					}
+				});
+			}
+		});
+		parentLayout.addView(backgroundLayout, -1, -1);
+		
+		var mainLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() * (2 / 3), -1);
+		mainLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		mainLayoutParams.setMargins(0, dip2px(5), 0, dip2px(5));
+		
+		var mainLayout = new LinearLayout(CTX);
+		mainLayout.setOrientation(1);
+		mainLayout.setBackgroundColor(Color.BLACK);
+		parentLayout.addView(mainLayout, mainLayoutParams);
+		
+		var titleLayout = new RelativeLayout(CTX);
+		titleLayout.setBackgroundColor(Color.GREEN);
+		
+		var exitButtonParams = new RelativeLayout.LayoutParams(-2, -2);
+		exitButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		exitButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		
+		var exitButton = new Button(CTX);
+		exitButton.setText("X");
+		exitButton.setBackgroundColor(Color.RED);
+		exitButton.setId(ViewID.EXIT_BUTTON);
+		
+		titleLayout.addView(exitButton, exitButtonParams);
+		
+		var titleTextParams = new RelativeLayout.LayoutParams(-1, -2);
+		titleTextParams.addRule(RelativeLayout.LEFT_OF, ViewID.EXIT_BUTTON);
+		titleTextParams.addRule(RelativeLayout.CENTER_VERTICAL);
+		
+		var titleText = new TextView(CTX);
+		titleText.setText("원하는 명령어를 선택하세요.");
+		titleText.setTextSize(SP, 25);
+		titleText.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+		titleText.setTypeface(Typeface.DEFAULT_BOLD);
+		titleText.setGravity(Gravity.CENTER);
+		titleText.setBackgroundColor(Color.BLACK);
+		titleLayout.addView(titleText, titleTextParams);
+		
+		mainLayout.addView(titleLayout);
+		
+		var scrollView = new ScrollView(CTX);
+		
+		var contentLayout = new LinearLayout(CTX);
+		contentLayout.setOrientation(1);
+		contentLayout.setBackgroundColor(Color.BLUE);
+		commandCustomDialogItems(window, contentLayout);
+		
+		scrollView.addView(contentLayout);
+		
+		mainLayout.addView(scrollView);
+		
+		return window;
+	} catch(e) {
+		toast(e, 1);
+	}
+}
+
+/*
+CTX.runOnUiThread(new Runnable() {
+	run: function() {
+		showWindow(commandCustomDialog(true), Gravity.CENTER, 0, 0);
+	}
+});
+*/
 
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
 
