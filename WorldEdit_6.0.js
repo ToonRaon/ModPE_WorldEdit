@@ -610,7 +610,13 @@ function getFilesListFromGithub(owner, repo, path, recursive, savedFileList) {
 	
 	for(var i in temp) {
 		if(temp[i].type == "file") { //불러들인 파일의 타입이 파일
-			fileList.push(temp[i].path);
+			var fileInfo = {
+				"name": temp[i].name, //파일 이름
+				"path": temp[i].path, //파일 경로
+				"size": temp[i].size, //파일 크기
+				"download_url": temp[i].download_url //다운로드 url
+			};
+			fileList.push(fileInfo);
 		} else if(temp[i].type == "dir" && recursive) { //불러들인 파일의 타입이 폴더이면서 재귀적으로 검사
 			getFilesListFromGithub(owner, repo, temp[i].path, recursive, fileList);
 		}
@@ -764,7 +770,7 @@ function checkFiles() {
 					var progressDialog;
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
-							progressDialog = ProgressDialog.show(CTX, "상단바에 다운로드 현황이 나옵니다.", "잠시만 기다려주세요...", true, false);
+							progressDialog = ProgressDialog.show(CTX, "리소스 파일 다운로드 중", "잠시만 기다려주세요...", true, false);
 						}
 					});
 					
@@ -1810,7 +1816,7 @@ function makeGUIWindow() {
 				var vLayout = new Array();
 				
 				//아이템, 블럭 버튼 생성
-				var files = getAllFiles(ITEM_PATH);
+				var files = getAllImageFiles(ITEM_PATH);
 				var currentPage = 0;
 				vLayout = makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog);
 				
@@ -1947,7 +1953,7 @@ function makeGUIWindow() {
 	makeGUIWindowThread.start();
 }
 
-function getAllFiles(path) {
+function getAllImageFiles(path) {
 	try {
 		var files = new Array();
 		var list = new File(path).list();
