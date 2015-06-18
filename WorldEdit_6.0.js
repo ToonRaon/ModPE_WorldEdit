@@ -625,6 +625,26 @@ function getFilesListFromGithub(owner, repo, path, recursive, savedFileList) {
 	return fileList;
 }
 
+function getFilesListFromLocal(path, recursive, savedFileList) {
+	var fileList = ((savedFileList != undefined) ? savedFileList : new Array());
+	var temp = new Array(); //내부 저장소 파일 리스트를 임시로 저장할 배열
+	
+	temp = File(path).list();
+	
+	for(var i in temp) {
+		if(File(path + temp[i]).isFile()) { //리스트의 원소가 파일이면
+			fileList.push(path + temp[i]); //파일 배열에 파일 경로 추가
+			toast("file" + path + temp[i]);
+		} else if(File(path + temp[i]).isDirectory() && recursive) { //리스트의 원소가 폴더라면
+			getFilesListFromLocal(path + temp[i] + "/", true, fileList); //재귀적으로 파일 리스트 불러옴
+			toast("dir " + path + temp[i])
+		} else
+			toast("이도저도 아닙니다" + path + temp[i]);
+	}
+	
+	return fileList;
+}
+
 function createButton(text, size, font, fontColor, width, height, backgroundNormal, backgroundPressed) {
 	var button = new Button(CTX);
 	if(text != null)
