@@ -595,6 +595,30 @@ function initialize() {
 }
 initialize();
 
+function getFilesListFromGithub(owner, repo, path, recursive, savedFileList) {
+	if(getInternetStatus() == "Offline") //오프라인이면 리턴
+		return;
+	
+	var fileList = ((savedFileList != undefined) ? savedFileList : new Array());
+	var temp = new Array(); //github의 파일 리스트를 임시로 저장할 배열
+	
+	if(path == undefined) //path 파라미터가 넘어오지 않은 경우
+		path = ""; //최상위 루트 폴더
+	
+	temp = readURL("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path);
+	temp = JSON.parse(temp);
+	
+	for(var i in temp) {
+		if(temp[i].type == "file") { //불러들인 파일의 타입이 파일
+			fileList.push(temp[i].path);
+		} else if(temp[i].type == "dir" && recursive) { //불러들인 파일의 타입이 폴더이면서 재귀적으로 검사
+			getFilesListFromGithub(owner, repo, temp[i].path, recursive, fileList);
+		}
+	}
+	
+	return fileList;
+}
+
 function createButton(text, size, font, fontColor, width, height, backgroundNormal, backgroundPressed) {
 	var button = new Button(CTX);
 	if(text != null)
