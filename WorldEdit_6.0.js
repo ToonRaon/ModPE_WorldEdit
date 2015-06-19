@@ -200,6 +200,7 @@ const RESOURCE_FILES_LIST = [
 		"NanumGothic.ttf"
 	]
 ];
+const GITHUB_TREE = "https://gist.githubusercontent.com/ToonRaon/6781f57629048d5675a5/raw/e391ae02373471ad6dda08c9b936ed759efb53f1/GitHubAPI";
 
 const ViewID = {
 	AXE_BUTTON: 100,
@@ -595,31 +596,54 @@ function initialize() {
 }
 initialize();
 
-function getFilesListFromGithub(owner, repo, path, recursive, savedFileList) {
-	if(getInternetStatus() == "Offline") //오프라인이면 리턴
-		return;
+function getFilesListFromGitHub(owner, repo, branch, recursive, path, tree, savedFileList) {
+	if(getInternetStatus().equals("Offline")) //오프라인이면 리턴
+		return undefined;
 	
 	var fileList = ((savedFileList != undefined) ? savedFileList : new Array());
-	var temp = new Array(); //github의 파일 리스트를 임시로 저장할 배열
 	
 	if(path == undefined) //path 파라미터가 넘어오지 않은 경우
 		path = ""; //최상위 루트 폴더
 	
-	temp = readURL("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path);
-	temp = JSON.parse(temp);
+	//GitHub API Tree를 한번에 읽어올 경우 모바일 기기에서는 성능상의 한계로 모든 글을 읽어내지 못하고 결국 깨져버림.
+	//따라서 긴 글을 읽어올 때는 컴퓨터 등을 통해 별도로 직접 만든 tree JSON의 링크(gist와 같은)를 tree 파라미터를 넘겨주세요.
+	var url = (tree != undefined ) ? (tree) : ("https://api.github.com/repos/" + owner + "/" + repo + "/git/trees/" + branch + (recursive ? "?recursive=1" : ""));
 	
-	for(var i in temp) {
-		if(temp[i].type == "file") { //불러들인 파일의 타입이 파일
-			var fileInfo = {
-				"name": temp[i].name, //파일 이름
-				"path": temp[i].path, //파일 경로
-				"size": temp[i].size, //파일 크기
-				"download_url": temp[i].download_url //다운로드 url
-			};
-			fileList.push(fileInfo);
-		} else if(temp[i].type == "dir" && recursive) { //불러들인 파일의 타입이 폴더이면서 재귀적으로 검사
-			getFilesListFromGithub(owner, repo, temp[i].path, recursive, fileList);
+	var temp = JSON.parse(readURL(url));
+	if(path != undefined) { //path가 별도로 지정이 된 경우 해당 폴더의 하위 파일만 저장
+		for(var i in temp.tree) {
+			var file = temp.tree[i];
+			
+			if(file.path.indexOf(path + "/") != -1) { //원소의 경로가 주어진 path의 하위 폴더인 경우
+				if(file.type.equals("blob")) { //원소의 유형이 파일일 때
+					if(recursive) { //해당 path의 하위 폴더의 파일들도 모두 읽을 때
+						var fileInfo = {
+							"name": (file.path.split("/")[file.path.split("/").length - 1]), //파일이름 == path를 /로 split 하였을 때 마지막 원소
+							"path": file.path,
+							"sha": file.sha,
+							"size": parseInt(file.size),
+							"url": file.url
+						};
+						
+						fileList.push(fileInfo);
+					} else if(!recursive) { //해당 path의 하위 폴더의 파일들을 읽지 않을 때
+						if( ( file.path.split(path + "/").slice(1).join(path + "/") ).indexOf("/") != -1 ) { //해당 파일의 상위 경로가 path뿐일 때
+							var fileInfo = {
+								"name": (file.path.split("/")[file.path.split("/").length - 1]), //파일이름 == path를 /로 split 하였을 때 마지막 원소
+								"path": file.path,
+								"sha": file.sha,
+								"size": parseInt(file.size),
+								"url": file.url
+							};
+							
+							fileList.push(fileInfo);
+						}
+					}
+				}
+			}
 		}
+	} else { //path가 지정이 되지 않은 경우 - 최상위 루트 폴더
+		fileList = temp.tree;
 	}
 	
 	return fileList;
