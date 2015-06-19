@@ -596,11 +596,11 @@ function initialize() {
 }
 initialize();
 
-function getFilesListFromGitHub(owner, repo, branch, recursive, path, tree, savedFileList) {
+function getFilesListFromGitHub(owner, repo, branch, recursive, path, tree) {
 	if(getInternetStatus().equals("Offline")) //오프라인이면 리턴
 		return undefined;
 	
-	var fileList = ((savedFileList != undefined) ? savedFileList : new Array());
+	var fileList = new Array();
 	
 	if(path == undefined) //path 파라미터가 넘어오지 않은 경우
 		path = ""; //최상위 루트 폴더
