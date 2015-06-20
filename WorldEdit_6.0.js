@@ -671,7 +671,7 @@ function checkVersion() {
 	}
 }
 
-function checkDirectoris() {
+function checkDirectories() {
 	try {
 		//폴더 생성//최상위 리소스 폴더
 		if(!File(RESOURCE_PATH).exists())
