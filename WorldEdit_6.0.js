@@ -1646,7 +1646,7 @@ function makeGUIWindow() {
 				tableParams.setMargins(dip2px(5), dip2px(5), 0, 0);
 				
 				var table = new ImageView(CTX);
-				var source = new BitmapFactory.decodeFile(GUI_PATH + "table.png");
+				var source = new BitmapFactory.decodeFile(GUI_PATH + "/table.png");
 				table.setImageBitmap(new Bitmap.createScaledBitmap(source, dip2px(630), dip2px(350), true));
 				table.setId(ViewID.TABLE);
 				rLayout.addView(table, tableParams);
@@ -1666,16 +1666,16 @@ function makeGUIWindow() {
 							case MotionEvent.ACTION_DOWN:
 							case MotionEvent.ACTION_MOVE:
 								if(view == prevButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_pressed.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "/prev_button_pressed.png");
 								else if(view == nextButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "next_button_pressed.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "/next_button_pressed.png");
 								break;
 							
 							case MotionEvent.ACTION_UP:
 								if(view == prevButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_normal.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "/prev_button_normal.png");
 								else if(view == nextButton)
-									source = new BitmapFactory.decodeFile(GUI_PATH + "next_button_normal.png");
+									source = new BitmapFactory.decodeFile(GUI_PATH + "/next_button_normal.png");
 								break;
 						}
 						
@@ -1742,14 +1742,14 @@ function makeGUIWindow() {
 				var prevButton = new Button(CTX);
 				prevButton.setOnTouchListener(ButtonOnTouchListener);
 				prevButton.setOnClickListener(ButtonOnClickListener);
-				var prevButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "prev_button_normal.png");
+				var prevButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "/prev_button_normal.png");
 				prevButton.setBackground(new BitmapDrawable(prevButtonSource));
 				arrowLayout.addView(prevButton, arrowButtonParams);
 				
 				var nextButton = new Button(CTX);
 				nextButton.setOnTouchListener(ButtonOnTouchListener);
 				nextButton.setOnClickListener(ButtonOnClickListener);
-				var nextButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "next_button_normal.png");
+				var nextButtonSource = new BitmapFactory.decodeFile(GUI_PATH + "/next_button_normal.png");
 				nextButton.setBackground(new BitmapDrawable(nextButtonSource));
 				arrowLayout.addView(nextButton, arrowButtonParams);
 				
