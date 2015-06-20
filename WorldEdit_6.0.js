@@ -114,6 +114,8 @@ var GUIWindow;
 
 var commandCustomDialogWindow;
 
+var mainWindow;
+
 //변수 선언
 var firstPoint = {x: null, y: null, z: null};
 var secondPoint = {x: null, y: null, z: null};
@@ -212,6 +214,9 @@ function newLevel() {
 	showWindow(hotkeyWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(70));
 	showWindow(hotkeyPopupWindow, Gravity.RIGHT | Gravity.TOP, 0 + dip2px(36), dip2px(70));
 	
+	//메인 윈도우
+	showWindow(mainWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+	
 	//월드디렉토리
 	currentWorldDir = Level.getWorldDir();
 	
@@ -227,7 +232,11 @@ function leaveGame() {
 	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
 			return;
 	
+	//단축 윈도우 종료
 	closeWindow(hotkeyWindow);
+	
+	//메인 윈도우 종료
+	closeWindow(mainWindow);
 }
 
 function useItem(x, y, z, item, block, side, itemData, blockData) {
@@ -464,11 +473,12 @@ function initialize() {
 	
 	//파일 체크
 	checkFiles(); 
-	checkFilesThread.join();
 	
 	new Thread(new Runnable() {
 		run: function() {
 			try {
+				checkFilesThread.join();
+				
 				if(isScriptable) { //리소스 파일 존재
 					//단축버튼 생성
 					makeHotkeyWindow();
@@ -478,7 +488,11 @@ function initialize() {
 					
 					//GUI 생성
 					makeGUIWindow();
-					makeGUIWindowThread.join();
+					if(makeGUIWindowThread != null)
+						makeGUIWindowThread.join();
+					
+					//메인 버튼 생성
+					makeMainWindow();
 					
 					//버전 확인
 					checkVersion();
@@ -1249,6 +1263,32 @@ function makeHotkeyWindow() {
 			}
 		}
 	}));
+}
+
+function makeMainWindow() {
+	try {
+	//메인 레이아웃
+	var mainLayout = new RelativeLayout(CTX);
+	
+	//메인 버튼
+	var mainButton = new Button(CTX);
+	mainButton.setBackground(new BitmapDrawable(new BitmapFactory.decodeFile(GUI_PATH + "/main_icon.png")));
+	mainButton.setOnClickListener(new OnClickListener() {
+		onClick: function() {
+			toast("asd");
+		}
+	});
+	
+	//메인 버튼 속성
+	var mainButtonParams = new RelativeLayout.LayoutParams(dip2px(50), dip2px(50));
+	
+	mainLayout.addView(mainButton, mainButtonParams);
+	
+	//메인 윈도우
+	mainWindow = new PopupWindow(mainLayout, -2, -2);
+	} catch(e) {
+		toast("메인 윈도우 생성과정에서 에러 발생!\n" + e, 1);
+	}
 }
 
 function setPoint(x, y, z, point, block, blockData) {
