@@ -1056,7 +1056,7 @@ function makeHotkeyWindow() {
 				//도끼버튼
 				var axeButton = new Button(CTX);
 				axeButton.setAlpha(0.7);
-				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_normal.png"));
+				axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "/axe_button_normal.png"));
 				axeButton.setId(ViewID.AXE_BUTTON);
 				hotkeyButtonLayout.addView(axeButton, axeButtonParams);
 				
@@ -1069,7 +1069,7 @@ function makeHotkeyWindow() {
 				//커맨드버튼
 				var cmdButton = new Button(CTX);
 				cmdButton.setAlpha(0.7);
-				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_normal.png"));
+				cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "/command_button_normal.png"));
 				cmdButton.setId(ViewID.CMD_BUTTON);
 				hotkeyButtonLayout.addView(cmdButton, cmdButtonParams);
 				
@@ -1082,7 +1082,7 @@ function makeHotkeyWindow() {
 				//되돌리기버튼
 				var undoButton = new Button(CTX);
 				undoButton.setAlpha(0.7);
-				undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_normal.png"));
+				undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/undo_button_normal.png"));
 				undoButton.setId(ViewID.UNDO_BUTTON);
 				hotkeyButtonLayout.addView(undoButton, undoButtonParams);
 				
@@ -1095,7 +1095,7 @@ function makeHotkeyWindow() {
 				//다시실행버튼
 				var redoButton = new Button(CTX);
 				redoButton.setAlpha(0.7);
-				redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_normal.png"));
+				redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/redo_button_normal.png"));
 				redoButton.setId(ViewID.REDO_BUTTON);
 				hotkeyButtonLayout.addView(redoButton, redoButtonParams);
 				
@@ -1107,16 +1107,16 @@ function makeHotkeyWindow() {
 							case MotionEvent.ACTION_DOWN:
 							case MotionEvent.ACTION_MOVE:
 								if(view == axeButton) {
-									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_pressed.png"));
+									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "/axe_button_pressed.png"));
 									axeButtonPopup.setAlpha(1);
 								} else if(view == cmdButton) {
-									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_pressed.png"));
+									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "/command_button_pressed.png"));
 									cmdButtonPopup.setAlpha(1);
 								} else if(view == undoButton) {
-									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_pressed.png"));
+									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/undo_button_pressed.png"));
 									undoButtonPopup.setAlpha(1);
 								} else if(view == redoButton) {
-									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_pressed.png"));
+									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/redo_button_pressed.png"));
 									redoButtonPopup.setAlpha(1);
 								}
 								break;
@@ -1124,16 +1124,16 @@ function makeHotkeyWindow() {
 							//버튼 업
 							case MotionEvent.ACTION_UP:
 								if(view == axeButton) {
-									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "axe_button_normal.png"));
+									axeButton.setBackground(Drawable.createFromPath(GUI_PATH + "/axe_button_normal.png"));
 									axeButtonPopup.setAlpha(0);
 								} else if(view == cmdButton) {
-									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "command_button_normal.png"));
+									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "/command_button_normal.png"));
 									cmdButtonPopup.setAlpha(0);
 								} else if(view == undoButton) {
-									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "undo_button_normal.png"));
+									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/undo_button_normal.png"));
 									undoButtonPopup.setAlpha(0);
 								} else if(view == redoButton) {
-									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "redo_button_normal.png"));
+									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/redo_button_normal.png"));
 									redoButtonPopup.setAlpha(0);
 								}
 								break;
