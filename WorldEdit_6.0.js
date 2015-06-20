@@ -459,16 +459,16 @@ function modTick() {
 /* ---------------------------------------------------------------------------- Custom Functions ---------------------------------------------------------------------------- */
 
 function initialize() {
+	//폴더 체크
+	checkDirectories();
+	
+	//파일 체크
+	checkFiles(); 
+	checkFilesThread.join();
+	
 	new Thread(new Runnable() {
 		run: function() {
 			try {
-				//폴더 체크
-				checkDirectoris();
-				
-				//파일 체크
-				checkFiles(); 
-				checkFilesThread.join();
-				
 				if(isScriptable) { //리소스 파일 존재
 					//단축버튼 생성
 					makeHotkeyWindow();
@@ -969,14 +969,20 @@ function readURL(url, returnType) {
 		return "";
 	}
 	
-	var URLContent = "";
-	var bufferedReader = new BufferedReader(new InputStreamReader(URL(url).openStream()));
-	
-	var temp = "";
-	while ((temp = bufferedReader.readLine()) != null) {
-		URLContent += (URLContent == "" ? temp :  "\n" + temp);
+	//readURL()을 Thread에서 돌릴 때 너무 많은 데이터를 읽으려 할 경우 오류가 남.
+	//정확한 버그 발생 이유 및 수정 방안은 아직 모름
+	try {
+		var URLContent = "";
+		var bufferedReader = new BufferedReader(new InputStreamReader(URL(url).openStream()));
+		
+		var temp = "";
+		while ((temp = bufferedReader.readLine()) != null) {
+			URLContent += (URLContent == "" ? temp :  "\n" + temp);
+		}
+		bufferedReader.close();
+	} catch (e) {
+		toast(e, 1);
 	}
-	bufferedReader.close();
 	
 	if(returnType == "array") //인자로 배열을 넘긴 경우 배열로 출력
 		return URLContent.split("\n");
