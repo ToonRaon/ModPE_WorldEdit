@@ -77,6 +77,8 @@ const CHANGE_LOG_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEd
 
 const NOTICE_FILE_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/notice.txt";
 
+const GITHUB_API_TREE_URL = "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/github_api_tree.txt";
+
 const SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 const RESOURCE_PATH = SD_CARD + "/games/com.mojang/worldedit";
 const IMAGE_PATH = RESOURCE_PATH + "/images";
@@ -94,8 +96,6 @@ const INITIAL = 19; //초성 - ㄱ, ㄲ, ㄴ, ㄷ, ㄸ, ㄹ, ㅁ, ㅂ, ㅃ, ㅅ,
 const MEDIAL = 21; //중성 - ㅏ, ㅐ, ㅑ, ㅒ, ㅓ, ㅔ, ㅕ, ㅖ, ㅗ, ㅘ, ㅙ, ㅚ, ㅛ, ㅜ, ㅝ, ㅞ, ㅟ, ㅠ, ㅡ, ㅢ,ㅣ
 const FINAL = 28; //종성 - (없음), ㄱ, ㄲ, ㄳ, ㄴ, ㄵ, ㄶ, ㄷ, ㄹ, ㄺ, ㄻ, ㄼ, ㄽ, ㄾ, ㄿ, ㅀ, ㅁ, ㅂ, ㅄ, ㅅ, ㅆ, ㅇ, ㅈ, ㅊ, ㅋ, ㅌ, ㅍ, ㅎ
 const FIRST_KOREAN_OF_UNICODE = 44032; //유니코드에서 첫번째 한글 문자인 '가'의 고유번호. 44033은 각, 44034는 갂... 과 같은 순서로 55203번째까지 한글이 존재하고있다.
-
-const GITHUB_TREE = "https://gist.githubusercontent.com/ToonRaon/6781f57629048d5675a5/raw/e391ae02373471ad6dda08c9b936ed759efb53f1/GitHubAPI";
 
 const ViewID = {
 	AXE_BUTTON: 100,
@@ -491,7 +491,7 @@ function initialize() {
 }
 initialize();
 
-function getFilesListFromGitHub(owner, repo, branch, recursive, path, tree) {
+function getFilesListFromGitHub(path, recursive, url) {
 	if(getInternetStatus().equals("Offline")) //오프라인이면 리턴
 		return undefined;
 	
@@ -501,10 +501,6 @@ function getFilesListFromGitHub(owner, repo, branch, recursive, path, tree) {
 		path = ""; //최상위 루트 폴더
 	
 	try {
-		//GitHub API Tree를 한번에 읽어올 경우 모바일 기기에서는 성능상의 한계로 모든 글을 읽어내지 못하고 결국 깨져버림.
-		//따라서 긴 글을 읽어올 때는 컴퓨터 등을 통해 별도로 직접 만든 tree JSON의 링크(gist와 같은)를 tree 파라미터를 넘겨주세요.
-		var url = (tree != undefined ) ? (tree) : ("https://api.github.com/repos/" + owner + "/" + repo + "/git/trees/" + branch + (recursive ? "?recursive=1" : ""));
-		
 		var temp = JSON.parse(readURL(url));
 	} catch(e) {
 		toast(e, 1);
@@ -515,7 +511,7 @@ function getFilesListFromGitHub(owner, repo, branch, recursive, path, tree) {
 			var file = temp.tree[i];
 			
 			if(file.path.indexOf(path + "/") != -1) { //원소의 경로가 주어진 path의 하위 폴더인 경우
-				if(file.type.equals("blob")) { //원소의 유형이 파일일 때
+				if(file.type =="blob") { //원소의 유형이 파일일 때
 					if(recursive) { //해당 path의 하위 폴더의 파일들도 모두 읽을 때
 						var fileInfo = {
 							"name": (file.path.split("/")[file.path.split("/").length - 1]), //파일이름 == path를 /로 split 하였을 때 마지막 원소
@@ -804,7 +800,7 @@ function checkFiles() {
 		missingFileDialog.setNegativeButton("취소", listener);
 		missingFileDialog.setCancelable(false);
 		
-		var resourceFilesList = getFilesListFromGitHub("ToonRaon", "ModPE_WorldEdit",  "master", true, "res", GITHUB_TREE); //서버의 파일 리스트
+		var resourceFilesList = getFilesListFromGitHub("res", true, GITHUB_API_TREE_URL); //서버의 파일 리스트
 		
 		var missingFilesList = new Array(); //누락된 파일 리스트
 		var missingFilesTotalSize = 0;
@@ -973,9 +969,8 @@ function readURL(url, returnType) {
 	//정확한 버그 발생 이유 및 수정 방안은 아직 모름
 	try {
 		var URLContent = "";
-		var bufferedReader = new BufferedReader(new InputStreamReader(URL(url).openStream()));
+		var bufferedReader = new BufferedReader(new InputStreamReader(URL(url).openStream(), "UTF-8"));
 		
-		var temp = "";
 		while ((temp = bufferedReader.readLine()) != null) {
 			URLContent += (URLContent == "" ? temp :  "\n" + temp);
 		}
@@ -983,6 +978,10 @@ function readURL(url, returnType) {
 	} catch (e) {
 		toast(e, 1);
 	}
+	
+	//UTF-8 인코딩 과정에서 생길 수 있는 BOM 문자 제거 (for JSON)
+	if(URLContent.indexOf(String.fromCharCode(65279)) != -1)
+		URLContent.slice(1);
 	
 	if(returnType == "array") //인자로 배열을 넘긴 경우 배열로 출력
 		return URLContent.split("\n");
