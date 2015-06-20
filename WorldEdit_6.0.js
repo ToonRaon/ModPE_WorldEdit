@@ -1811,11 +1811,15 @@ function getAllImageFiles(path) {
 		
 		for(var i = 0; i < 512; i++) {
 			if(Item.getName(i, 0, true) == null) continue;
+			if(i == 383) continue; //예외 - 소환 에그
 			
 			if(files.indexOf(i + "-0.png") == -1 && Item.getName(i, 0, true).indexOf("Missing") == -1) {
 				var j = 0;
 				
 				while(Item.getName(i, j, true).indexOf("Missing") == -1) {
+					if(j > 255) //예외상황에서 과도한 무한루프 방지
+						break;
+					
 					files.push(i + "-" + j + ".png");
 					
 					j++;
