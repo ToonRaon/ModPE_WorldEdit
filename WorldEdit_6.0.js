@@ -2164,6 +2164,27 @@ function loadOption(option) {
 	}
 }
 
+function readLocalTextFile(path) {
+	try {
+		var fileInputStream = new FileInputStream(File(path));
+		var inputStreamReader = new InputStreamReader(fileInputStream);
+		var bufferedReader = new BufferedReader(inputStreamReader);
+		
+		var content = "";
+		while((temp = bufferedReader.readLine()) != null) {
+			content = ( content == "" ? temp : ("\n" + temp) );
+		}
+		
+		fileInputStream.close();
+		inputStreamReader.close();
+		bufferedReader.close();
+		
+		return content;
+	} catch(e) {
+		toast("로컬 텍스트 파일을 불러오는 과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
 function notice() {
 	try { 
 		if(getInternetStatus() != "Offline") {
