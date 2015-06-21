@@ -569,19 +569,19 @@ function getFilesListFromLocal(path, recursive, savedFileList) {
 	if(savedFileList == undefined) //함수 제일 첫 호출시에만 초기화
 		resourceLocalFilesNameList = new Array();
 	
-	temp = File(path).list();
+	temp = new File(path).list();
 	
 	for(var i in temp) {
-		if(File(path, temp[i]).isFile()) { //리스트의 원소가 파일이면
+		if(new File(path, temp[i]).isFile()) { //리스트의 원소가 파일이면
 			var fileInfo = {
 				"name": ( temp[i] + "" ), //파일 이름
 				"path": path + "/" + temp[i], //파일 경로
-				"size": parseInt(File(path, temp[i]).length()) //파일 크기
+				"size": parseInt(new File(path, temp[i]).length()) //파일 크기
 			};
 			resourceLocalFilesNameList.push(temp[i] + ""); 
 			
 			fileList.push(fileInfo); //파일 배열에 파일 정보 추가
-		} else if(File(path, temp[i]).isDirectory() && recursive) { //리스트의 원소가 폴더라면
+		} else if(new File(path, temp[i]).isDirectory() && recursive) { //리스트의 원소가 폴더라면
 			getFilesListFromLocal(path + "/" + temp[i], true, fileList); //재귀적으로 파일 리스트 불러옴
 		}
 	}
@@ -690,37 +690,47 @@ function checkVersion() {
 
 function checkDirectories() {
 	try {
-		//폴더 생성//최상위 리소스 폴더
-		if(!File(RESOURCE_PATH).exists())
-			File(RESOURCE_PATH).mkdirs();
+		// -- 폴더 생성 -- //
 		
-		//이미지 리소스 폴더
-		if(!File(IMAGE_PATH).exists())
-			File(IMAGE_PATH).mkdirs();
+		//최상위 리소스 폴더
+		var resourceDir = new File(RESOURCE_PATH);
+		if(!resourceDir.exists())
+			resourceDir.mkdirs();
 		
-		//GUI 리소스 폴더
-		if(!File(GUI_PATH).exists())
-			File(GUI_PATH).mkdirs();
+			//이미지 리소스 폴더
+			var imageDir = new File(IMAGE_PATH);
+			if(!imageDir.exists())
+				imageDir.mkdirs();
+			
+				//GUI 리소스 폴더
+				var GUIDir = new File(GUI_PATH);
+				if(!GUIDir.exists())
+					GUIDir.mkdirs();
+				
+				//아이템 리소스 폴더
+				var itemDir = new File(ITEM_PATH);
+				if(!itemDir.exists())
+					itemDir.mkdirs();
+				
+				//엔티티 리소스 폴더
+				var entityDir = new File(ENTITY_PATH);
+				if(!entityDir.exists())
+					entityDir.mkdirs();
 		
-		//아이템 리소스 폴더
-		if(!File(ITEM_PATH).exists())
-			File(ITEM_PATH).mkdirs();
+			//옵션 폴더
+			var optionDir = new File(OPTION_PATH);
+			if(!FileoptionDir.exists())
+				optionDir.mkdirs();
+			
+				//옵션 파일
+				var optionFile = new File(OPTION_FILE);
+				if(!optionFile.exists())
+					optionFile.createNewFile(); //options.txt
 		
-		//엔티티 리소스 폴더
-		if(!File(ENTITY_PATH).exists())
-			File(ENTITY_PATH).mkdirs();
-		
-		//옵션 폴더
-		if(!File(OPTION_PATH).exists())
-			File(OPTION_PATH).mkdirs();
-		
-		//옵션 파일
-		if(!File(OPTION_FILE).exists())
-			File(OPTION_FILE).createNewFile(); //options.txt
-		
-		//폰트 폴더
-		if(!File(FONT_PATH).exists())
-			File(FONT_PATH).mkdirs();
+			//폰트 폴더
+			var fontDir = new File(FONT_PATH);
+			if(!fontDir.exists())
+				fontDir.mkdirs();
 	} catch(e) {
 		toast("리소스 폴더를 생성하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -1949,7 +1959,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 					itemImage.setId(id);
 					itemImage.setPadding(0, 0, 0, 0);
 					if(files[id] != null) {
-						if(File(ITEM_PATH, files[id]).exists()) {
+						if(new File(ITEM_PATH, files[id]).exists()) {
 							itemImage.setImageBitmap(new Bitmap.createScaledBitmap(src, dip2px(50), dip2px(50), true));
 						} else
 							itemImage.setImageBitmap(new Bitmap.createScaledBitmap(new BitmapFactory.decodeFile(ITEM_PATH + "/no_image.png"), dip2px(50), dip2px(50), true));
@@ -2150,7 +2160,7 @@ function internet(url) {
 
 function saveOption(option, value) {
 	try {
-		var fileInputStream = new FileInputStream(File(OPTION_FILE));
+		var fileInputStream = new FileInputStream(new File(OPTION_FILE));
 		var inputStreamReader = new InputStreamReader(fileInputStream);
 		var bufferedReader = new BufferedReader(inputStreamReader);
 		
@@ -2172,7 +2182,7 @@ function saveOption(option, value) {
 		inputStreamReader.close();
 		bufferedReader.close();
 		
-		var fileOutputStream = new FileOutputStream(File(OPTION_FILE));
+		var fileOutputStream = new FileOutputStream(new File(OPTION_FILE));
 		var outputStreamWriter = new OutputStreamWriter(fileOutputStream);
 		
 		outputStreamWriter.write(fileContent + option.toString() + "=" + value.toString()); //새로운 데이터 덧붙여 저장
@@ -2186,7 +2196,7 @@ function saveOption(option, value) {
 
 function loadOption(option) {
 	try {
-		var fileInputStream = new FileInputStream(File(OPTION_FILE));
+		var fileInputStream = new FileInputStream(new File(OPTION_FILE));
 		var inputStreamReader = new InputStreamReader(fileInputStream);
 		var bufferedReader = new BufferedReader(inputStreamReader);
 		
@@ -2217,7 +2227,7 @@ function loadOption(option) {
 
 function readLocalTextFile(path) {
 	try {
-		var fileInputStream = new FileInputStream(File(path));
+		var fileInputStream = new FileInputStream(new File(path));
 		var inputStreamReader = new InputStreamReader(fileInputStream);
 		var bufferedReader = new BufferedReader(inputStreamReader);
 		
