@@ -742,14 +742,12 @@ function checkFiles() {
 		
 		var isDownloadAllowed = false;
 		var threadFreezer = false;
-		var isFilesExisted = true;
 		
 		if(getInternetStatus().equals("Offline")) { //인터넷 미접속중
 			if(resourceLocalFilesList.length == 0) { //로컬 저장소에 파일이 아무 것도 존재하지 않음
 				isDownloadAllowed = false;
 				isScriptable = false;
 				threadFreezer = false;
-				isFilesExisted = false;
 				
 				alertDialog("월드에딧 스크립트 실행 불가능",
 					"인터넷에 연결되어 있지 않으며\n" +
@@ -769,7 +767,6 @@ function checkFiles() {
 				isDownloadAllowed = false;
 				isScriptable = true;
 				threadFreezer = false;
-				isFilesExisted = true;
 				
 				return;
 			}
@@ -789,7 +786,6 @@ function checkFiles() {
 							isDownloadAllowed = false;
 							isScriptable = false;
 							threadFreezer = false;
-							isFilesExisted = false;
 						}
 						break;
 					
@@ -797,7 +793,7 @@ function checkFiles() {
 						isDownloadAllowed = false;
 						isScriptable = false;
 						threadFreezer = false;
-						isFilesExisted = false;
+						
 						toast("파일 다운로드가 거부되었습니다.\n월드에딧 스크립트 사용이 불가능합니다.");
 						break;
 				}
@@ -855,7 +851,6 @@ function checkFiles() {
 					
 					if(missingFilesList.length == 0) { //모든 파일 존재
 						isScriptable = true;
-						isFilesExisted = true;
 					} else if(missingFilesList.length > 0) { //누락 파일이 존재
 						//다운로드 의사 묻기
 						CTX.runOnUiThread(new Runnable() {
@@ -920,6 +915,9 @@ function checkFiles() {
 							
 							//상단바 다시 숨김
 							hideStatusBar();
+							
+							//스크립트 실행 가능
+							isScriptable = true;
 							
 						} else if(!isDownloadAllowed) { //다운로드 거부됨
 							//Do nothing 
