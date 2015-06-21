@@ -719,7 +719,7 @@ function checkDirectories() {
 		
 			//옵션 폴더
 			var optionDir = new File(OPTION_PATH);
-			if(!FileoptionDir.exists())
+			if(!optionDir.exists())
 				optionDir.mkdirs();
 			
 				//옵션 파일
@@ -878,7 +878,7 @@ function checkFiles() {
 						freezer.join();
 						
 						//이 코드는 사용자로부터 응답(다이얼로그 버튼 선택)을 받은 후 실행됩니다.
-						if(isDownloadAllowed) { //다운로드 허락		
+						if(isDownloadAllowed) { //다운로드 허락
 							//리소스 파일 다운로드 알림 다이얼로그
 							var progressDialog;
 							CTX.runOnUiThread(new Runnable() {
