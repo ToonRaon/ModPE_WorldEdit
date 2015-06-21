@@ -850,7 +850,6 @@ function checkFiles() {
 							};
 							
 							missingFilesList.push(fileInfo);
-							missingFilesTotalSize += resourceFilesList[i].size;
 						}
 					}
 					
@@ -887,33 +886,41 @@ function checkFiles() {
 								}
 							});
 							
-							var currentProgress = 0;
-							var totalProgress = missingFilesTotalSize;
+							//상단바 보여줌
+							showStatusBar();
 							
 							for(var i in missingFilesList) {
 								//파일 다운로드
-								downloadFileFromURL(missingFilesList[i].download_url, missingFilesList[i].local_path, missingFilesList[i].name);
+								var currentProgress = i;
+								var totalProgress = missingFilesList.length;
+								
+								var missingFile = new File(missingFilesList[i].local_path);
+								
+								//프로그래스 다이얼로그 표시
+								CTX.runOnUiThread(new Runnable() {
+									run: function() {
+										var progressString = "상단바에 현재 파일의 다운로드 진행률을 보여줍니다.\n도중에 홈키를 누른다거나 전원을 끄지 마세요.\n전체 진행률: "+ ( currentProgress / totalProgress * 100 ).toFixed(2) + "% ( " + currentProgress + " / " + totalProgress + " )" + "\n다운로드 중인 파일: " + missingFilesList[i].name;
+										
+										progressDialog.setMessage(progressString);
+									}
+								});
+								
 								var downloadThread = new Thread(new Runnable() {
 									run: function() {
-										var size; //다운로드 중인 파일의 현재 크기
-										while((size = File(missingFilesList[i].local_path).length()) < missingFilesList[i].size) { //다운로드가 덜 된 경우
-											//Thread.sleep(1);
+										downloadFileFromURL(missingFilesList[i].download_url, missingFilesList[i].local_path, missingFilesList[i].name); //URL으로부터 파일 다운로드
+										
+										while(( size = missingFile.length() ) < missingFilesList[i].size) { //다운로드가 덜 된 경우 계속 루프 돌림
 											
-											CTX.runOnUiThread(new Runnable() {
-												run: function() {
-													var progressString = "파일을 다운로드 중 입니다. " + ( ( currentProgress + size ) / totalProgress * 100 ).toFixed(2) + "%\n" + missingFilesList[i].name;
-													
-													progressDialog.setMessage(progressString);
-												}
-											});
 										}
 									}
 								});
 								downloadThread.start();
-								downloadThread.join();
-								
-								currentProgress += missingFilesList[i].size;
+								downloadThread.join(); //blocking
 							}
+							
+							//상단바 다시 숨김
+							hideStatusBar();
+							
 						} else if(!isDownloadAllowed) { //다운로드 거부됨
 							//Do nothing 
 						}
