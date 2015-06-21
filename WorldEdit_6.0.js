@@ -195,6 +195,8 @@ var commands = [
 	"회전 90"
 ];
 
+var resourceLocalFilesNameList = new Array(); //로컬 리소스 파일들의 이름만 저장할 배열
+
 /* ---------------------------------------------------------------------------- ModPE Functions ---------------------------------------------------------------------------- */
 
 function selectLevelHook() {
@@ -563,15 +565,19 @@ function getFilesListFromLocal(path, recursive, savedFileList) {
 	var fileList = ((savedFileList != undefined) ? savedFileList : new Array());
 	var temp = new Array(); //내부 저장소 파일 리스트를 임시로 저장할 배열
 	
+	if(savedFileList == undefined) //함수 제일 첫 호출시에만 초기화
+		resourceLocalFilesNameList = new Array();
+	
 	temp = File(path).list();
 	
 	for(var i in temp) {
 		if(File(path, temp[i]).isFile()) { //리스트의 원소가 파일이면
 			var fileInfo = {
-				"name": temp[i], //파일 이름
+				"name": ( temp[i] + "" ), //파일 이름
 				"path": path + "/" + temp[i], //파일 경로
 				"size": parseInt(File(path, temp[i]).length()) //파일 크기
 			};
+			resourceLocalFilesNameList.push(temp[i] + ""); 
 			
 			fileList.push(fileInfo); //파일 배열에 파일 정보 추가
 		} else if(File(path, temp[i]).isDirectory() && recursive) { //리스트의 원소가 폴더라면
@@ -823,17 +829,8 @@ function checkFiles() {
 			run: function() {
 				try {
 					for(var i in resourceFilesList) {
-						var isExist = true;
-						
 						//로컬 저장소의 파일 중 name이 같은 것이 있는지를 찾아냄
-						for(var j in resourceLocalFilesList) {
-							if(resourceLocalFilesList[j].name.equals(resourceFilesList[i].name)) { //로컬에 파일이 있을 때
-								isExist = false;
-								break;
-							}
-						}
-						
-						if(isExist) { //해당 파일이 누락된 경우
+						if(resourceLocalFilesNameList.indexOf(resourceFilesList[i].name) == -1) { //로컬에 파일 없을 때
 							var fileInfo = {
 								"name": resourceFilesList[i].name,
 								"download_url": "https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/" + resourceFilesList[i].path,
