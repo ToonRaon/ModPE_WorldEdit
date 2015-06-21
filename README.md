@@ -1,3 +1,4 @@
+![WorldEdit](https://raw.githubusercontent.com/ToonRaon/ModPE_WorldEdit/master/res/images/gui/main_icon.png)
 # ModPE_WorldEdit
 
 ##for Korean :
