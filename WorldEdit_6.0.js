@@ -2413,6 +2413,31 @@ function commandCustomDialog(outsideTouchable) {
 	}
 }
 
+//상단바 보여주는 함수 (전체화면 해제)
+function showStatusBar() {
+	try {
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				CTX.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			}
+		});
+	} catch(e) {
+		toast("상단바 호출 에러!\n" + e);
+	}
+}
+
+function hideStatusBar() {
+	try {
+		CTX.runOnUiThread(new Runnable() {
+			run: function() {
+				CTX.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			}
+		});
+	} catch(e) {
+		toast("상단바 숨김 에러!\n" + e);
+	}
+}
+
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
 
 function comparePoint(type) {
