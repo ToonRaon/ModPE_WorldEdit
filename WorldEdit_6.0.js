@@ -479,7 +479,8 @@ function initialize() {
 	new Thread(new Runnable() {
 		run: function() {
 			try {
-				checkFilesThread.join();
+				if(checkFilesThread != null)
+					checkFilesThread.join();
 				
 				if(isScriptable) { //리소스 파일 존재
 					//단축버튼 생성
@@ -908,6 +909,20 @@ function checkFiles() {
 						}
 						
 						//프로그래스 다이얼로그 종료
+						if(progressDialog != null) {
+							CTX.runOnUiThread(new Runnable() {
+								run: function() {
+									progressDialog.dismiss();
+									progressDialog = null;
+								}
+							});
+						}
+					}
+				} catch(e) {
+					toast("파일을 체크하는 도중 오류가 발생했습니다.\n" + e, 1);
+					
+					//프로그래스 다이얼로그 종료
+					if(progressDialog != null) {
 						CTX.runOnUiThread(new Runnable() {
 							run: function() {
 								progressDialog.dismiss();
@@ -915,16 +930,6 @@ function checkFiles() {
 							}
 						});
 					}
-				} catch(e) {
-					toast("파일을 체크하는 도중 오류가 발생했습니다.\n" + e, 1);
-					
-					//프로그래스 다이얼로그 종료
-					CTX.runOnUiThread(new Runnable() {
-						run: function() {
-							progressDialog.dismiss();
-							progressDialog = null;
-						}
-					});
 				}
 			}
 		});
