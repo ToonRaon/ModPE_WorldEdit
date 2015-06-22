@@ -1308,24 +1308,10 @@ function makeMainWindow() {
 	}
 }
 
-function setPoint(x, y, z, point, block, blockData) {
-	point.x = x;
-	point.y = y;
-	point.z = z;
 	
-	clientMessage(ChatColor.RED + "지점 " + ((point == firstPoint) ? "1이" : "2가") + " 설정되었습니다. x: " + x + ", y: " + y + ", z:" + z);
 	
-	new Thread({
-		run: function() {
-			try{
-				Level.setTile(x, y, z, 159, 14);
-				Thread.sleep(300);
-				Level.setTile(x, y, z, block, blockData);
-			} catch(e) {
-				toast(e, 1);
 			}
 		}
-	}).start();
 }
 
 function makeCommandWindow() {
@@ -2444,6 +2430,26 @@ function hideStatusBar() {
 }
 
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
+
+function setPoint(x, y, z, point, block, blockData) {
+	point.x = x;
+	point.y = y;
+	point.z = z;
+	
+	clientMessage(ChatColor.RED + "지점 " + ((point == firstPoint) ? "1이" : "2가") + " 설정되었습니다. x: " + x + ", y: " + y + ", z:" + z);
+	
+	new Thread({
+		run: function() {
+			try{
+				Level.setTile(x, y, z, 159, 14);
+				Thread.sleep(300);
+				Level.setTile(x, y, z, block, blockData);
+			} catch(e) {
+				toast(e, 1);
+			}
+		}
+	}).start();
+}
 
 function comparePoint(type) {
 	try {
