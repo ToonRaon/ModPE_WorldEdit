@@ -15,6 +15,8 @@ const ImageView = android.widget.ImageView;
 const TextView = android.widget.TextView;
 const EditText = android.widget.EditText;
 const ScrollView = android.widget.ScrollView;
+const ToggleButton = android.widget.ToggleButton;
+const CompoundButton = android.widget.CompoundButton;
 
 const SP = android.util.TypedValue.COMPLEX_UNIT_SP;
 
@@ -23,7 +25,7 @@ const Gravity = android.view.Gravity;
 const MotionEvent = android.view.MotionEvent;
 const ViewGroup = android.view.ViewGroup;
 
-//const View = android.view.View;
+const OnCheckedChangeListener = android.widget.CompoundButton.OnCheckedChangeListener;
 const OnClickListener = android.view.View.OnClickListener;
 const OnLongClickListener = android.view.View.OnLongClickListener;
 const OnTouchListener = android.view.View.OnTouchListener;
@@ -103,7 +105,14 @@ const ViewID = {
 	UNDO_BUTTON: 102,
 	REDO_BUTTON: 103,
 	CLOSE_BUTTON: 104,
-	TABLE: 1000
+	TABLE: 1000,
+	SCRIPT_TITLE: 200,
+	SCRIPTER_NAME: 201,
+	FUNC_CLOSE_BUTTON: 202,
+	TITLE_ICON: 203,
+	FUNC_TITLE_LAYOUT: 204,
+	FUNC_TOGGLE_LAYOUT: 205,
+	FUNC_BUTTON_LAYOUT: 206
 };
 
 //GUI 선언
@@ -115,6 +124,8 @@ var GUIWindow;
 var commandCustomDialogWindow;
 
 var mainWindow;
+
+var funcWindow;
 
 //변수 선언
 var firstPoint = {x: null, y: null, z: null};
@@ -1322,6 +1333,8 @@ function makeMainWindow() {
 	//메인 레이아웃
 	var mainLayout = new RelativeLayout(CTX);
 	
+	makeFuncWindow();
+	
 	//메인 버튼
 	var mainButton = new Button(CTX);
 	mainButton.setBackground(new BitmapDrawable(new BitmapFactory.decodeFile(GUI_PATH + "/main_icon.png")));
@@ -1343,10 +1356,336 @@ function makeMainWindow() {
 	}
 }
 
+function makeFuncWindow() {
+	//전체 레이아웃
+	var funcLayout = new RelativeLayout(CTX);
+	funcLayout.setBackgroundColor(Color.DKGRAY);
 	
+	var funcLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() * ( 2 / 3 ), -1);
 	
+	funcLayout.setLayoutParams(funcLayoutParams);
+	
+	//상단 타이틀 레이아웃
+	var funcTitleLayout= makeFuncTitleLayout();
+	funcTitleLayout.setId(ViewID.FUNC_TITLE_LAYOUT);
+	
+	funcLayout.addView(funcTitleLayout);
+	
+	//좌측 토글 레이아웃
+	var funcToggleLayout = makeFuncToggleLayout();
+	funcToggleLayout.setId(ViewID.FUNC_TOGGLE_LAYOUT);
+	
+	var funcToggleLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() / 3, -2);
+	funcToggleLayoutParams.addRule(RelativeLayout.BELOW, ViewID.FUNC_TITLE_LAYOUT);
+	funcToggleLayoutParams.addRule(RelativeLayout.ALIGN_LEFT, ViewID.FUNC_TITLE_LAYOUT);
+	
+	funcLayout.addView(funcToggleLayout, funcToggleLayoutParams);
+	
+	//우측 버튼 레이아웃
+	var funcButtonLayout = makeFuncButtonLayout();
+	funcButtonLayout.setId(ViewID.FUNC_BUTTON_LAYOUT);
+	
+	var funcButtonLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() / 3, -1);
+	funcButtonLayoutParams.addRule(RelativeLayout.BELOW, ViewID.FUNC_TITLE_LAYOUT);
+	funcButtonLayoutParams.addRule(RelativeLayout.RIGHT_OF, ViewID.FUNC_TOGGLE_LAYOUT);
+	
+	funcLayout.addView(funcButtonLayout, funcButtonLayoutParams);
+	
+	//윈도우
+	funcWindow = new PopupWindow(funcLayout, getScreenSize.getWidth() * ( 2 / 3 ), -1);
+	showWindow(funcWindow, Gravity.RIGHT | Gravity.TOP, 0, 0);
+}
+
+function makeFuncTitleLayout() {
+	const DEFAULT_MARGIN = dip2px(3);
+	
+	//타이틀 레이아웃
+	var titleLayout = new RelativeLayout(CTX);
+	titleLayout.setBackground(Drawable.createFromPath(GUI_PATH + "/title_bar.png"));
+	titleLayout.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+	
+	//아이콘
+	var icon = new ImageView(CTX);
+	icon.setImageBitmap(new Bitmap.createScaledBitmap(new BitmapFactory.decodeFile(GUI_PATH + "/main_icon.png"), dip2px(50), dip2px(50), true));
+	icon.setId(ViewID.TITLE_ICON);
+	
+	var iconParams = new RelativeLayout.LayoutParams(-2, -2);
+	iconParams.setMargins(DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN);
+	iconParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+	iconParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+	
+	titleLayout.addView(icon, iconParams);
+	
+	//스크립트 타이틀
+	var scriptTitle = new TextView(CTX);
+	scriptTitle.setText("WorldEdit " + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION);
+	scriptTitle.setTextColor(Color.WHITE);
+	scriptTitle.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
+	scriptTitle.setTextSize(SP, 25);
+	scriptTitle.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+	scriptTitle.setId(ViewID.SCRIPT_TITLE);
+	
+	var scriptTitleParams = new RelativeLayout.LayoutParams(-2, -2);
+	scriptTitleParams.setMargins(DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN);
+	scriptTitleParams.addRule(RelativeLayout.ALIGN_TOP, ViewID.TITLE_ICON);
+	scriptTitleParams.addRule(RelativeLayout.RIGHT_OF, ViewID.TITLE_ICON);
+	
+	titleLayout.addView(scriptTitle, scriptTitleParams);
+	
+	//스크립터 이름
+	var scripterName = new TextView(CTX);
+	scripterName.setText("제작: 툰라온");
+	scripterName.setTextSize(SP, 15);
+	scripterName.setTextColor(Color.WHITE);
+	scripterName.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
+	scripterName.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+	scripterName.setId(ViewID.SCRIPTER_NAME);
+	
+	var scripterNameParams = new RelativeLayout.LayoutParams(-2, -2);
+	scripterNameParams.setMargins(DEFAULT_MARGIN, 0, DEFAULT_MARGIN, DEFAULT_MARGIN);
+	scripterNameParams.addRule(RelativeLayout.BELOW, ViewID.SCRIPT_TITLE);
+	scripterNameParams.addRule(RelativeLayout.ALIGN_LEFT, ViewID.SCRIPT_TITLE);
+	
+	titleLayout.addView(scripterName, scripterNameParams);
+	
+	//닫기 버튼
+	var funcCloseButton = createButton(null, null, null, null, null, null, "close_button_normal.png", "close_button_pressed.png");
+	funcCloseButton.setId(ViewID.FUNC_CLOSE_BUTTON);
+	
+	var funcCloseButtonParams = new RelativeLayout.LayoutParams(dip2px(35), dip2px(35));
+	funcCloseButtonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+	funcCloseButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+	
+	var funcCLoseButtonClickListener = new OnClickListener() {
+		onClick: function() {
+			closeWindow(funcWindow);
+		}
+	}
+	funcCloseButton.setOnClickListener(funcCLoseButtonClickListener);
+	
+	titleLayout.addView(funcCloseButton, funcCloseButtonParams);
+	
+	return titleLayout;
+}
+
+function makeFuncToggleLayout() {
+	//토글 레이아웃
+	var toggleLayout = new LinearLayout(CTX);
+	toggleLayout.setOrientation(1);
+	toggleLayout.setBackgroundColor(Color.DKGRAY);
+	toggleLayout.setPadding(dip2px(3), 0, dip2px(1), 0);
+	
+	makeFuncToggles(toggleLayout);
+	
+	//토글 레이아웃 속성
+	var toggleLayoutParams = new RelativeLayout.LayoutParams(-1, -2);
+	
+	//토글 스크롤 뷰
+	var toggleScroll = new ScrollView(CTX);
+	
+	toggleScrollParams = new RelativeLayout.LayoutParams(-1, -2);
+	
+	toggleScroll.addView(toggleLayout, toggleLayoutParams);
+	
+	return toggleScroll;
+}
+
+function makeFuncToggles(layout) {
+	const FONT_SIZE = 20;
+	const WIDTH = -1;
+	const HEIGHT = dip2px(50);
+	
+	//토글 정보
+	var funcTogglesInfo = [
+		{ "textOn": "켜짐 1", "textOff": "꺼짐 1", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 2", "textOff": "꺼짐 2", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 3", "textOff": "꺼짐 3", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 4", "textOff": "꺼짐 4", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 5", "textOff": "꺼짐 5", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 6", "textOff": "꺼짐 6", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 7", "textOff": "꺼짐 7", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 8", "textOff": "꺼짐 8", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 9", "textOff": "꺼짐 9", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 10", "textOff": "꺼짐 10", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 11", "textOff": "꺼짐 11", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
+		{ "textOn": "켜짐 12", "textOff": "꺼짐 12", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true }
+	];
+	
+	//토글 추가
+	var funcToggles = new Array(funcTogglesInfo.length);
+	for(var i in funcTogglesInfo) {
+		funcToggles[i] = makeMinecrafticToggle(funcTogglesInfo[i].textOn, funcTogglesInfo[i].textOff, funcTogglesInfo[i].fontSize, funcTogglesInfo[i].width, funcTogglesInfo[i].height, funcTogglesInfo[i].isChecked);
+		layout.addView(funcToggles[i]);
+	}
+}
+
+function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isChecked) {
+	const DEFAULT_MARGIN = dip2px(3);
+	
+	var font = NANUM_GOTHIC_FILE;
+	var fontColor = Color.WHITE;
+	var toggleImageOn = "toggle_button_on.png";
+	var toggleImageOff = "toggle_button_off.png";
+	
+	//토글버튼 전체 레이아웃
+	var toggleButtonLayout = new RelativeLayout(CTX);
+	toggleButtonLayout.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_normal.png"));
+	
+	var toggleButtonLayoutParams = new RelativeLayout.LayoutParams(width, height);
+	
+	toggleButtonLayout.setLayoutParams(toggleButtonLayoutParams);
+	
+	//토글 버튼
+	var toggleButton = new ToggleButton(CTX);
+	toggleButton.setText(""); //Default: 해제
+	toggleButton.setEnabled(false);
+	toggleButton.setTextOn("");  //Default: 사용 
+	toggleButton.setTextOff(""); //Default: 해제
+	toggleButton.setChecked(isChecked);
+	toggleButton.setBackground(Drawable.createFromPath(GUI_PATH + "/toggle_button_on.png"));
+	toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		onCheckedChanged: function(toggle, isChecked) {
+			if(isChecked) { //check on
+				toggleText.setText(textOn);
+				
+				toggleButton.setBackground(Drawable.createFromPath(GUI_PATH + "/toggle_button_on.png"));
+			} else if(!isChecked){ //check off
+				toggleText.setText(textOff);
+				
+				toggleButton.setBackground(Drawable.createFromPath(GUI_PATH + "/toggle_button_off.png"));
 			}
 		}
+	});
+	
+	toggleButtonParams = new RelativeLayout.LayoutParams(dip2px(50), dip2px(30));
+	toggleButtonParams.setMargins(DEFAULT_MARGIN, 0, DEFAULT_MARGIN, 0);
+	toggleButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+	toggleButtonParams.addRule(RelativeLayout.CENTER_VERTICAL);
+	
+	toggleButtonLayout.addView(toggleButton, toggleButtonParams);
+	
+	//텍스트
+	var toggleText = new TextView(CTX);
+	toggleText.setText(textOn);
+	toggleText.setTextSize(SP, fontSize);
+	toggleText.setTextColor(fontColor);
+	toggleText.setPadding(dip2px(5), 0, 0, 0);
+	toggleText.setTypeface(new Typeface.createFromFile(font));
+	toggleText.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
+	
+	var toggleTextParams = new RelativeLayout.LayoutParams(-1, -2);
+	toggleTextParams.setMargins(DEFAULT_MARGIN, 0, DEFAULT_MARGIN, 0);
+	toggleTextParams.addRule(RelativeLayout.ALIGN_LEFT);
+	toggleTextParams.addRule(RelativeLayout.CENTER_VERTICAL);
+	
+	toggleButtonLayout.addView(toggleText, toggleTextParams);
+	
+	//레이아웃 전체의 터치를 받기 위한 뷰
+	var touchView = new View(CTX);
+	touchView.setOnClickListener(new OnClickListener() {
+		onClick: function() {
+			CTX.runOnUiThread(new Runnable() {
+				run: function() {
+					toggleButton.setChecked(!toggleButton.isChecked());
+				}
+			});
+		}
+	});
+	
+	var touchViewParams = new RelativeLayout.LayoutParams(width, height);
+	
+	toggleButtonLayout.addView(touchView, touchViewParams);
+	
+	return toggleButtonLayout;
+}
+
+function makeFuncButtonLayout() {
+	//버튼 레이아웃
+	var buttonLayout = new LinearLayout(CTX);
+	buttonLayout.setOrientation(1);
+	buttonLayout.setBackgroundColor(Color.DKGRAY);
+	buttonLayout.setPadding(dip2px(1), 0, dip2px(3), 0);
+	
+	//버튼 레이아웃 속성
+	var buttonLayoutParams = new LinearLayout.LayoutParams(-1, -2);
+	
+	makeFuncButtons(buttonLayout);
+	
+	var buttonScroll = new ScrollView(CTX);
+	
+	buttonScroll.addView(buttonLayout, buttonLayoutParams);
+	
+	return buttonScroll;
+}
+
+function makeFuncButtons(layout) {
+	const FONT_SIZE = 20;
+	const WIDTH = -1;
+	const HEIGHT = dip2px(50);
+	
+	//버튼 정보
+	var funcButtonsInfo = [
+		{ "text": "버튼 1", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "버튼 2", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "버튼 3", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "버튼 5", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "버튼 6", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "버튼 7", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "버튼 8", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "버튼 9", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT }
+	];
+	
+	//토글 추가
+	var funcButtons = new Array(funcButtonsInfo.length);
+	for(var i in funcButtonsInfo) {
+		funcButtons[i] = makeMinecrafticButton(funcButtonsInfo[i].text, funcButtonsInfo[i].fontSize, funcButtonsInfo[i].width, funcButtonsInfo[i].height);
+		funcButtons[i].setHeight(HEIGHT);
+		layout.addView(funcButtons[i]);
+	}
+}
+
+function makeMinecrafticButton(text, fontSize, width, height) {
+	var font = NANUM_GOTHIC_FILE;
+	var fontColor = Color.WHITE;
+	
+	var mcButton = new Button(CTX);
+	mcButton.setText(text);
+	mcButton.setTextSize(SP, fontSize);
+	mcButton.setTextColor(Color.WHITE);
+	mcButton.setTypeface(new Typeface.createFromFile(font));
+	mcButton.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
+	mcButton.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_normal.png"));
+	mcButton.setOnTouchListener(new OnTouchListener() {
+		onTouch: function(view, event) {
+			switch(event.action) {
+				//버튼 다운
+				case MotionEvent.ACTION_DOWN:
+				case MotionEvent.ACTION_MOVE:	
+					CTX.runOnUiThread(new Runnable() {
+						run: function() {
+							mcButton.setTextColor(Color.YELLOW);
+							mcButton.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_pressed.png"));
+						}
+					});
+					break;
+				
+				//버튼 업
+				case MotionEvent.ACTION_UP:
+				case MotionEvent.ACTION_CANCEL:
+					CTX.runOnUiThread(new Runnable() {
+						run: function() {
+							mcButton.setTextColor(Color.WHITE);
+							mcButton.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_normal.png"));
+						}
+					});
+					break;
+			}
+			
+			return false;
+		}
+	});
+	
+	return mcButton;
 }
 
 function makeCommandWindow() {
