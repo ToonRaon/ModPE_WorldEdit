@@ -664,8 +664,10 @@ function createButton(text, size, font, fontColor, width, height, backgroundNorm
 		});
 	}
 	
-	var buttonParams = new ViewGroup.MarginLayoutParams(width, height);
-	button.setLayoutParams(buttonParams);
+	if(width != null && height != null) {
+		var buttonParams = new ViewGroup.MarginLayoutParams(width, height);
+		button.setLayoutParams(buttonParams);
+	}
 	
 	return button;
 }
