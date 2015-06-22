@@ -467,6 +467,39 @@ function modTick() {
 	}
 }
 
+
+/* ---------------------------------------------------------------------------- Dev Area ---------------------------------------------------------------------------- */
+
+function testingButton() {
+	var tLayout = new LinearLayout(CTX);
+	
+	var tButton = new Button(CTX);
+	
+	var tOnClickListener = new OnClickListener() {
+		onClick: function() {
+			//TO DO WHAT YOU WNAT TO TEST1
+			
+		}
+	};
+	//tButton.setBackground(new Drawable.createFromPath(GUI_PATH + "/main_icon.png"));
+	tButton.setOnClickListener(tOnClickListener);
+	
+	var tOnLongClickListener = new OnLongClickListener() {
+		onLongClick: function() {
+			tWindow.dismiss();
+			
+			return true;
+		}
+	};
+	tButton.setOnLongClickListener(tOnLongClickListener);
+	
+	tLayout.addView(tButton);
+	
+	var tWindow = new PopupWindow(tLayout, -2, -2);
+	showWindow(tWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+}
+testingButton();
+
 /* ---------------------------------------------------------------------------- Custom Functions ---------------------------------------------------------------------------- */
 
 function initialize() {
