@@ -1,6 +1,6 @@
 {
-  "sha": "50ab8dadaf2afc146d7700349838881562d6782d",
-  "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/50ab8dadaf2afc146d7700349838881562d6782d",
+  "sha": "761e13fb36621ac8157536e446d83ed0b7564b43",
+  "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/761e13fb36621ac8157536e446d83ed0b7564b43",
   "tree": [
     {
       "path": ".gitignore",
@@ -14,17 +14,17 @@
       "path": "README.md",
       "mode": "100644",
       "type": "blob",
-      "sha": "4cc81d80d98af42123f6e27b943c9eca72af330a",
-      "size": 783,
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/4cc81d80d98af42123f6e27b943c9eca72af330a"
+      "sha": "579dc2ffa0e35c9b9c9831b3adfa29a2d4b94713",
+      "size": 892,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/579dc2ffa0e35c9b9c9831b3adfa29a2d4b94713"
     },
     {
       "path": "WorldEdit_6.0.js",
       "mode": "100644",
       "type": "blob",
-      "sha": "4acfa605608423f7a00e2d1749c0bec91397af8b",
-      "size": 114034,
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/4acfa605608423f7a00e2d1749c0bec91397af8b"
+      "sha": "227a176596f5ace1e9deaa02399b1183d078ea37",
+      "size": 116003,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/227a176596f5ace1e9deaa02399b1183d078ea37"
     },
     {
       "path": "change_log.txt",
@@ -38,9 +38,9 @@
       "path": "github_api_tree.txt",
       "mode": "100644",
       "type": "blob",
-      "sha": "2219364502f61f3f1bc02a395a6c7b43e871837d",
-      "size": 52920,
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/2219364502f61f3f1bc02a395a6c7b43e871837d"
+      "sha": "2d2e063a3c98ca1077e4a04074f1c7c14f541b3f",
+      "size": 155043,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/2d2e063a3c98ca1077e4a04074f1c7c14f541b3f"
     },
     {
       "path": "lastest_version.txt",
@@ -62,8 +62,8 @@
       "path": "res",
       "mode": "040000",
       "type": "tree",
-      "sha": "2f06fcb60eaa6cb740a0f2e83cb30ef98e8dc2b2",
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/2f06fcb60eaa6cb740a0f2e83cb30ef98e8dc2b2"
+      "sha": "acea7ee591925567a75a5d7f3ba7fb13f167480a",
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/acea7ee591925567a75a5d7f3ba7fb13f167480a"
     },
     {
       "path": "res/fonts",
@@ -84,8 +84,8 @@
       "path": "res/images",
       "mode": "040000",
       "type": "tree",
-      "sha": "4566b5d720e9fc241b7d37b66298f39d0753c0e1",
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/4566b5d720e9fc241b7d37b66298f39d0753c0e1"
+      "sha": "af2e3e97645eee9694a741e6dcc643d1d6593dd2",
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/af2e3e97645eee9694a741e6dcc643d1d6593dd2"
     },
     {
       "path": "res/images/.nomedia",
@@ -338,8 +338,8 @@
       "path": "res/images/gui",
       "mode": "040000",
       "type": "tree",
-      "sha": "05da14081ce32af6d17257fda7225fe0d27f2c34",
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/05da14081ce32af6d17257fda7225fe0d27f2c34"
+      "sha": "239df8e0a971e7f5e35c8828a76c90a1ef9e9483",
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/trees/239df8e0a971e7f5e35c8828a76c90a1ef9e9483"
     },
     {
       "path": "res/images/gui/axe_button_normal.png",
@@ -356,6 +356,22 @@
       "sha": "f51f513482d63613f1856bc3156cbea8991ccca3",
       "size": 15999,
       "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/f51f513482d63613f1856bc3156cbea8991ccca3"
+    },
+    {
+      "path": "res/images/gui/button_normal.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b7e404f70df40b507db127b0690a84e10263032",
+      "size": 3005,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/7b7e404f70df40b507db127b0690a84e10263032"
+    },
+    {
+      "path": "res/images/gui/button_pressed.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb758119d48adf0d3ddc88e209d709aff19a4dd3",
+      "size": 3025,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/bb758119d48adf0d3ddc88e209d709aff19a4dd3"
     },
     {
       "path": "res/images/gui/close_button_normal.png",
@@ -393,25 +409,25 @@
       "path": "res/images/gui/item_background_normal.png",
       "mode": "100644",
       "type": "blob",
-      "sha": "1cbf5be62d4fd3258b0efe2e47d07c72b927dcda",
-      "size": 7036,
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/1cbf5be62d4fd3258b0efe2e47d07c72b927dcda"
+      "sha": "8f25ac7b5a789230b1dabb5ef408ad260dc35b3e",
+      "size": 5026,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/8f25ac7b5a789230b1dabb5ef408ad260dc35b3e"
     },
     {
       "path": "res/images/gui/item_background_pressed.png",
       "mode": "100644",
       "type": "blob",
-      "sha": "3cf594caf6980c3fe0e0f7a2c0690f3791d2da78",
-      "size": 7034,
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/3cf594caf6980c3fe0e0f7a2c0690f3791d2da78"
+      "sha": "9e5307aa804cfdf7231eac364875edc1f18daaf8",
+      "size": 5034,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/9e5307aa804cfdf7231eac364875edc1f18daaf8"
     },
     {
       "path": "res/images/gui/main_icon.png",
       "mode": "100644",
       "type": "blob",
-      "sha": "fef4474652263d3c30e0fe63cfa192200d45a3a7",
-      "size": 5715,
-      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/fef4474652263d3c30e0fe63cfa192200d45a3a7"
+      "sha": "d1b8c9a01a25dba81c94e8e72bb9eb44a088c6c0",
+      "size": 19989,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/d1b8c9a01a25dba81c94e8e72bb9eb44a088c6c0"
     },
     {
       "path": "res/images/gui/next_button_normal.png",
@@ -462,6 +478,14 @@
       "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/12b59de680959030221e95c2623462fda0ac0827"
     },
     {
+      "path": "res/images/gui/scroll_button_header.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d9e7dbdaa5f9ced95584ef0afed58a51fe407be",
+      "size": 2891,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/6d9e7dbdaa5f9ced95584ef0afed58a51fe407be"
+    },
+    {
       "path": "res/images/gui/slot.png",
       "mode": "100644",
       "type": "blob",
@@ -484,6 +508,22 @@
       "sha": "75e72cc4224097fd1099d56474c83e070c2f1977",
       "size": 6640,
       "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/75e72cc4224097fd1099d56474c83e070c2f1977"
+    },
+    {
+      "path": "res/images/gui/toggle_button_off.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79d3bc1d953c77a4d5526d49ac96b00d296addc8",
+      "size": 2996,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/79d3bc1d953c77a4d5526d49ac96b00d296addc8"
+    },
+    {
+      "path": "res/images/gui/toggle_button_on.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf02b82be5b83ceb4b5262b26721b8a13d1f3dfd",
+      "size": 2950,
+      "url": "https://api.github.com/repos/ToonRaon/ModPE_WorldEdit/git/blobs/cf02b82be5b83ceb4b5262b26721b8a13d1f3dfd"
     },
     {
       "path": "res/images/gui/undo_button_normal.png",
