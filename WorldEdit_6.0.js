@@ -1526,6 +1526,7 @@ function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isCheck
 	var fontColor = Color.WHITE;
 	var toggleImageOn = "toggle_button_on.png";
 	var toggleImageOff = "toggle_button_off.png";
+	var drawableOn = Drawable.createFromPath(GUI_PATH + "/toggle_button_on.png");
 	
 	//토글버튼 전체 레이아웃
 	var toggleButtonLayout = new RelativeLayout(CTX);
@@ -1542,17 +1543,17 @@ function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isCheck
 	toggleButton.setTextOn("");  //Default: 사용 
 	toggleButton.setTextOff(""); //Default: 해제
 	toggleButton.setChecked(isChecked);
-	toggleButton.setBackground(Drawable.createFromPath(GUI_PATH + "/toggle_button_on.png"));
+	toggleButton.setBackground(drawableOn);
 	toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 		onCheckedChanged: function(toggle, isChecked) {
 			if(isChecked) { //check on
 				toggleText.setText(textOn);
 				
-				toggleButton.setBackground(Drawable.createFromPath(GUI_PATH + "/toggle_button_on.png"));
+				toggleButton.setBackground(drawableOn);
 			} else if(!isChecked){ //check off
 				toggleText.setText(textOff);
 				
-				toggleButton.setBackground(Drawable.createFromPath(GUI_PATH + "/toggle_button_off.png"));
+				toggleButton.setBackground(drawableOff);
 			}
 		}
 	});
@@ -1647,6 +1648,9 @@ function makeFuncButtons(layout) {
 function makeMinecrafticButton(text, fontSize, width, height) {
 	var font = NANUM_GOTHIC_FILE;
 	var fontColor = Color.WHITE;
+	var normalDrawable = Drawable.createFromPath(GUI_PATH + "/item_background_normal.png");
+	var pressedDrawable = Drawable.createFromPath(GUI_PATH + "/item_background_pressed.png");
+	
 	
 	var mcButton = new Button(CTX);
 	mcButton.setText(text);
@@ -1654,7 +1658,7 @@ function makeMinecrafticButton(text, fontSize, width, height) {
 	mcButton.setTextColor(Color.WHITE);
 	mcButton.setTypeface(new Typeface.createFromFile(font));
 	mcButton.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
-	mcButton.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_normal.png"));
+	mcButton.setBackground(normalDrawable);
 	mcButton.setOnTouchListener(new OnTouchListener() {
 		onTouch: function(view, event) {
 			switch(event.action) {
@@ -1664,7 +1668,7 @@ function makeMinecrafticButton(text, fontSize, width, height) {
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
 							mcButton.setTextColor(Color.YELLOW);
-							mcButton.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_pressed.png"));
+							mcButton.setBackground(pressedDrawable);
 						}
 					});
 					break;
@@ -1675,7 +1679,7 @@ function makeMinecrafticButton(text, fontSize, width, height) {
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
 							mcButton.setTextColor(Color.WHITE);
-							mcButton.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_normal.png"));
+							mcButton.setBackground(normalDrawable);
 						}
 					});
 					break;
