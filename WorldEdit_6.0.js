@@ -112,7 +112,11 @@ const ViewID = {
 	TITLE_ICON: 203,
 	FUNC_TITLE_LAYOUT: 204,
 	FUNC_TOGGLE_LAYOUT: 205,
-	FUNC_BUTTON_LAYOUT: 206
+	FUNC_BUTTON_LAYOUT: 206,
+	FUNC_TITLE_IMAGE: 207,
+	FUNC_TITLE_MAJOR_NUM: 208,
+	FUNC_TITLE_DOT: 209,
+	FUNC_TITLE_MINOR_NUM: 210
 };
 
 //GUI 선언
@@ -250,6 +254,9 @@ function leaveGame() {
 	
 	//메인 윈도우 종료
 	closeWindow(mainWindow);
+	
+	//기능 윈도우 종료
+	closeWindow(funcWindow)
 }
 
 function useItem(x, y, z, item, block, side, itemData, blockData) {
@@ -1340,7 +1347,14 @@ function makeMainWindow() {
 	mainButton.setBackground(new BitmapDrawable(new BitmapFactory.decodeFile(GUI_PATH + "/main_icon.png")));
 	mainButton.setOnClickListener(new OnClickListener() {
 		onClick: function() {
-			toast("asd");
+			if(funcWindow == null)
+				return;
+			
+			if(!funcWindow.isShowing()) { //창이 안 열려 있을 때
+				showWindow(funcWindow, Gravity.RIGHT | Gravity.TOP, 0, 0);
+			} else { //창이 열려 있을 때
+				//closeWindow(funcWindow);
+			}
 		}
 	});
 	
@@ -1361,7 +1375,7 @@ function makeFuncWindow() {
 	var funcLayout = new RelativeLayout(CTX);
 	funcLayout.setBackgroundColor(Color.DKGRAY);
 	
-	var funcLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() * ( 2 / 3 ), -1);
+	var funcLayoutParams = new RelativeLayout.LayoutParams(dip2px(500), -1);
 	
 	funcLayout.setLayoutParams(funcLayoutParams);
 	
@@ -1375,7 +1389,7 @@ function makeFuncWindow() {
 	var funcToggleLayout = makeFuncToggleLayout();
 	funcToggleLayout.setId(ViewID.FUNC_TOGGLE_LAYOUT);
 	
-	var funcToggleLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() / 3, -2);
+	var funcToggleLayoutParams = new RelativeLayout.LayoutParams(dip2px(250), -2);
 	funcToggleLayoutParams.addRule(RelativeLayout.BELOW, ViewID.FUNC_TITLE_LAYOUT);
 	funcToggleLayoutParams.addRule(RelativeLayout.ALIGN_LEFT, ViewID.FUNC_TITLE_LAYOUT);
 	
@@ -1385,15 +1399,14 @@ function makeFuncWindow() {
 	var funcButtonLayout = makeFuncButtonLayout();
 	funcButtonLayout.setId(ViewID.FUNC_BUTTON_LAYOUT);
 	
-	var funcButtonLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() / 3, -1);
+	var funcButtonLayoutParams = new RelativeLayout.LayoutParams(dip2px(250), -1);
 	funcButtonLayoutParams.addRule(RelativeLayout.BELOW, ViewID.FUNC_TITLE_LAYOUT);
 	funcButtonLayoutParams.addRule(RelativeLayout.RIGHT_OF, ViewID.FUNC_TOGGLE_LAYOUT);
 	
 	funcLayout.addView(funcButtonLayout, funcButtonLayoutParams);
 	
 	//윈도우
-	funcWindow = new PopupWindow(funcLayout, getScreenSize.getWidth() * ( 2 / 3 ), -1);
-	showWindow(funcWindow, Gravity.RIGHT | Gravity.TOP, 0, 0);
+	funcWindow = new PopupWindow(funcLayout, dip2px(500), -1);
 }
 
 function makeFuncTitleLayout() {
@@ -1402,51 +1415,56 @@ function makeFuncTitleLayout() {
 	//타이틀 레이아웃
 	var titleLayout = new RelativeLayout(CTX);
 	titleLayout.setBackground(Drawable.createFromPath(GUI_PATH + "/title_bar.png"));
-	titleLayout.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+	titleLayout.setPadding(dip2px(5), dip2px(3), dip2px(5), dip2px(5));
 	
-	//아이콘
-	var icon = new ImageView(CTX);
-	icon.setImageBitmap(new Bitmap.createScaledBitmap(new BitmapFactory.decodeFile(GUI_PATH + "/main_icon.png"), dip2px(50), dip2px(50), true));
-	icon.setId(ViewID.TITLE_ICON);
+	//타이틀 이미지
+	var titleImage = new ImageView(CTX);
+	titleImage.setImageBitmap( new Bitmap.createScaledBitmap( new BitmapFactory.decodeFile(GUI_PATH + "/func_layout_title.png"), dip2px(300), dip2px(60), true) );
+	titleImage.setId(ViewID.FUNC_TITLE_IMAGE);
 	
-	var iconParams = new RelativeLayout.LayoutParams(-2, -2);
-	iconParams.setMargins(DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN);
-	iconParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-	iconParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+	var titleImageParams = new RelativeLayout.LayoutParams(-2, -2);
+	titleImageParams.setMargins(DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN);
+	titleImageParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+	titleImageParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 	
-	titleLayout.addView(icon, iconParams);
+	titleLayout.addView(titleImage, titleImageParams);
 	
-	//스크립트 타이틀
-	var scriptTitle = new TextView(CTX);
-	scriptTitle.setText("WorldEdit " + CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION);
-	scriptTitle.setTextColor(Color.WHITE);
-	scriptTitle.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
-	scriptTitle.setTextSize(SP, 25);
-	scriptTitle.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
-	scriptTitle.setId(ViewID.SCRIPT_TITLE);
+	//타이틀 메이저버전 넘버
+	var titleMajorVerNumber = new ImageView(CTX);
+	titleMajorVerNumber.setImageBitmap( new Bitmap.createScaledBitmap( new Bitmap.createBitmap( new BitmapFactory.decodeFile(GUI_PATH + "/func_layout_title_num.png"), 50 * CURRENT_MAJOR_VERSION, 0, 50, 55 ), dip2px(25), dip2px(30), true ) ); //이 코드는 버전의 자릿수가 2자리가 넘어가면 수정이 필요합니다.
+	titleMajorVerNumber.setId(ViewID.FUNC_TITLE_MAJOR_NUM);
+	//titleMajorVerNumber.setBackgroundColor(Color.RED);
 	
-	var scriptTitleParams = new RelativeLayout.LayoutParams(-2, -2);
-	scriptTitleParams.setMargins(DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN);
-	scriptTitleParams.addRule(RelativeLayout.ALIGN_TOP, ViewID.TITLE_ICON);
-	scriptTitleParams.addRule(RelativeLayout.RIGHT_OF, ViewID.TITLE_ICON);
+	var titleMajorVerNumberParams = new RelativeLayout.LayoutParams(-2, -2);
+	titleMajorVerNumberParams.addRule(RelativeLayout.ALIGN_TOP, ViewID.FUNC_TITLE_IMAGE);
+	titleMajorVerNumberParams.setMargins(dip2px(205), dip2px(7), 0, 0);
 	
-	titleLayout.addView(scriptTitle, scriptTitleParams);
+	titleLayout.addView(titleMajorVerNumber, titleMajorVerNumberParams);
 	
-	//스크립터 이름
-	var scripterName = new TextView(CTX);
-	scripterName.setText("제작: 툰라온");
-	scripterName.setTextSize(SP, 15);
-	scripterName.setTextColor(Color.WHITE);
-	scripterName.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
-	scripterName.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
-	scripterName.setId(ViewID.SCRIPTER_NAME);
+	//타이틀 마이너버전 넘버
+	var titleMinorVerNumber = new ImageView(CTX);
+	titleMinorVerNumber.setImageBitmap( new Bitmap.createScaledBitmap( new Bitmap.createBitmap( new BitmapFactory.decodeFile(GUI_PATH + "/func_layout_title_num.png"), 50 * CURRENT_MINOR_VERSION, 0, 50, 55 ), dip2px(25), dip2px(30), true ) ); //이 코드는 버전의 자릿수가 2자리가 넘어가면 수정이 필요합니다.
+	titleMinorVerNumber.setId(ViewID.FUNC_TITLE_MINOR_NUM);
+	//titleMinorVerNumber.setBackgroundColor(Color.BLUE);
 	
-	var scripterNameParams = new RelativeLayout.LayoutParams(-2, -2);
-	scripterNameParams.setMargins(DEFAULT_MARGIN, 0, DEFAULT_MARGIN, DEFAULT_MARGIN);
-	scripterNameParams.addRule(RelativeLayout.BELOW, ViewID.SCRIPT_TITLE);
-	scripterNameParams.addRule(RelativeLayout.ALIGN_LEFT, ViewID.SCRIPT_TITLE);
+	var titleMinorVerNumberParams = new RelativeLayout.LayoutParams(-2, -2);
+	titleMinorVerNumberParams.addRule(RelativeLayout.RIGHT_OF, ViewID.FUNC_TITLE_MAJOR_NUM);
+	titleMinorVerNumberParams.addRule(RelativeLayout.ALIGN_TOP, ViewID.FUNC_TITLE_MAJOR_NUM);
 	
-	titleLayout.addView(scripterName, scripterNameParams);
+	titleLayout.addView(titleMinorVerNumber, titleMinorVerNumberParams);
+	
+	//타이틀 점
+	var titleDot = new ImageView(CTX);
+	titleDot.setImageBitmap( new Bitmap.createScaledBitmap( new Bitmap.createBitmap( new BitmapFactory.decodeFile(GUI_PATH + "/func_layout_title_num.png"), 50 * 10, 0, 50, 55 ), dip2px(25), dip2px(30), true ) );
+	titleDot.setId(ViewID.FUNC_TITLE_DOT);
+	//titleDot.setBackgroundColor(Color.GREEN);
+	
+	var titleDotParams = new RelativeLayout.LayoutParams(-2, -2);
+	titleDotParams.addRule(RelativeLayout.ALIGN_RIGHT, ViewID.FUNC_TITLE_MINOR_NUM);
+	titleDotParams.addRule(RelativeLayout.ALIGN_TOP, ViewID.FUNC_TITLE_MAJOR_NUM);
+	titleDotParams.setMargins(0, 0, dip2px(13), 0);
+	
+	titleLayout.addView(titleDot, titleDotParams);
 	
 	//닫기 버튼
 	var funcCloseButton = createButton(null, null, null, null, null, null, "close_button_normal.png", "close_button_pressed.png");
@@ -1524,9 +1542,8 @@ function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isCheck
 	
 	var font = NANUM_GOTHIC_FILE;
 	var fontColor = Color.WHITE;
-	var toggleImageOn = "toggle_button_on.png";
-	var toggleImageOff = "toggle_button_off.png";
 	var drawableOn = Drawable.createFromPath(GUI_PATH + "/toggle_button_on.png");
+	var drawableOff = Drawable.createFromPath(GUI_PATH + "/toggle_button_off.png");
 	
 	//토글버튼 전체 레이아웃
 	var toggleButtonLayout = new RelativeLayout(CTX);
@@ -2716,7 +2733,7 @@ function commandCustomDialog(outsideTouchable) {
 		});
 		parentLayout.addView(backgroundLayout, -1, -1);
 		
-		var mainLayoutParams = new RelativeLayout.LayoutParams(getScreenSize.getWidth() * (2 / 3), -1);
+		var mainLayoutParams = new RelativeLayout.LayoutParams(dip2px(500), -1);
 		mainLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
 		mainLayoutParams.setMargins(0, dip2px(5), 0, dip2px(5));
 		
