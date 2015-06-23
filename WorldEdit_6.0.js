@@ -488,8 +488,10 @@ function modTick() {
 
 /* ---------------------------------------------------------------------------- Dev Area ---------------------------------------------------------------------------- */
 
+var tText;
 function testingButton() {
 	var tLayout = new LinearLayout(CTX);
+	tLayout.setOrientation(1);
 	
 	var tButton = new Button(CTX);
 	
@@ -497,6 +499,14 @@ function testingButton() {
 		onClick: function() {
 			//TO DO WHAT YOU WNAT TO TEST1
 			
+			toast("the button is pressed!");
+			
+			if(funcWindow == null)
+				makeFuncWindow();
+			else {
+				closeWindow(funcWindow);
+				funcWindow = null;
+			}
 		}
 	};
 	//tButton.setBackground(new Drawable.createFromPath(GUI_PATH + "/main_icon.png"));
@@ -513,10 +523,15 @@ function testingButton() {
 	
 	tLayout.addView(tButton);
 	
+	tText = new TextView(CTX);
+	tText.setText("this is a textview for testing");
+	tText.setBackgroundColor(Color.argb(128, 128, 128, 128));
+	tLayout.addView(tText);
+	
 	var tWindow = new PopupWindow(tLayout, -2, -2);
 	showWindow(tWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 }
-testingButton();
+//testingButton();
 
 /* ---------------------------------------------------------------------------- Custom Functions ---------------------------------------------------------------------------- */
 
