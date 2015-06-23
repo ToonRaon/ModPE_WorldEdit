@@ -1726,8 +1726,23 @@ function makeMinecrafticButton(text, fontSize, width, height) {
 			return false;
 		}
 	});
+	mcButton.setOnClickListener(new OnClickListener() {
+		onclick: function(view) {
+			buttonHander(view);
+		}
+	});
 	
 	return mcButton;
+}
+
+function buttonHander(view) {
+	var text = view.getText() + "";
+	
+	switch(text) {
+		case "옵션":
+			showOption();
+			break;
+	}
 }
 
 function makeCommandWindow() {
