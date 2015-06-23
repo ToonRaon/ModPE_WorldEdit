@@ -25,10 +25,10 @@ const Gravity = android.view.Gravity;
 const MotionEvent = android.view.MotionEvent;
 const ViewGroup = android.view.ViewGroup;
 
-const OnCheckedChangeListener = android.widget.CompoundButton.OnCheckedChangeListener;
 const OnClickListener = android.view.View.OnClickListener;
 const OnLongClickListener = android.view.View.OnLongClickListener;
 const OnTouchListener = android.view.View.OnTouchListener;
+const OnCheckedChangeListener = android.widget.CompoundButton.OnCheckedChangeListener;
 
 const Bitmap = android.graphics.Bitmap;
 const BitmapFactory = android.graphics.BitmapFactory;
@@ -1668,7 +1668,7 @@ function makeFuncButtons(layout) {
 		{ "text": "버튼 9", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT }
 	];
 	
-	//토글 추가
+	//버튼 추가
 	var funcButtons = new Array(funcButtonsInfo.length);
 	for(var i in funcButtonsInfo) {
 		funcButtons[i] = makeMinecrafticButton(funcButtonsInfo[i].text, funcButtonsInfo[i].fontSize, funcButtonsInfo[i].width, funcButtonsInfo[i].height);
