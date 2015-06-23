@@ -1729,7 +1729,7 @@ function makeMinecrafticButton(text, fontSize, width, height) {
 		}
 	});
 	mcButton.setOnClickListener(new OnClickListener() {
-		onclick: function(view) {
+		onClick: function(view) {
 			buttonHander(view);
 		}
 	});
