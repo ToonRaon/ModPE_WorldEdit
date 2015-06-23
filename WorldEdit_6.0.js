@@ -131,6 +131,8 @@ var mainWindow;
 
 var funcWindow;
 
+var optionWindow;
+
 //변수 선언
 var firstPoint = {x: null, y: null, z: null};
 var secondPoint = {x: null, y: null, z: null};
@@ -1740,7 +1742,7 @@ function buttonHander(view) {
 	
 	switch(text) {
 		case "옵션":
-			showOption();
+			showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 			break;
 	}
 }
@@ -2858,6 +2860,91 @@ function hideStatusBar() {
 	} catch(e) {
 		toast("상단바 숨김 에러!\n" + e);
 	}
+}
+
+function makeInGameOption() {
+	//전체 레이아웃
+	var optionLayout = new LinearLayout(CTX);
+	optionLayout.setOrientation(1);
+	
+		//타이틀 레이아웃
+		var optionTitleLayout = new RelativeLayout(CTX);
+			
+			//옵션 타이틀 텍스트
+			var optionTitleText = new TextView(CTX);
+			optionTitleText.setText("option");
+			optionTitleText.setTextSize(SP, 25);
+			optionTitleText.setTextColor(Color.WHITE);
+			optionTitleText.setGravity(Gravity.CENTER);
+			optionTitleText.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
+			optionTitleText.setBackground(Drawable.createFromPath(GUI_PATH + "/title_bar.png"));
+			
+			var optionTitleTextParams = new RelativeLayout.LayoutParams(-1, dip2px(46));
+			//optionTitleTextParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+			
+			optionTitleLayout.addView(optionTitleText, optionTitleTextParams);
+			
+			//닫기 버튼
+			var optionCloseButton = new createButton(null, null, null, null, null, null, "close_button_normal.png", "close_button_pressed.png");
+			optionCloseButton.setOnClickListener(new OnClickListener() {
+				onClick: function() {
+					closeWindow(optionWindow);
+				}
+			});
+			
+			var optionCloseButtonParams = new RelativeLayout.LayoutParams(dip2px(35), dip2px(35));
+			optionCloseButtonParams.addRule(RelativeLayout.CENTER_VERTICAL);
+			optionCloseButtonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+			optionCloseButtonParams.setMargins(0, dip2px(3), dip2px(5), dip2px(3));
+			
+			optionTitleLayout.addView(optionCloseButton, optionCloseButtonParams);
+			
+		optionLayout.addView(optionTitleLayout, new LinearLayout.LayoutParams(-1, -2));
+		
+		//컨텐트 레이아웃
+		var contentLayout = new LinearLayout(CTX);
+		contentLayout.setOrientation(0);
+		
+			//항목 레이아웃
+			var itemLayout = new LinearLayout(CTX);
+			itemLayout.setOrientation(1);
+			itemLayout.setBackgroundColor(Color.rgb(148, 134, 132));
+			itemLayout.setGravity(Gravity.CENTER_VERTICAL);
+			
+				//항목
+				for(var i = 0; i < 5; i++){
+					var itemButton = new Button(CTX);
+					itemButton.setBackground(Drawable.createFromPath(GUI_PATH + "/axe_button_normal.png"));
+					itemButton.setOnClickListener(new OnClickListener() {
+						onClick: function(view) {
+							toast("the button is pressed!");
+						}
+					});
+					
+					var itemButtonParams = new LinearLayout.LayoutParams(dip2px(40), dip2px(40));
+					itemButtonParams.setMargins(0, 0, 0, dip2px(3));
+					
+					itemLayout.addView(itemButton, itemButtonParams);
+				}
+			
+			contentLayout.addView(itemLayout, new LinearLayout.LayoutParams(dip2px(45), -1));
+			
+			//메인 레이아웃
+			var mainLayout = new LinearLayout(CTX);
+			mainLayout.setBackgroundColor(Color.argb(128, 128, 128, 128));
+			
+				var tv = new TextView(CTX);
+				tv.setText("this is test option window");
+				
+				mainLayout.addView(tv);
+			
+			contentLayout.addView(mainLayout, new LinearLayout.LayoutParams(-1, -1));
+			
+		optionLayout.addView(contentLayout, new LinearLayout.LayoutParams(-1, -1));
+		
+		optionWindow = new PopupWindow(optionLayout, -1, -1);
+		
+		showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 }
 
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
