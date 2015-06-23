@@ -1530,18 +1530,18 @@ function makeFuncToggles(layout) {
 	
 	//토글 정보
 	var funcTogglesInfo = [
-		{ "textOn": "켜짐 1", "textOff": "꺼짐 1", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 2", "textOff": "꺼짐 2", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 3", "textOff": "꺼짐 3", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 4", "textOff": "꺼짐 4", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 5", "textOff": "꺼짐 5", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 6", "textOff": "꺼짐 6", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 7", "textOff": "꺼짐 7", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 8", "textOff": "꺼짐 8", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 9", "textOff": "꺼짐 9", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 10", "textOff": "꺼짐 10", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 11", "textOff": "꺼짐 11", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true },
-		{ "textOn": "켜짐 12", "textOff": "꺼짐 12", "fontSize": FONT_SIZE,  "width": WIDTH, "height": HEIGHT, "isChecked": true }
+		{ "textOn": "현재 좌표 켜짐", "textOff": "현재 좌표 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "포커스 정보 켜짐", "textOff": "포커스 정보 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "아이템 정보 켜짐", "textOff": "아이템 정보 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "빠른 제거 켜짐", "textOff": "빠른 제거 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "빠른 변경 켜짐", "textOff": "빠른 변경 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "발블럭 켜짐", "textOff": "머리블럭 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "크리에이티브", "textOff": "서바이벌", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "블럭 위로 쌓기 켜짐", "textOff": "블럭 위로 쌓기 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "블럭 아래로 쌓기 켜짐", "textOff": "블럭 아래로 쌓기", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "구 생성 켜짐", "textOff": "구 생성 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "반구 생성 켜짐", "textOff": "반구 생성 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true }
+		
 	];
 	
 	//토글 추가
@@ -1658,14 +1658,20 @@ function makeFuncButtons(layout) {
 	
 	//버튼 정보
 	var funcButtonsInfo = [
-		{ "text": "버튼 1", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "버튼 2", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "버튼 3", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "버튼 5", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "버튼 6", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "버튼 7", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "버튼 8", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "버튼 9", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT }
+		{ "text": "로드메이커", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "계단 메이커", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "지점 1 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "지점 2 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "시간 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "아이템 리스트", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "시간 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "튜토리얼", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "스폰지역 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "엔티티 스폰", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "엔티티 관리", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "아이템 편집", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "게임 속도", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "옵션", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT}
 	];
 	
 	//버튼 추가
