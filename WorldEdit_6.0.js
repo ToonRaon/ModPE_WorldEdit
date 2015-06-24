@@ -499,7 +499,7 @@ function testingButton() {
 	
 	var tOnClickListener = new OnClickListener() {
 		onClick: function() {
-			//TO DO WHAT YOU WNAT TO TEST1
+			//TO DO WHAT YOU WANT TO TEST
 			
 			toast("the button is pressed!");
 			
