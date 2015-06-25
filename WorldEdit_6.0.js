@@ -1566,7 +1566,7 @@ function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isCheck
 	var toggleButtonLayout = new RelativeLayout(CTX);
 	toggleButtonLayout.setBackground(Drawable.createFromPath(GUI_PATH + "/item_background_normal.png"));
 	
-	var toggleButtonLayoutParams = new RelativeLayout.LayoutParams(width, height);
+	var toggleButtonLayoutParams = new ViewGroup.MarginLayoutParams(width, height);
 	
 	toggleButtonLayout.setLayoutParams(toggleButtonLayoutParams);
 	
@@ -1577,7 +1577,7 @@ function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isCheck
 	toggleButton.setTextOn("");  //Default: 사용 
 	toggleButton.setTextOff(""); //Default: 해제
 	toggleButton.setChecked(isChecked);
-	toggleButton.setBackground(drawableOn);
+	toggleButton.setBackground(isChecked ? drawableOn : drawableOff);
 	toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 		onCheckedChanged: function(toggle, isChecked) {
 			if(isChecked) { //check on
