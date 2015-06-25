@@ -2643,6 +2643,12 @@ function loadOption(option) {
 		inputStreamReader.close();
 		bufferedReader.close();
 		
+		//return boolean
+		if( ( value + "" ) === "true" )
+			return true;
+		else
+			return false;
+		
 		return value;
 	} catch(e) {
 		toast("파일을 불러오는 과정에서 오류가 발생했습니다.\n" + e, 1);
