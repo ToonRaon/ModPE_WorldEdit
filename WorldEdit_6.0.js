@@ -1554,7 +1554,7 @@ function makeFuncToggles(layout) {
 	}
 }
 
-function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isChecked) {
+function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isChecked, checkedChangeFunc) {
 	const DEFAULT_MARGIN = dip2px(3);
 	
 	var font = NANUM_GOTHIC_FILE;
@@ -1589,6 +1589,8 @@ function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isCheck
 				
 				toggleButton.setBackground(drawableOff);
 			}
+			
+			checkedChangeFunc(isChecked);
 		}
 	});
 	
