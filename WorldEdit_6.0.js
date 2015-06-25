@@ -2646,7 +2646,7 @@ function loadOption(option) {
 		//return boolean
 		if( ( value + "" ) === "true" )
 			return true;
-		else
+		else if( ( value + "") === "false" )
 			return false;
 		
 		return value;
@@ -3018,7 +3018,7 @@ function fill(minPoint, maxPoint, id, data) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3078,7 +3078,7 @@ function wall(minPoint, maxPoint, id, data) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3146,7 +3146,7 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3203,7 +3203,7 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3275,7 +3275,7 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData) 
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3332,7 +3332,7 @@ function drain(minPoint, maxPoint) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3435,7 +3435,7 @@ function paste() {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3498,7 +3498,7 @@ function paste() {
 function createSphere(type, x, y, z, id, data, radius) {
 	try {
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3620,7 +3620,7 @@ function createCircle(type, x, y, z, id, data, radius) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3689,7 +3689,7 @@ function createCylinder(type, x, y, z, id, data, radius, height) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
@@ -3776,7 +3776,7 @@ function cover(minPoint, maxPoint, id, data) {
 		});
 		
 		//백업
-		var backupOption = (loadOption("backup") != "false" ? true : false);
+		var backupOption = loadOption("backup");
 		if(backupOption) {
 			if(!Array.isArray(backupArray[backupWorldNumber][backupIndex[backupWorldNumber]]))
 				backupArray[backupWorldNumber][backupIndex[backupWorldNumber]] = new Array();
