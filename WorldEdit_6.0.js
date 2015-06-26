@@ -1408,17 +1408,14 @@ function makeMainWindow() {
 function makeFuncWindow() {
 	//전체 레이아웃
 	var funcLayout = new RelativeLayout(CTX);
-	funcLayout.setBackgroundColor(Color.DKGRAY);
-	
-	var funcLayoutParams = new RelativeLayout.LayoutParams(dip2px(500), -1);
-	
-	funcLayout.setLayoutParams(funcLayoutParams);
+	funcLayout.setGravity(Gravity.RIGHT);
+	funcLayout.setBackgroundColor(Color.argb(128, 0, 0, 0));
 	
 	//상단 타이틀 레이아웃
 	var funcTitleLayout= makeFuncTitleLayout();
 	funcTitleLayout.setId(ViewID.FUNC_TITLE_LAYOUT);
 	
-	funcLayout.addView(funcTitleLayout);
+	funcLayout.addView(funcTitleLayout, new RelativeLayout.LayoutParams(dip2px(500), -2));
 	
 	//좌측 토글 레이아웃
 	var funcToggleLayout = makeFuncToggleLayout();
@@ -1441,7 +1438,8 @@ function makeFuncWindow() {
 	funcLayout.addView(funcButtonLayout, funcButtonLayoutParams);
 	
 	//윈도우
-	funcWindow = new PopupWindow(funcLayout, dip2px(500), -1);
+	funcWindow = new PopupWindow(funcLayout, -1, -1);
+	funcWindow.setFocusable(true);
 }
 
 function makeFuncTitleLayout() {
