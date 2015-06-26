@@ -120,7 +120,8 @@ const ViewID = {
 	INGAME_OPTION_BUTTON_GUI: 300,
 	INGAME_OPTION_BUTTON_EDIT: 301,
 	INGAME_OPTION_BUTTON_ETC: 302,
-	INGAME_OPTION_BUTTON_ADVANCED: 303
+	INGAME_OPTION_BUTTON_ADVANCED: 303,
+	DO_NOT_CHECK_FILES: 304
 };
 
 //GUI 선언
@@ -2958,7 +2959,12 @@ function makeInGameOption() {
 						onClick: function(view) {
 							//클릭한 버튼의 인덱스를 찾아서 그 항목의 mainLayout만 visible
 							for(var j in items) {
-								( items[j].itemButtonId == parseInt(view.getId()) ) ? items[j].mainLayout.setVisibility(View.VISIBLE) : items[j].mainLayout.setVisibility(View.INVISIBLE);
+								if( items[j].itemButtonId == parseInt(view.getId()) ) { //클릭한 버튼의 인덱스 인 경우
+									items[j].mainScrollView.setVisibility(View.VISIBLE);
+									items[j].mainScrollView.bringToFront(); //터치 이벤트를 받기 위해 가장 앞으로 레이아웃 꺼냄
+								} else { //클릭한 버튼의 인덱스가 아닌 경우
+									items[j].mainScrollView.setVisibility(View.INVISIBLE);
+								}
 							}
 						}
 					});
@@ -2972,10 +2978,22 @@ function makeInGameOption() {
 			contentLayout.addView(itemLayout, new LinearLayout.LayoutParams(dip2px(45), -1));
 			
 			//메인 레이아웃
+			var mainLayoutContainer = new RelativeLayout(CTX);
+			
 			makeInGameOptionMainLayout(items); //메인레이아웃 및 메인스크롤뷰 생성
 			
-			for(var i in items)
-				contentLayout.addView(items[i].mainScrollView);
+			for(var i in items) {
+				//제일 첫 항목 제외하고 모두 invisible
+				if(parseInt(i) != 0) {
+					items[i].mainScrollView.setVisibility(View.INVISIBLE);
+				}
+				
+				mainLayoutContainer.addView(items[i].mainScrollView);
+			}
+			//제일 첫 항목의 터치 이벤트를 받기 위해 제일 앞으로 꺼내옴
+			items[0].mainScrollView.bringToFront();
+			
+			contentLayout.addView(mainLayoutContainer, new LinearLayout.LayoutParams(-1, -1));
 			
 		optionLayout.addView(contentLayout, new LinearLayout.LayoutParams(-1, -1));
 		
@@ -3004,13 +3022,50 @@ function makeInGameOptionMainLayout(items) {
 		switch(items[i].item) {
 			case "gui":
 				//GUI준비 다이얼로그 숨김 여부
-				var hideReadyingGUI = makeMinecrafticToggle("GUI 준비 다이얼로그 보이지 않음", "GUI 준비 다이얼로그 보임", 20, -1, dip2px(35), loadOption("hide_preparing_gui"), function(isChecked) {
+				var hidePreparingGUI = makeMinecrafticToggle("GUI 준비 다이얼로그 보이지 않음", "GUI 준비 다이얼로그 보임", 20, -1, dip2px(35), loadOption("hide_preparing_gui"), function(isChecked) {
 					saveOption("hide_preparing_gui", isChecked);
-					toast(isChecked);
 				});
-				hideReadyingGUI.setBackground(null);
+				hidePreparingGUI.setBackground(null);
 				
-				items[i].mainLayout.addView(hideReadyingGUI, contentMarginsParams);
+				items[i].mainLayout.addView(hidePreparingGUI, contentMarginsParams);
+				break;
+				
+			case "etc":
+				//파일 확인 해제
+				var doNotCheckFiles = makeMinecrafticToggle("리소스 파일 체크함", "리소스 파일 체크하지 않음", 20, -1, dip2px(35), loadOption("check_files") == true ? true : false, function(isChecked) {
+					if(!isChecked) {
+						alertDialog("주의!", "이 기능은 게임 구동 시 속도를 향상시켜주는 효과가 있으나 추천되지 않는 기능입니다. 그래도 계속하시겠습니까?", new DialogInterface.OnClickListener({
+							onClick: function(dialog, which) {
+								switch(which) {
+									case DialogInterface.BUTTON_POSITIVE: //확인
+										saveOption("check_files", ( CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION ));
+										toast("리소스 파일을 체크하지 않습니다. 이 기능은 다음 스크립트 버전 업데이트 시 자동으로 다시 켜집니다.", 1);
+										break;
+										
+									case DialogInterface.BUTTON_NEGATIVE: //취소
+										saveOption("check_files",  true);
+										
+										//자식 객체의 개수
+										var childCount = doNotCheckFiles.getChildCount();
+										
+										//자식들 중 토글버튼을 찾아냄
+										for(var i = 0; i < 	childCount; i++) {
+											if(doNotCheckFiles.getChildAt(i) instanceof ToggleButton) {
+												doNotCheckFiles.getChildAt(i).setChecked(true);
+												break;
+											}
+										}
+										break;
+									}
+								}
+							})
+					, "확인", "", "취소")
+					}
+				});
+				doNotCheckFiles.setId(ViewID.DO_NOT_CHECK_FILES);
+				doNotCheckFiles.setBackground(null);
+				
+				items[i].mainLayout.addView(doNotCheckFiles, contentMarginsParams);
 				break;
 		}
 		
