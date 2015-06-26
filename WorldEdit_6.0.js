@@ -116,7 +116,11 @@ const ViewID = {
 	FUNC_TITLE_IMAGE: 207,
 	FUNC_TITLE_MAJOR_NUM: 208,
 	FUNC_TITLE_DOT: 209,
-	FUNC_TITLE_MINOR_NUM: 210
+	FUNC_TITLE_MINOR_NUM: 210,
+	INGAME_OPTION_BUTTON_GUI: 300,
+	INGAME_OPTION_BUTTON_EDIT: 301,
+	INGAME_OPTION_BUTTON_ETC: 302,
+	INGAME_OPTION_BUTTON_ADVANCED: 303
 };
 
 //GUI 선언
@@ -159,7 +163,7 @@ var isScriptable = false;
 var checkFilesThread;
 var makeGUIWindowThread;
 
-var currentWorldDir = "";
+var currentWorldDir = null;
 
 /*
  === backupArray 4차원 배열 구조도 ===
@@ -226,6 +230,9 @@ function newLevel() {
 	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
 			return;
 	
+	if(GUIWindow == null)  //아직 GUI Window 생성이 덜 된 경우
+		return;
+	
 	//공지사항
 	notice();
 	
@@ -259,6 +266,9 @@ function leaveGame() {
 	
 	//기능 윈도우 종료
 	closeWindow(funcWindow)
+	
+	//월드디렉토리 초기화
+	currentWorldDir = null;
 }
 
 function useItem(x, y, z, item, block, side, itemData, blockData) {
@@ -568,6 +578,9 @@ function initialize() {
 					//버전 확인
 					checkVersion();
 				}
+				
+				if(Level.getWorldDir() != null) //게임에 이미 접속
+					newLevel();
 			} catch(e) {
 				toast("initialize 과정에서 오류가 발생하였습니다.\n" + e, 1);
 			}
@@ -1603,7 +1616,7 @@ function makeMinecrafticToggle(textOn, textOff, fontSize, width, height, isCheck
 	
 	//텍스트
 	var toggleText = new TextView(CTX);
-	toggleText.setText(textOn);
+	toggleText.setText(isChecked ? textOn : textOff);
 	toggleText.setTextSize(SP, fontSize);
 	toggleText.setTextColor(fontColor);
 	toggleText.setPadding(dip2px(5), 0, 0, 0);
@@ -1744,7 +1757,7 @@ function buttonHander(view) {
 	
 	switch(text) {
 		case "옵션":
-			showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+			showInGameOption();
 			break;
 	}
 }
@@ -1753,6 +1766,11 @@ function makeCommandWindow() {
 	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
+				if(commandCustomDialogWindow == null || GUIWindow == null) {
+					toast("아직 월드에딧을 사용할 수 없습니다. 리소스 파일을 불러오는 중입니다.");
+					return;
+				}
+				
 				showWindow(commandCustomDialogWindow, Gravity.CENTER, 0, 0);
 				
 			} catch(e) {
@@ -2114,12 +2132,14 @@ function makeGUIWindow() {
 	makeGUIWindowThread = new Thread(new Runnable() {
 		run: function() {
 			try {
-				var progressDialog;
-				CTX.runOnUiThread(new Runnable() {
-					run: function() {
-						progressDialog = ProgressDialog.show(CTX, "GUI를 불러오고 있습니다...", "잠시만 기다려주세요...", true, false);
-					}
-				});
+				if(!loadOption("hide_preparing_gui")) {
+					var progressDialog;
+					CTX.runOnUiThread(new Runnable() {
+						run: function() {
+							progressDialog = ProgressDialog.show(CTX, "GUI를 불러오고 있습니다...", "잠시만 기다려주세요...", true, false);
+						}
+					});
+				}
 				
 				var rLayout = new RelativeLayout(CTX);
 				rLayout.setGravity(Gravity.CENTER);
@@ -2258,12 +2278,14 @@ function makeGUIWindow() {
 				GUIWindow.setFocusable(true);
 				//GUIWindow.showAtLocation(CTX.getWindow().getDecorView(), Gravity.CENTER, 0, 0);
 				
-				CTX.runOnUiThread(new Runnable() {
-					run: function() {
-						progressDialog.dismiss();
-						progressDialog = null;
-					}
-				});
+				if(!loadOption("hide_preparing_gui")) {
+					CTX.runOnUiThread(new Runnable() {
+						run: function() {
+							progressDialog.dismiss();
+							progressDialog = null;
+						}
+					});
+				}
 				
 				toast("월드에딧을 사용할 준비가 완료되었습니다.", 0);
 			} catch(e) {
@@ -2409,13 +2431,15 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 					
 					hLayout.addView(itemLayout);
 					
-					CTX.runOnUiThread(new Runnable() {
-						run: function() {
-							try {
-								progressDialog.setMessage(((id / ((Math.floor(files.length / 66) * 66) + (5 * 11) + 10 + 1) * 100)).toFixed(2).toString() + "%");
-							} catch(e) { toast(e, 1); }
-						}
-					});
+					if(!loadOption("hide_preparing_gui")) {
+						CTX.runOnUiThread(new Runnable() {
+							run: function() {
+								try {
+									progressDialog.setMessage(((id / ((Math.floor(files.length / 66) * 66) + (5 * 11) + 10 + 1) * 100)).toFixed(2).toString() + "%");
+								} catch(e) { toast(e, 1); }
+							}
+						});
+					}
 				}
 				
 				vLayout[i].addView(hLayout);
@@ -2917,42 +2941,88 @@ function makeInGameOption() {
 			var itemLayout = new LinearLayout(CTX);
 			itemLayout.setOrientation(1);
 			itemLayout.setBackgroundColor(Color.rgb(148, 134, 132));
-			itemLayout.setGravity(Gravity.CENTER_VERTICAL);
+			itemLayout.setGravity(Gravity.CENTER);
+			
+			var items = [
+				{ "item": "gui", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_GUI, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
+				{ "item": "edit", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_EDIT, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
+				{ "item": "etc", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_ETC, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
+				{ "item": "advanced", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_ADVANCED, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null }
+			];
 			
 				//항목
-				for(var i = 0; i < 5; i++){
-					var itemButton = new Button(CTX);
-					itemButton.setBackground(Drawable.createFromPath(GUI_PATH + "/axe_button_normal.png"));
-					itemButton.setOnClickListener(new OnClickListener() {
+				for(var i in items){
+					items[i].itemButton = makeMinecrafticButton(items[i].item, 15, 40, 40); //For testing
+					items[i].itemButton.setId(items[i].itemButtonId);
+					items[i].itemButton.setOnClickListener(new OnClickListener() {
 						onClick: function(view) {
-							toast("the button is pressed!");
+							//클릭한 버튼의 인덱스를 찾아서 그 항목의 mainLayout만 visible
+							for(var j in items) {
+								( items[j].itemButtonId == parseInt(view.getId()) ) ? items[j].mainLayout.setVisibility(View.VISIBLE) : items[j].mainLayout.setVisibility(View.INVISIBLE);
+							}
 						}
 					});
 					
-					var itemButtonParams = new LinearLayout.LayoutParams(dip2px(40), dip2px(40));
-					itemButtonParams.setMargins(0, 0, 0, dip2px(3));
+					items[i].itemButtonParams = new LinearLayout.LayoutParams(dip2px(40), dip2px(40));
+					items[i].itemButtonParams.setMargins(0, 0, 0, dip2px(3));
 					
-					itemLayout.addView(itemButton, itemButtonParams);
+					itemLayout.addView(items[i].itemButton, items[i].itemButtonParams);
 				}
 			
 			contentLayout.addView(itemLayout, new LinearLayout.LayoutParams(dip2px(45), -1));
 			
 			//메인 레이아웃
-			var mainLayout = new LinearLayout(CTX);
-			mainLayout.setBackgroundColor(Color.argb(128, 128, 128, 128));
+			makeInGameOptionMainLayout(items); //메인레이아웃 및 메인스크롤뷰 생성
 			
-				var tv = new TextView(CTX);
-				tv.setText("this is test option window");
-				
-				mainLayout.addView(tv);
-			
-			contentLayout.addView(mainLayout, new LinearLayout.LayoutParams(-1, -1));
+			for(var i in items)
+				contentLayout.addView(items[i].mainScrollView);
 			
 		optionLayout.addView(contentLayout, new LinearLayout.LayoutParams(-1, -1));
 		
 		optionWindow = new PopupWindow(optionLayout, -1, -1);
+		optionWindow.setFocusable(true);
 		
-		showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+		//showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+}
+
+function makeInGameOptionMainLayout(items) {
+	for(var i in items) {
+		items[i].mainScrollView = new ScrollView(CTX);
+		items[i].mainScrollView.setFillViewport(true); //내용물이  scrollView를 모두 채우지 못하더라도 빈 공간으로 채움
+		items[i].mainScrollView.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
+		
+		items[i].mainLayout = new LinearLayout(CTX);
+		items[i].mainLayout.setOrientation(1);
+		items[i].mainLayout.setPadding(dip2px(5), dip2px(5), dip2px(5), dip2px(5));
+		items[i].mainLayout.setBackgroundColor(Color.argb(128, 0, 0, 0));
+		items[i].mainLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
+		
+		var contentMarginsParams = new LinearLayout.LayoutParams(-1, -2);
+		contentMarginsParams.setMargins(0, 0, 0, dip2px(5))
+		
+		//mainLayout content
+		switch(items[i].item) {
+			case "gui":
+				//GUI준비 다이얼로그 숨김 여부
+				var hideReadyingGUI = makeMinecrafticToggle("GUI 준비 다이얼로그 보이지 않음", "GUI 준비 다이얼로그 보임", 20, -1, dip2px(35), loadOption("hide_preparing_gui"), function(isChecked) {
+					saveOption("hide_preparing_gui", isChecked);
+					toast(isChecked);
+				});
+				hideReadyingGUI.setBackground(null);
+				
+				items[i].mainLayout.addView(hideReadyingGUI, contentMarginsParams);
+				break;
+		}
+		
+		items[i].mainScrollView.addView(items[i].mainLayout);
+	}
+}
+
+function showInGameOption() {
+	if(optionWindow == null) //optionWindow가 생성이 안 되어 있는 경우
+		makeInGameOption();
+	
+	showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 }
 
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
