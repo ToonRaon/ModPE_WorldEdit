@@ -1759,6 +1759,7 @@ function buttonHander(view) {
 	switch(text) {
 		case "옵션":
 			showInGameOption();
+			closeWindow(funcWindow);
 			break;
 	}
 }
