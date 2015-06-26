@@ -1557,13 +1557,32 @@ function makeFuncToggles(layout) {
 		{ "textOn": "블럭 아래로 쌓기 켜짐", "textOff": "블럭 아래로 쌓기", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
 		{ "textOn": "구 생성 켜짐", "textOff": "구 생성 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
 		{ "textOn": "반구 생성 켜짐", "textOff": "반구 생성 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true }
-		
 	];
 	
 	//토글 추가
 	var funcToggles = new Array(funcTogglesInfo.length);
 	for(var i in funcTogglesInfo) {
 		funcToggles[i] = makeMinecrafticToggle(funcTogglesInfo[i].textOn, funcTogglesInfo[i].textOff, funcTogglesInfo[i].fontSize, funcTogglesInfo[i].width, funcTogglesInfo[i].height, funcTogglesInfo[i].isChecked);
+		
+		//자식 뷰 개수 구함
+		var childCount = funcToggles[i].getChildCount();
+		
+		//자식 뷰 중 텍스트 뷰 찾아냄
+		for(var j = 0; j < childCount; j++) {
+			var child = funcToggles[i].getChildAt(j);
+			
+			if(child instanceof TextView && !(child instanceof ToggleButton)) { //자식뷰가 텍스트뷰 일 때 (ToggleButton은 TextView와 상속관계에서 더 아래에 있음)
+				//그냥 View.getWidth(), View.getHeight()를 쓰면 화면에 뷰가 표시되기 전까지는 무조건 0이 리턴됨
+				child.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED); 
+				var width = child.getMeasuredWidth();
+				//var height = child.getMeasuredHeight();
+				
+				if(width > dip2px(150)) { //텍스트뷰의 길이가 너무 길 때(150dip보다 클 때)
+					child.setTextScaleX(dip2px(150) / width); //장평 좁힘
+				}
+			}
+		}
+		
 		layout.addView(funcToggles[i]);
 	}
 }
@@ -1697,6 +1716,16 @@ function makeFuncButtons(layout) {
 	for(var i in funcButtonsInfo) {
 		funcButtons[i] = makeMinecrafticButton(funcButtonsInfo[i].text, funcButtonsInfo[i].fontSize, funcButtonsInfo[i].width, funcButtonsInfo[i].height);
 		funcButtons[i].setHeight(HEIGHT);
+		
+		//그냥 View.getWidth(), View.getHeight()를 쓰면 화면에 뷰가 표시되기 전까지는 무조건 0이 리턴됨
+		funcButtons[i].measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED); 
+		var width = funcButtons[i].getMeasuredWidth();
+		//var height = funcButtons[i].getMeasuredHeight();
+		
+		if(width > dip2px(180)) { //텍스트의 길이가 너무 길 때(180dip보다 클 때)
+			funcButtons[i].setTextScaleX(dip2px(180) / width); //장평 좁힘
+		}
+		
 		layout.addView(funcButtons[i]);
 	}
 }
