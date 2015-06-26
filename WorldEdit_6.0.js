@@ -1548,17 +1548,18 @@ function makeFuncToggles(layout) {
 	
 	//토글 정보
 	var funcTogglesInfo = [
-		{ "textOn": "현재 좌표 켜짐", "textOff": "현재 좌표 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "포커스 정보 켜짐", "textOff": "포커스 정보 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "아이템 정보 켜짐", "textOff": "아이템 정보 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "빠른 제거 켜짐", "textOff": "빠른 제거 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "빠른 변경 켜짐", "textOff": "빠른 변경 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "발블럭 켜짐", "textOff": "머리블럭 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "현재 좌표 표시", "textOff": "현재 좌표 표시", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "포커스 정보 표시", "textOff": "포커스 정보 표시", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "아이템 정보 표시", "textOff": "아이템 정보 표시", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "빠른 제거", "textOff": "빠른 제거", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "빠른 변경", "textOff": "빠른 변경", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "발블럭", "textOff": "발블럭", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "머리블럭", "textOff": "머리블럭", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
 		{ "textOn": "크리에이티브", "textOff": "서바이벌", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "블럭 위로 쌓기 켜짐", "textOff": "블럭 위로 쌓기 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "블럭 아래로 쌓기 켜짐", "textOff": "블럭 아래로 쌓기", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "구 생성 켜짐", "textOff": "구 생성 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
-		{ "textOn": "반구 생성 켜짐", "textOff": "반구 생성 꺼짐", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true }
+		{ "textOn": "블럭 위로 쌓기", "textOff": "블럭 위로 쌓기", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "블럭 아래로 쌓기", "textOff": "블럭 아래로 쌓기", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "구 생성 모드", "textOff": "구 생성 모드", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true },
+		{ "textOn": "반구 생성 모드", "textOff": "반구 생성 모드", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT, "isChecked": true }
 	];
 	
 	//토글 추가
