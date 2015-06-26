@@ -2163,7 +2163,7 @@ function makeGUIWindow() {
 	makeGUIWindowThread = new Thread(new Runnable() {
 		run: function() {
 			try {
-				if(!loadOption("hide_preparing_gui")) {
+				if(!loadOption("show_preparing_gui")) {
 					var progressDialog;
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
@@ -2309,7 +2309,7 @@ function makeGUIWindow() {
 				GUIWindow.setFocusable(true);
 				//GUIWindow.showAtLocation(CTX.getWindow().getDecorView(), Gravity.CENTER, 0, 0);
 				
-				if(!loadOption("hide_preparing_gui")) {
+				if(!loadOption("show_preparing_gui")) {
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
 							progressDialog.dismiss();
@@ -2462,7 +2462,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 					
 					hLayout.addView(itemLayout);
 					
-					if(!loadOption("hide_preparing_gui")) {
+					if(!loadOption("show_preparing_gui")) {
 						CTX.runOnUiThread(new Runnable() {
 							run: function() {
 								try {
@@ -3052,17 +3052,17 @@ function makeInGameOptionMainLayout(items) {
 		switch(items[i].item) {
 			case "gui":
 				//GUI준비 다이얼로그 숨김 여부
-				var hidePreparingGUI = makeMinecrafticToggle("GUI 준비 다이얼로그 보이지 않음", "GUI 준비 다이얼로그 보임", 20, -1, dip2px(35), loadOption("hide_preparing_gui"), function(isChecked) {
-					saveOption("hide_preparing_gui", isChecked);
+				var showPreparingGUI = makeMinecrafticToggle("GUI 준비 다이얼로그 표시", "GUI 준비 다이얼로그 표시", 20, -1, dip2px(35), loadOption("show_preparing_gui"), function(isChecked) {
+					saveOption("show_preparing_gui", isChecked);
 				});
-				hidePreparingGUI.setBackground(null);
+				showPreparingGUI.setBackground(null);
 				
-				items[i].mainLayout.addView(hidePreparingGUI, contentMarginsParams);
+				items[i].mainLayout.addView(showPreparingGUI, contentMarginsParams);
 				break;
 				
 			case "etc":
 				//파일 확인 해제
-				var doNotCheckFiles = makeMinecrafticToggle("리소스 파일 체크함", "리소스 파일 체크하지 않음", 20, -1, dip2px(35), loadOption("check_files") == true ? true : false, function(isChecked) {
+				var doNotCheckFiles = makeMinecrafticToggle("리소스 파일 체크", "리소스 파일 체크", 20, -1, dip2px(35), loadOption("check_files") == true ? true : false, function(isChecked) {
 					if(!isChecked) {
 						alertDialog("주의!", "이 기능은 게임 구동 시 속도를 향상시켜주는 효과가 있으나 추천되지 않는 기능입니다. 그래도 계속하시겠습니까?", new DialogInterface.OnClickListener({
 							onClick: function(dialog, which) {
