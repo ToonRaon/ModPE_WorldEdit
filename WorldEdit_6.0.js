@@ -821,6 +821,10 @@ function checkDirectories() {
 }
 
 function checkFiles() {
+	//파일 체크 비허용
+	if(!loadOption("check_files"))
+		return;
+	
 	try {
 		var resourceLocalFilesList = getFilesListFromLocal(RESOURCE_PATH, true); //로컬의 파일 리스트
 		
