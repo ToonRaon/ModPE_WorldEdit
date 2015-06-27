@@ -1808,7 +1808,7 @@ function makeMinecrafticSeekBar(progress, max, thumbWidth, thumbHeight, width, h
 	mcSeekBar.setProgress(0);
 	
 	//Thumb
-	var thumb = resizeDrawable(Drawable.createFromPath(GUI_PATH + "/scroll_button_header.png"), thumbWidth, thumbHeight, false);
+	var thumb = resizeDrawable(Drawable.createFromPath(GUI_PATH + "/seekbar_thumb.png"), thumbWidth, thumbHeight, false);
 	
 	mcSeekBar.setThumb(thumb);
 	
