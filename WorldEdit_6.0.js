@@ -3190,6 +3190,71 @@ function makeInGameOptionMainLayout(items) {
 				
 				items[i].mainLayout.addView(mainButtonAlphaSettingLayout, contentMarginsParams);
 				
+				// ------------------------------ 메인 버튼 위치 ----------------------------- //
+				
+				var mainButtonPositionSetting = makeMinecrafticButton("메인 버튼 위치 설정", DEFAULT_FONT_SIZE, -1, dip2px(35));
+				mainButtonPositionSetting.setOnClickListener(new OnClickListener() {
+					onClick: function() {
+						var optionLayout = optionWindow.getContentView();
+						optionLayout.setAlpha(0);
+						
+						//mainWindow 제일 앞으로 꺼냄
+						showMainWindow();
+						
+						var mainButton = mainWindow.getContentView().getChildAt(0);
+						/* -------------------------------------------------------------------- * 
+						 * 아래의 코드는 mainButton에 OnTouchListener가 이미 존재할 경우		*
+						 * 이전에 설정되있는 OnTouchListener를 덮어버린다는 문제가 존재합니다.	*
+						 * mainButton에 OnTouchListener가 있는 경우에는 본 코드를 수정하세요.	*
+						 * -------------------------------------------------------------------- */
+						 
+						var viewX;
+						var viewY;
+						var x;
+						var y;
+						
+						mainButton.setOnTouchListener(new OnTouchListener() {
+							onTouch: function(view, event) {
+								switch(event.action) {
+									case MotionEvent.ACTION_DOWN: //버튼에 손 댔을 때
+										//터치한 뷰(버튼) 내에서의 터치 좌표
+										viewX = event.getX();
+										viewY = event.getY();
+										break;
+										
+									case MotionEvent.ACTION_MOVE: //드래그 할 때
+										//스크린 전체에서의 터치 좌표
+										var screenX = event.getRawX();
+										var screenY = event.getRawY();
+										
+										x = screenX - viewX;
+										y = screenY - viewY;
+										mainWindow.update(x, y, -2, -2, true); //팝업윈도우 좌표 갱신 (팝업윈도우 Gravity가 LEFT | TOP일 때 기준
+										break;
+										
+									case MotionEvent.ACTION_UP: //버튼에서 손 뗐을 때
+										toast("메인 버튼의 위치가 변경되었습니다.");
+										
+										saveOption("main_button_x", x);
+										saveOption("main_button_y", y);
+										
+										mainButton.setOnTouchListener(null); //mainButton에 OnTouchListener가 원래 있었을 경우 해당 리스너로 교체하여야 합니다.
+										
+										optionLayout.setAlpha(1);
+										
+										closeWindow(mainWindow);
+										break;
+								}
+								
+								return true; //OnLongClickListenr와 OnClickListener를 실행하지 않음. (false는 실행)
+							}
+						});
+						
+					}
+				});
+				
+				items[i].mainLayout.addView(mainButtonPositionSetting, contentMarginsParams);
+				
 				break;
 				
 			case "edit":
