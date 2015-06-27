@@ -1391,6 +1391,14 @@ function makeHotkeyWindow() {
 	}));
 }
 
+function showHotkeyWindow() {
+	if(hotkeyWindow == null || hotkeyPopupWindow == null)
+		makeHotkeyWindow();
+	
+	showWindow(hotkeyWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(70));
+	showWindow(hotkeyPopupWindow, Gravity.RIGHT | Gravity.TOP, 0 + dip2px(36), dip2px(70));
+}
+
 function makeMainWindow() {
 	try {
 	//메인 레이아웃
