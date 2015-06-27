@@ -3003,12 +3003,12 @@ function makeInGameOption() {
 					});
 					
 					items[i].itemButtonParams = new LinearLayout.LayoutParams(dip2px(40), dip2px(40));
-					items[i].itemButtonParams.setMargins(0, 0, 0, dip2px(3));
+					items[i].itemButtonParams.setMargins(dip2px(3), 0, dip2px(3), dip2px(3));
 					
 					itemLayout.addView(items[i].itemButton, items[i].itemButtonParams);
 				}
 			
-			contentLayout.addView(itemLayout, new LinearLayout.LayoutParams(dip2px(45), -1));
+			contentLayout.addView(itemLayout, new LinearLayout.LayoutParams(-2, -1));
 			
 			//메인 레이아웃
 			var mainLayoutContainer = new RelativeLayout(CTX);
