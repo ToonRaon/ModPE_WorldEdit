@@ -17,6 +17,8 @@ const EditText = android.widget.EditText;
 const ScrollView = android.widget.ScrollView;
 const ToggleButton = android.widget.ToggleButton;
 const CompoundButton = android.widget.CompoundButton;
+const SeekBar = android.widget.SeekBar;
+const ColorDrawable = android.graphics.drawable.ColorDrawable;
 
 const SP = android.util.TypedValue.COMPLEX_UNIT_SP;
 
@@ -1794,6 +1796,27 @@ function buttonHander(view) {
 			closeWindow(funcWindow);
 			break;
 	}
+}
+
+function makeMinecrafticSeekBar(progress, max, thumbWidth, thumbHeight, width, height) {
+	//SeekBar
+	var mcSeekBar = new SeekBar(CTX);
+	mcSeekBar.setMax(2);
+	mcSeekBar.setProgress(0);
+	
+	//Thumb
+	var thumb = resizeDrawable(Drawable.createFromPath(GUI_PATH + "/scroll_button_header.png"), thumbWidth, thumbHeight, false);
+	
+	mcSeekBar.setThumb(thumb);
+	
+	//ProgressDrawable
+	mcSeekBar.setProgressDrawable(new ColorDrawable(Color.argb(255, 110, 110, 110)));
+	
+	//Params
+	var mcSeekBarParams = new ViewGroup.LayoutParams(width, height);
+	mcSeekBar.setLayoutParams(mcSeekBarParams);
+	
+	return mcSeekBar;
 }
 
 function makeCommandWindow() {
