@@ -1820,8 +1820,8 @@ function buttonHander(view) {
 function makeMinecrafticSeekBar(progress, max, thumbWidth, thumbHeight, width, height) {
 	//SeekBar
 	var mcSeekBar = new SeekBar(CTX);
-	mcSeekBar.setMax(2);
-	mcSeekBar.setProgress(0);
+	mcSeekBar.setMax(max);
+	mcSeekBar.setProgress(progress);
 	
 	//Thumb
 	var thumb = resizeDrawable(Drawable.createFromPath(GUI_PATH + "/seekbar_thumb.png"), thumbWidth, thumbHeight, false);
