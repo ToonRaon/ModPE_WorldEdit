@@ -3114,17 +3114,22 @@ function makeInGameOptionMainLayout(items) {
 		//mainLayout content
 		switch(items[i].item) {
 			case "gui":
-				//GUI준비 다이얼로그 숨김 여부
+				
+				// ------------------------------ GUI준비 다이얼로그 숨김 여부 ----------------------------- //
+				
 				var showPreparingGUI = makeMinecrafticToggle("GUI 준비 다이얼로그 표시", "GUI 준비 다이얼로그 표시", DEFAULT_FONT_SIZE, -1, dip2px(35), loadOption("show_preparing_gui"), function(isChecked) {
 					saveOption("show_preparing_gui", isChecked);
 				});
 				showPreparingGUI.setBackground(null);
 				
 				items[i].mainLayout.addView(showPreparingGUI, contentMarginsParams);
+				
 				break;
 				
 			case "edit":
-				//백업 설정
+			
+				// ------------------------------ 백업 설정 ----------------------------- //
+				
 				var backupBool = new makeMinecrafticToggle("에딧하기 전 지형 백업", "에딧하기 전 직업 백업", DEFAULT_FONT_SIZE, -1, dip2px(35), loadOption("backup"), function(isChecked) {
 					saveOption("backup", isChecked);
 					
@@ -3155,10 +3160,13 @@ function makeInGameOptionMainLayout(items) {
 				backupBool.setBackground(null);
 				
 				items[i].mainLayout.addView(backupBool, contentMarginsParams);
+				
 				break;
 				
 			case "misc":
-				//파일 확인 해제
+				
+				// ------------------------------ 파일 확인 해제 ----------------------------- //
+				
 				var doNotCheckFiles = makeMinecrafticToggle("리소스 파일 체크", "리소스 파일 체크", DEFAULT_FONT_SIZE, -1, dip2px(35), loadOption("check_files") == true ? true : false, function(isChecked) {
 					if(!isChecked) {
 						alertDialog("주의!", "이 기능은 게임 구동 시 속도를 향상시켜주는 효과가 있으나 추천되지 않는 기능입니다. 그래도 계속하시겠습니까?", new DialogInterface.OnClickListener({
@@ -3193,6 +3201,7 @@ function makeInGameOptionMainLayout(items) {
 				doNotCheckFiles.setBackground(null);
 				
 				items[i].mainLayout.addView(doNotCheckFiles, contentMarginsParams);
+				
 				break;
 		}
 		
