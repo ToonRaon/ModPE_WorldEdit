@@ -3020,25 +3020,38 @@ function makeInGameOption() {
 			itemLayout.setGravity(Gravity.CENTER);
 			
 			var items = [
-				{ "item": "gui", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_GUI, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
-				{ "item": "edit", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_EDIT, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
-				{ "item": "etc", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_ETC, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
-				{ "item": "advanced", "background_normal": "", "background_pressed": "", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_ADVANCED, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null }
+				{ "item": "gui", "background_normal": "ingame_option_item_gui_normal.png", "background_pressed": "ingame_option_item_gui_pressed.png", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_GUI, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
+				{ "item": "edit", "background_normal": "ingame_option_item_edit_normal.png", "background_pressed": "ingame_option_item_edit_pressed.png", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_EDIT, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
+				{ "item": "misc", "background_normal": "ingame_option_item_etc_normal.png", "background_pressed": "ingame_option_item_etc_pressed.png", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_ETC, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null },
+				{ "item": "advanced", "background_normal": "ingame_option_item_advanced_normal.png", "background_pressed": "ingame_option_item_advanced_pressed.png", "itemButton": null, "itemButtonId": ViewID.INGAME_OPTION_BUTTON_ADVANCED, "itemButtonParams": null, "mainLayout": null, "mainScrollView": null }
 			];
 			
 				//항목
 				for(var i in items){
-					items[i].itemButton = makeMinecrafticButton(items[i].item, 15, 40, 40); //For testing
+					items[i].itemButton = new Button(CTX);
+					//첫 항목의 버튼 배경만 pressed 상태로 설정하고 나머지는 normal 상태의 이미지 씌움
+					if(i == 0) {
+						items[i].itemButton.setBackground(Drawable.createFromPath(GUI_PATH + "/" + items[i].background_pressed));
+					} else {
+						items[i].itemButton.setBackground(Drawable.createFromPath(GUI_PATH + "/" + items[i].background_normal));
+					}
+					
 					items[i].itemButton.setId(items[i].itemButtonId);
 					items[i].itemButton.setOnClickListener(new OnClickListener() {
 						onClick: function(view) {
-							//클릭한 버튼의 인덱스를 찾아서 그 항목의 mainLayout만 visible
+							//클릭한 버튼의 인덱스를 찾아서 그 항목의 mainLayout만 visible, 누른 항목 버튼만 pressed하고 나머진 normal
 							for(var j in items) {
 								if( items[j].itemButtonId == parseInt(view.getId()) ) { //클릭한 버튼의 인덱스 인 경우
 									items[j].mainScrollView.setVisibility(View.VISIBLE);
 									items[j].mainScrollView.bringToFront(); //터치 이벤트를 받기 위해 가장 앞으로 레이아웃 꺼냄
+									
+									items[j].itemButton.setBackground(Drawable.createFromPath(GUI_PATH + "/" + items[j].background_pressed)); //해당 항목 버튼 pressed 상태로 변경
+									
+									optionTitleText.setText(items[j].item + " option"); //타이틀 내용 변경
 								} else { //클릭한 버튼의 인덱스가 아닌 경우
 									items[j].mainScrollView.setVisibility(View.INVISIBLE);
+									
+									items[j].itemButton.setBackground(Drawable.createFromPath(GUI_PATH + "/" + items[j].background_normal)); //해당 항목 버튼이 아닌 경우 normal 상태로 변경
 								}
 							}
 						}
@@ -3065,6 +3078,9 @@ function makeInGameOption() {
 				
 				mainLayoutContainer.addView(items[i].mainScrollView);
 			}
+			//제일 첫 항목 버튼 pressed 상태로 만듬
+			items[0].itemButton.setBackground(Drawable.createFromPath(GUI_PATH + "/" + items[0].background_pressed));
+			
 			//제일 첫 항목의 터치 이벤트를 받기 위해 제일 앞으로 꺼내옴
 			items[0].mainScrollView.bringToFront();
 			
@@ -3141,7 +3157,7 @@ function makeInGameOptionMainLayout(items) {
 				items[i].mainLayout.addView(backupBool, contentMarginsParams);
 				break;
 				
-			case "etc":
+			case "misc":
 				//파일 확인 해제
 				var doNotCheckFiles = makeMinecrafticToggle("리소스 파일 체크", "리소스 파일 체크", DEFAULT_FONT_SIZE, -1, dip2px(35), loadOption("check_files") == true ? true : false, function(isChecked) {
 					if(!isChecked) {
