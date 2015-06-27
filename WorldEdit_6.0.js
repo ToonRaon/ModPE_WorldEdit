@@ -1236,9 +1236,17 @@ function makeHotkeyWindow() {
 									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "/command_button_pressed.png"));
 									cmdButtonPopup.setAlpha(1);
 								} else if(view == undoButton) {
+									//백업 옵션 꺼진 경우
+									if(!loadOption("backup"))
+										return true;
+									
 									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/undo_button_pressed.png"));
 									undoButtonPopup.setAlpha(1);
 								} else if(view == redoButton) {
+									//백업 옵션 꺼진 경우
+									if(!loadOption("backup"))
+										return true;
+									
 									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/redo_button_pressed.png"));
 									redoButtonPopup.setAlpha(1);
 								}
@@ -1253,9 +1261,17 @@ function makeHotkeyWindow() {
 									cmdButton.setBackground(Drawable.createFromPath(GUI_PATH + "/command_button_normal.png"));
 									cmdButtonPopup.setAlpha(0);
 								} else if(view == undoButton) {
+									//백업 옵션 꺼진 경우
+									if(!loadOption("backup"))
+										return true;
+									
 									undoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/undo_button_normal.png"));
 									undoButtonPopup.setAlpha(0);
 								} else if(view == redoButton) {
+									//백업 옵션 꺼진 경우
+									if(!loadOption("backup"))
+										return true;
+									
 									redoButton.setBackground(Drawable.createFromPath(GUI_PATH + "/redo_button_normal.png"));
 									redoButtonPopup.setAlpha(0);
 								}
@@ -3089,6 +3105,40 @@ function makeInGameOptionMainLayout(items) {
 				items[i].mainLayout.addView(showPreparingGUI, contentMarginsParams);
 				break;
 				
+			case "edit":
+				//백업 설정
+				var backupBool = new makeMinecrafticToggle("에딧하기 전 지형 백업", "에딧하기 전 직업 백업", DEFAULT_FONT_SIZE, -1, dip2px(35), loadOption("backup"), function(isChecked) {
+					saveOption("backup", isChecked);
+					
+					if(!isChecked) { //백업 옵션 꺼짐
+						var hotkeyLayout = hotkeyWindow.getContentView();
+						for(var j = 0; j < hotkeyLayout.getChildCount(); j++) {
+							var childView = hotkeyLayout.getChildAt(j);
+							
+							if(childView.getId() == ViewID.REDO_BUTTON) { //Redo button
+								childView.setBackground(Drawable.createFromPath(GUI_PATH + "/redo_button_pressed.png"));
+							} else if(childView.getId() == ViewID.UNDO_BUTTON) { //Undo button
+								childView.setBackground(Drawable.createFromPath(GUI_PATH + "/undo_button_pressed.png"));
+							}
+						}
+					} else { //백업 옵션 켜짐
+						var hotkeyLayout = hotkeyWindow.getContentView();
+						for(var j = 0; j < hotkeyLayout.getChildCount(); j++) {
+							var childView = hotkeyLayout.getChildAt(j);
+							
+							if(childView.getId() == ViewID.REDO_BUTTON) { //Redo button
+								childView.setBackground(Drawable.createFromPath(GUI_PATH + "/redo_button_normal.png"));
+							} else if(childView.getId() == ViewID.UNDO_BUTTON) { //Undo button
+								childView.setBackground(Drawable.createFromPath(GUI_PATH + "/undo_button_normal.png"));
+							}
+						}
+					}
+				});
+				backupBool.setBackground(null);
+				
+				items[i].mainLayout.addView(backupBool, contentMarginsParams);
+				break;
+				
 			case "etc":
 				//파일 확인 해제
 				var doNotCheckFiles = makeMinecrafticToggle("리소스 파일 체크", "리소스 파일 체크", 20, -1, dip2px(35), loadOption("check_files") == true ? true : false, function(isChecked) {
@@ -4019,7 +4069,7 @@ function cover(minPoint, maxPoint, id, data) {
 
 function backupSetting() {
 	try {
-		if(loadOption("backup") == "false") //백업 안 함 옵션
+		if(!loadOption("backup")) //백업 안 함 옵션
 			return;
 		
 		if(backupArray.length == 0) { //백업 최초 실행
@@ -4042,7 +4092,7 @@ function backupSetting() {
 
 function undo() {
 	try {
-		if(loadOption("backup") == "false") //백업 안 함 옵션
+		if(!loadOption("backup")) //백업 안 함 옵션
 			return;
 		
 		if(backupIndex[backupWorldNumber] <= 1) //백업 없음
@@ -4070,7 +4120,7 @@ function undo() {
 
 function redo() {
 	try {
-		if(loadOption("backup") == "false") //백업 안 함 옵션
+		if(!loadOption("backup")) //백업 안 함 옵션
 			return;
 		try {
 			if(backupIndex[backupWorldNumber] + 1 >= backupArray[backupWorldNumber][backupIndex[backupWorldNumber]].length) //되돌릴 것 없음
@@ -4099,7 +4149,7 @@ function redo() {
 
 function rotate(degree) {
 	try {
-		if(loadOption("backup") == "false") //백업 안 함
+		if(!loadOption("backup")) //백업 안 함
 			return;
 			
 		if(clipboard == null) {
