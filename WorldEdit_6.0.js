@@ -1,11 +1,11 @@
-/*
+/**
  * 월드에딧 스크립트 6.0
  * 제작 : 툰라온
  * 무단 수정 및 2차 배포 금지
  * Github : https://github.com/ToonRaon/ModPE_WorldEdit
  */
  
- //import
+//import
 const Toast = android.widget.Toast;
 const LinearLayout = android.widget.LinearLayout;
 const RelativeLayout = android.widget.RelativeLayout;
@@ -169,13 +169,13 @@ var makeGUIWindowThread;
 var currentWorldDir = null;
 
 /*
- === backupArray 4차원 배열 구조도 ===
- backupArray = [
-	["월드1", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
-	["월드2", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
-	["월드3", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
-	...
- ];
+ * === backupArray 4차원 배열 구조도 ===
+ * backupArray = [
+ *	["월드1", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
+ *	["월드2", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
+ *	["월드3", [[x, y, z, id, data], [x, y, z, id, data], ....], [[x, y, z, id, data], [x, y, z, id, data], ...], [[x, y, z, id, data], [x, y, z, id, data], ...], ...],
+ *	...
+ * ];
  */
 var backupArray = new Array();
 var backupIndex = new Array();
