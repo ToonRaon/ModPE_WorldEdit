@@ -3113,6 +3113,11 @@ function showInGameOption() {
 	showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 }
 
+function resizeDrawable(drawable, width, height, filter) {
+	var bitmap = drawable.getBitmap();
+	return (new BitmapDrawable(CTX.getResources(), Bitmap.createScaledBitmap(bitmap, width, height, filter)));
+}
+
 /* ---------------------------------------------------------------------------- Worldedit Functions ---------------------------------------------------------------------------- */
 
 function setPoint(x, y, z, point, block, blockData) {
