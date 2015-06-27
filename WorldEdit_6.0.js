@@ -3142,7 +3142,7 @@ function makeInGameOptionMainLayout(items) {
 				
 				mainButtonAlphaSettingLayout.addView(mainButtonAlphaSettingText, mainButtonAlphaSettingTextParams);
 				
-				var mainButtonAlphaSettingSeekBar = makeMinecrafticSeekBar(parseFloat(loadOption("main_button_alpha")) * 10, 10, dip2px(20), dip2px(30), dip2px(200), -2);
+				var mainButtonAlphaSettingSeekBar = makeMinecrafticSeekBar(parseFloat(loadOption("main_button_alpha")) * 10, 9, dip2px(20), dip2px(30), dip2px(200), -2);
 				mainButtonAlphaSettingSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 					onStartTrackingTouch: function(seekBar) {
 						closeWindow(mainWindow);
@@ -3152,7 +3152,9 @@ function makeInGameOptionMainLayout(items) {
 					onProgressChanged: function(seekBar, progress, fromUser) {
 						CTX.runOnUiThread(new Runnable() {
 							run: function() {
-								mainWindow.getContentView().setAlpha(progress / seekBar.getMax());
+								var alpha = (progress + 1) / seekBar.getMax();
+								mainWindow.getContentView().setAlpha(alpha);
+								saveOption("main_button_alpha", alpha.toString());
 							}
 						});
 					},
