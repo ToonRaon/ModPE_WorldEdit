@@ -824,8 +824,11 @@ function checkDirectories() {
 
 function checkFiles() {
 	//파일 체크 비허용
-	if(!loadOption("check_files"))
+	if(loadOption("check_files") == ( CURRENT_MAJOR_VERSION + "." + CURRENT_MINOR_VERSION )) {
+		isScriptable = true;
+		
 		return;
+	}
 	
 	try {
 		var resourceLocalFilesList = getFilesListFromLocal(RESOURCE_PATH, true); //로컬의 파일 리스트
