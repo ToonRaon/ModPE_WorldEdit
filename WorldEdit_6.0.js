@@ -2986,7 +2986,7 @@ function hideStatusBar() {
 	}
 }
 
-function makeInGameOption() {
+function makeInGameOptionWindow() {
 	//전체 레이아웃
 	var optionLayout = new LinearLayout(CTX);
 	optionLayout.setOrientation(1);
@@ -3274,9 +3274,14 @@ function makeInGameOptionMainLayout(items) {
 	}
 }
 
-function showInGameOption() {
-	if(optionWindow == null) //optionWindow가 생성이 안 되어 있는 경우
-		makeInGameOption();
+function showInGameOptionWindow() {
+	if(optionWindow == null) { //optionWindow가 생성이 안 되어 있는 경우
+		makeInGameOptionWindow();
+	}
+	
+	closeWindow(mainWindow);
+	closeWindow(hotkeyWindow);
+	closeWindow(funcWindow);
 	
 	showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 }
