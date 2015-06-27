@@ -2192,7 +2192,7 @@ function makeGUIWindow() {
 	makeGUIWindowThread = new Thread(new Runnable() {
 		run: function() {
 			try {
-				if(!loadOption("show_preparing_gui")) {
+				if(loadOption("show_preparing_gui")) {
 					var progressDialog;
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
@@ -2338,7 +2338,7 @@ function makeGUIWindow() {
 				GUIWindow.setFocusable(true);
 				//GUIWindow.showAtLocation(CTX.getWindow().getDecorView(), Gravity.CENTER, 0, 0);
 				
-				if(!loadOption("show_preparing_gui")) {
+				if(loadOption("show_preparing_gui")) {
 					CTX.runOnUiThread(new Runnable() {
 						run: function() {
 							progressDialog.dismiss();
@@ -2491,7 +2491,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 					
 					hLayout.addView(itemLayout);
 					
-					if(!loadOption("show_preparing_gui")) {
+					if(loadOption("show_preparing_gui")) {
 						CTX.runOnUiThread(new Runnable() {
 							run: function() {
 								try {
