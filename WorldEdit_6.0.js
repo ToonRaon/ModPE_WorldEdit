@@ -1395,6 +1395,7 @@ function makeMainWindow() {
 	try {
 	//메인 레이아웃
 	var mainLayout = new RelativeLayout(CTX);
+	mainLayout.setAlpha(parseFloat(loadOption("main_button_alpha")));
 	
 	makeFuncWindow();
 	
@@ -1424,6 +1425,13 @@ function makeMainWindow() {
 	} catch(e) {
 		toast("메인 윈도우 생성과정에서 에러 발생!\n" + e, 1);
 	}
+}
+
+function showMainWindow() {
+	if(mainWindow == null)
+		makeMainWindow();
+	
+	showWindow(mainWindow, Gravity.LEFT | Gravity.TOP, parseFloat(loadOption("main_button_x")), parseFloat(loadOption("main_button_y")));
 }
 
 function makeFuncWindow() {
