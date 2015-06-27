@@ -3124,6 +3124,53 @@ function makeInGameOptionMainLayout(items) {
 				
 				items[i].mainLayout.addView(showPreparingGUI, contentMarginsParams);
 				
+				// ------------------------------ 메인 버튼 투명도 ----------------------------- //
+				
+				var mainButtonAlphaSettingLayout = new RelativeLayout(CTX);
+				
+				var mainButtonAlphaSettingText = new TextView(CTX);
+				mainButtonAlphaSettingText.setText("메인 버튼 투명도 설정");
+				mainButtonAlphaSettingText.setTextSize(DEFAULT_FONT_SIZE);
+				mainButtonAlphaSettingText.setTextColor(Color.WHITE);
+				mainButtonAlphaSettingText.setShadowLayer(1, dip2px(1.5), dip2px(1.5), Color.DKGRAY);
+				mainButtonAlphaSettingText.setTypeface(new Typeface.createFromFile(NANUM_GOTHIC_FILE));
+				
+				var mainButtonAlphaSettingTextParams = new RelativeLayout.LayoutParams(-2, -2);
+				mainButtonAlphaSettingTextParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				mainButtonAlphaSettingTextParams.addRule(RelativeLayout.CENTER_VERTICAL);
+				mainButtonAlphaSettingTextParams.setMargins(dip2px(8), 0, 0, 0);
+				
+				mainButtonAlphaSettingLayout.addView(mainButtonAlphaSettingText, mainButtonAlphaSettingTextParams);
+				
+				var mainButtonAlphaSettingSeekBar = makeMinecrafticSeekBar(parseFloat(loadOption("main_button_alpha")) * 10, 10, dip2px(20), dip2px(30), dip2px(200), -2);
+				mainButtonAlphaSettingSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+					onStartTrackingTouch: function(seekBar) {
+						closeWindow(mainWindow);
+						showWindow(mainWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+					},
+					
+					onProgressChanged: function(seekBar, progress, fromUser) {
+						CTX.runOnUiThread(new Runnable() {
+							run: function() {
+								mainWindow.getContentView().setAlpha(progress / seekBar.getMax());
+							}
+						});
+					},
+					
+					onStopTrackingTouch: function(seekBar) {
+						closeWindow(optionWindow);
+						showInGameOption();
+					}
+				});
+				
+				var mainButtonAlphaSettingSeekBarParams = new RelativeLayout.LayoutParams(dip2px(200), -2);
+				mainButtonAlphaSettingSeekBarParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				mainButtonAlphaSettingSeekBarParams.addRule(RelativeLayout.CENTER_VERTICAL);
+				
+				mainButtonAlphaSettingLayout.addView(mainButtonAlphaSettingSeekBar, mainButtonAlphaSettingSeekBarParams);
+				
+				items[i].mainLayout.addView(mainButtonAlphaSettingLayout, contentMarginsParams);
+				
 				break;
 				
 			case "edit":
