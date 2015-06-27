@@ -1827,8 +1827,7 @@ function buttonHander(view) {
 	
 	switch(text) {
 		case "옵션":
-			showInGameOption();
-			closeWindow(funcWindow);
+			showInGameOptionWindow();
 			break;
 	}
 }
@@ -3106,6 +3105,12 @@ function makeInGameOptionWindow() {
 		
 		optionWindow = new PopupWindow(optionLayout, -1, -1);
 		optionWindow.setFocusable(true);
+		optionWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+			onDismiss: function() {
+				showMainWindow();
+				showHotkeyWindow();
+			}
+		});
 		
 		//showWindow(optionWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 }
@@ -3161,8 +3166,7 @@ function makeInGameOptionMainLayout(items) {
 				var mainButtonAlphaSettingSeekBar = makeMinecrafticSeekBar(parseFloat(loadOption("main_button_alpha")) * 10, 9, dip2px(20), dip2px(30), dip2px(200), -2);
 				mainButtonAlphaSettingSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 					onStartTrackingTouch: function(seekBar) {
-						closeWindow(mainWindow);
-						showWindow(mainWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+						showMainWindow();
 					},
 					
 					onProgressChanged: function(seekBar, progress, fromUser) {
@@ -3176,8 +3180,7 @@ function makeInGameOptionMainLayout(items) {
 					},
 					
 					onStopTrackingTouch: function(seekBar) {
-						closeWindow(optionWindow);
-						showInGameOption();
+						closeWindow(mainWindow);
 					}
 				});
 				
