@@ -2525,9 +2525,7 @@ function makeItemButtons(files, rLayout, vLayout, currentPage, progressDialog) {
 					if(loadOption("show_preparing_gui")) {
 						CTX.runOnUiThread(new Runnable() {
 							run: function() {
-								try {
 									progressDialog.setMessage(((id / ((Math.floor(files.length / 66) * 66) + (5 * 11) + 10 + 1) * 100)).toFixed(2).toString() + "%");
-								} catch(e) { toast(e, 1); }
 							}
 						});
 					}
