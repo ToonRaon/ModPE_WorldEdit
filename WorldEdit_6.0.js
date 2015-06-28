@@ -312,9 +312,10 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /채우기 <아이디:데이터>");
 					return;
 				} else {
-					var id = parseInt(command[1].split(":")[0]);
-					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					fill(minPoint, maxPoint, id, data);
+					selectedItemId = parseInt(command[1].split(":")[0]);
+					selectedItemData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					
+					commandHandler(command[0]);	
 				}
 				break;
 			
@@ -323,14 +324,15 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /벽 <아이디:데이터>");
 					return;
 				} else {
-					var id = parseInt(command[1].split(":")[0]);
-					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					wall(minPoint, maxPoint, id, data);
+					selectedItemId = parseInt(command[1].split(":")[0]);
+					selectedItemData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					
+					commandHandler(command[0]);	
 				}
 				break;
 			
 			case "비우기":
-				fill(minPoint, maxPoint, 0, 0);
+				commandHandler(command[0]);	
 				break;
 			
 			case "바꾸기":
@@ -338,12 +340,12 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /바꾸기 <바뀔아이디:바뀔데이터> <바꿀아이디:바꿀데이터>");
 					return;
 				} else {
-					var fromId = parseInt(command[1].split(":")[0]);
-					var fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					var toId = parseInt(command[2].split(":")[0]);
-					var toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
+					fromId = parseInt(command[1].split(":")[0]);
+					fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					toId = parseInt(command[2].split(":")[0]);
+					toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
 					
-					replace(minPoint, maxPoint, fromId, fromData, toId, toData);
+					commandHandler(command[0]);	
 				}
 				break;
 			
@@ -352,12 +354,12 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /벽바꾸기 <바뀔아이디:바뀔데이터> <바꿀아이디:바꿀데이터>");
 					return;
 				} else {
-					var fromId = parseInt(command[1].split(":")[0]);
-					var fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					var toId = parseInt(command[2].split(":")[0]);
-					var toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
+					fromId = parseInt(command[1].split(":")[0]);
+					fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					toId = parseInt(command[2].split(":")[0]);
+					toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
 					
-					wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData);
+					commandHandler(command[0]);	
 				}
 				break;
 			
@@ -366,25 +368,25 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /남기기 <남길아이디:남길데이터> <바꿀아이디:바꿀데이터>");
 					return;
 				} else {
-					var fromId = parseInt(command[1].split(":")[0]);
-					var fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					var toId = parseInt(command[2].split(":")[0]);
-					var toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
+					fromId = parseInt(command[1].split(":")[0]);
+					fromData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					toId = parseInt(command[2].split(":")[0]);
+					toData = (command[2].indexOf(":") != -1 ? parseInt(command[2].split(":")[1]) : 0);
 					
-					preserve(minPoint, maxPoint, fromId, fromData, toId, toData);
+					commandHandler(command[0]);	
 				}
 				break;
 			
 			case "흡수":
-				drain(minPoint, maxPoint);
+				commandHandler(command[0]);
 				break;
 			
 			case "복사":
-				copy(minPoint, maxPoint);
+				commandHandler(command[0]);
 				break;
 			
 			case "붙여넣기":
-				paste();
+				commandHandler(command[0]);
 				break;
 			
 			case "구":
@@ -397,11 +399,11 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /" + command[1] + " <아이디:데이터> <반지름>");
 					return;
 				} else {
-					var id = parseInt(command[1].split(":")[0]);
-					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					var radius = parseInt(command[2]);
+					selectedItemId = parseInt(command[1].split(":")[0]);
+					selectedItemData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					radius = parseInt(command[2]);
 					
-					createSphere(command[0], Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius);
+					commandHandler(command[0]);
 				}
 				break;
 			
@@ -411,11 +413,11 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /" + command[1] + " <아이디:데이터> <반지름>");
 					return;
 				} else {
-					var id = parseInt(command[1].split(":")[0]);
-					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					var radius = parseInt(command[2]);
+					selectedItemId = parseInt(command[1].split(":")[0]);
+					selectedItemData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					radius = parseInt(command[2]);
 					
-					createCircle(command[0], Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius);
+					commandHandler(command[0]);
 				}
 				break;
 			
@@ -425,17 +427,17 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /" + command[1] + " <아이디:데이터> <반지름> <높이>");
 					return;
 				} else {
-					var id = parseInt(command[1].split(":")[0]);
-					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
-					var radius = parseInt(command[2]);
-					var height = parseInt(command[3]);
+					selectedItemId = parseInt(command[1].split(":")[0]);
+					selectedItemData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					radius = parseInt(command[2]);
+					height = parseInt(command[3]);
 					
-					createCylinder(command[0], Math.floor(Player.getX()), Math.floor(Player.getY() - 1), Math.floor(Player.getZ()), id, data, radius, height);
+					commandHandler(command[0]);
 				}
 				break;
 			
 			case "길이":
-				getAreaLength(minPoint, maxPoint);
+				commandHandler(command[0]);	
 				break;
 			
 			case "덮기":
@@ -443,10 +445,10 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /덮기 <아이디:데이터>");
 					return;
 				} else {
-					var id = parseInt(command[1].split(":")[0]);
-					var data = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
+					selectedItemId = parseInt(command[1].split(":")[0]);
+					selectedItemData = (command[1].indexOf(":") != -1 ? parseInt(command[1].split(":")[1]) : 0);
 					
-					cover(minPoint, maxPoint, id, data);
+					commandHandler(command[0]);
 				}
 				break;
 			
@@ -455,9 +457,9 @@ function procCmd(command) {
 					clientMessage(ChatColor.GREEN + "[HELP] /회전 <회전각도>");
 					return;
 				} else {
-					var degree = parseInt(command[1]);
+					var degree = parseInt(command[1]) % 360;
 					
-					rotate(degree);
+					commandHandler(command[0] + degree.toString());
 				}
 				break;
 		}
@@ -2214,6 +2216,16 @@ function commandHandler(command) {
 			
 			case "회전90":
 				rotate(90);
+				break;
+			
+			//This can be called by procCmd()
+			case "회전180":
+				rotate(180);
+				break;
+				
+			//This can be called by procCmd()
+			case "회전270":
+				rotate(270);
 				break;
 		}
 	} catch(e) {
