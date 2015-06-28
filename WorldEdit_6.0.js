@@ -240,11 +240,10 @@ function newLevel() {
 	notice();
 	
 	//단축버튼
-	showWindow(hotkeyWindow, Gravity.RIGHT | Gravity.TOP, 0, dip2px(70));
-	showWindow(hotkeyPopupWindow, Gravity.RIGHT | Gravity.TOP, 0 + dip2px(36), dip2px(70));
+	showHotkeyWindow();
 	
 	//메인 윈도우
-	showWindow(mainWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
+	showMainWindow();
 	
 	//월드디렉토리
 	currentWorldDir = Level.getWorldDir();
