@@ -4331,7 +4331,7 @@ function redo() {
 	}
 }
 
-function rotate(degree) {
+function rotate(degree, init) {
 	try {
 		if(!loadOption("backup")) //백업 안 함
 			return;
@@ -4356,22 +4356,31 @@ function rotate(degree) {
 			}
 		}
 		
-		for(var h = 1;  h <= degree / 90; h++) { //회전변환한 도형이 3, 4분면일 경우를 따지기 않기 위해 그냥 pi/2 회전변환을 반복시킨다.
-			for(var i = 0; i < clipboard.length; i++) {
-				for(var j = 0; j < clipboard[0].length; j++) {
-					for(var k = 0; k < clipboard[0][0].length; k++) {
-						var x = i, y = j, z = k;
-						var _x = -z, _y = y, _z = x; //각 Θ = pi/2일 때 회전변환
-						_x += clipboard[0][0].length - 1; //제 2사분면을 제 1사분면으로 평행이동
-						tempArray[_x][_y][_z] = clipboard[x][y][z];
-					}
+		for(var i = 0; i < clipboard.length; i++) {
+			for(var j = 0; j < clipboard[0].length; j++) {
+				for(var k = 0; k < clipboard[0][0].length; k++) {
+					var x = i, y = j, z = k;
+					var _x = -z, _y = y, _z = x; //각 Θ = pi/2일 때 회전변환
+					_x += clipboard[0][0].length - 1; //제 2사분면을 제 1사분면으로 평행이동
+					tempArray[_x][_y][_z] = clipboard[x][y][z];
 				}
 			}
-			
-			clipboard = tempArray;
 		}
 		
-		toast(degree + "도 회전하였습니다.");
+		clipboard = tempArray;
+		
+		//degree가 90이 아니면 90이 될 때까지 계속 돌림
+		if(degree != 90) {
+			rotate(degree - 90, degree);
+			
+			return;
+		}
+		
+		if(init == undefined) {
+			toast("90도 회전하였습니다.");
+		} else {
+			toast(init + "도 회전하였습니다.");
+		}
 	} catch(e) {
 		toast("회전 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
