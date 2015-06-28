@@ -4241,11 +4241,18 @@ function backupSetting() {
 			backupIndex[backupWorldNumber] = 1;
 		} else { //백업한 흔적이 있는 경우
 			backupWorldNumber = backupArray.length; //backupArray에 없는 새로운 월드인 경우
-			for(var i in backupArray)
+			for(var i in backupArray) {
 				if(backupArray[i][0] == currentWorldDir) { //backupArray에 이미 있는 월드인 경우
 					backupWorldNumber = i;
 					break;
 				}
+			}
+			
+			if(backupWorldNumber == backupArray.length) { //backupArray에 없는 새로운 월드인 경우 backupArray 초기화
+				backupArray[backupWorldNumber] = new Array();
+				backupArray[backupWorldNumber].push(currentWorldDir);
+				backupIndex[backupWorldNumber] = 1;
+			}
 		}
 	} catch(e) {
 		toast("백업을 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
