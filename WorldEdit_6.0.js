@@ -1125,6 +1125,9 @@ function showWindow(window, gravity, x, y) {
 }
 
 function closeWindow(window) {
+	if(window == null) //window가 정의가 안 된 경우
+		return;
+	
 	CTX.runOnUiThread(new Runnable({
 		run: function() {
 			try {
