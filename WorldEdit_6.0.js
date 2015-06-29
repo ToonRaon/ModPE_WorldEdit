@@ -2165,7 +2165,7 @@ function commandHandler(command) {
 				break;
 			
 			case "비우기":
-				terrain = fill(minPoint, maxPoint, 0, 0);
+				terrain = fill(minPoint, maxPoint, 0, 0, terrain);
 				break;
 			
 			case "바꾸기":
@@ -3474,11 +3474,8 @@ function fill(minPoint, maxPoint, id, data, terrain) {
 						"y": y,
 						"z": z,
 						"id": Level.getTile(x, y, z),
-						"data": Level.getTile(x, y, z)
+						"data": Level.getData(x, y, z)
 					});
-					
-					Level.setTile(x, y, z, id, data);
-					blockCount++;
 					
 					terrain.modified.push({
 						"x": x,
@@ -3487,6 +3484,9 @@ function fill(minPoint, maxPoint, id, data, terrain) {
 						"id": id,
 						"data": data
 					});
+					
+					Level.setTile(x, y, z, id, data);
+					blockCount++;
 				}
 			}
 		}
@@ -3528,6 +3528,22 @@ function wall(minPoint, maxPoint, id, data, terrain) {
 		for(var y = minPoint.y; y <= maxPoint.y; y++) {
 			for(var z = minPoint.z; ; z = maxPoint.z) {
 				for(var x = minPoint.x; x <= maxPoint.x; x++) {
+					terrain.origin.push({
+						"x": x,
+						"y": y,
+						"z": z,
+						"id": Level.getTile(x, y, z),
+						"data": Level.getData(x, y, z)
+					});
+					
+					terrain.modified.push({
+						"x": x,
+						"y": y,
+						"z": z,
+						"id": id,
+						"data": data
+					});
+					
 					Level.setTile(x, y, z, id, data);
 					blockCount++;
 				}
@@ -3538,6 +3554,24 @@ function wall(minPoint, maxPoint, id, data, terrain) {
 			
 			for(var x = minPoint.x; ; x = maxPoint.x) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
+					if(( x != minPoint.x && x != maxPoint.x && z != minPoint.z && z != maxPoint.z ) || ( minPoint.z < z && z < maxPoint.z )) { //네 귀퉁이 부분 위에서 백업하였으므로 무시
+						terrain.origin.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": Level.getTile(x, y, z),
+							"data": Level.getData(x, y, z)
+						});
+						
+						terrain.modified.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": id,
+							"data": data
+						});
+					}
+					
 					Level.setTile(x, y, z, id, data);
 					blockCount++;
 				}
@@ -3559,6 +3593,7 @@ function wall(minPoint, maxPoint, id, data, terrain) {
 			}
 		});
 		
+		return terrain;
 	} catch(e) {
 		toast("wall 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3579,6 +3614,22 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
 					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
+						terrain.origin.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": fromId,
+							"data": fromData
+						});
+						
+						terrain.modified.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": toId,
+							"data": toData
+						});
+						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
 					}
@@ -3597,6 +3648,8 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("replace 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3605,6 +3658,7 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 	try {
 		//프로그래스 다이얼로그 시작
+		
 		var progressDialog;
 		CTX.runOnUiThread(new Runnable() {
 			run: function() {
@@ -3617,6 +3671,22 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain
 			for(var z = minPoint.z; ; z = maxPoint.z) {
 				for(var x = minPoint.x; x <= maxPoint.x; x++) {
 					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
+						terrain.origin.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": fromId,
+							"data": fromData
+						});
+						
+						terrain.modified.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": toId,
+							"data": toData
+						});
+						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
 					}
@@ -3629,6 +3699,24 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain
 			for(var x = minPoint.x; ; x = maxPoint.x) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
 					if(Level.getTile(x, y, z) == fromId && Level.getData(x, y, z) == fromData) {
+						if(( x != minPoint.x && x != maxPoint.x && z != minPoint.z && z != maxPoint.z ) || ( minPoint.z < z && z < maxPoint.z )) { //네 귀퉁이 부분 위에서 백업하였으므로 무시
+							terrain.origin.push({
+								"x": x,
+								"y": y,
+								"z": z,
+								"id": fromId,
+								"data": fromData
+							});
+							
+							terrain.modified.push({
+								"x": x,
+								"y": y,
+								"z": z,
+								"id": toId,
+								"data": toData
+							});
+						}
+						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
 					}
@@ -3650,6 +3738,9 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain
 				progressDialog = null;
 			}
 		});
+		
+		
+		return terrain;
 	} catch(e) {
 		toast("wallReplace 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3669,7 +3760,25 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, 
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
-					if(Level.getTile(x, y, z) != preservedId || Level.getData(x, y, z) != preservedData) {
+					var currentBlockId, currentBlockData;
+					
+					if(( currentBlockId = Level.getTile(x, y, z) ) != preservedId || ( currentBlockId = Level.getData(x, y, z) ) != preservedData) {
+						terrain.origin.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": currentBlockId,
+							"data": currentBlockData
+						});
+						
+						terrain.modified.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": toId,
+							"data": toData
+						});
+						
 						Level.setTile(x, y, z, toId, toData);
 						blockCount++;
 					}
@@ -3688,6 +3797,8 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, 
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("preserve 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3709,6 +3820,22 @@ function drain(minPoint, maxPoint, terrain) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
 					var block = Level.getTile(x, y, z);
 					if(block == 8 || block == 9 || block == 10 || block == 11) {
+						terrain.origin.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": block,
+							"data": Level.getData(x, y, z)
+						});
+						
+						terrain.modified.push({
+							"x": x,
+							"y": y,
+							"z": z,
+							"id": 0,
+							"data": 0
+						});
+						
 						Level.setTile(x, y, z, 0);
 						blockCount++;
 					}
@@ -3725,6 +3852,8 @@ function drain(minPoint, maxPoint, terrain) {
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("drain 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3807,6 +3936,22 @@ function paste(terrain) {
 		for (var i = 0; i < clipboard.length; i++) {
 			for (var j = 0; j < clipboard[0].length; j++) {
 				for (var k = 0; k < clipboard[0][0].length; k++) {
+					terrain.origin.push({
+						"x": x + i,
+						"y": y + j,
+						"z": z + k,
+						"id": Level.getTile(x + i, y + j, z + k),
+						"data": Level.getData(x + i, y + j, z + k)
+					});
+					
+					terrain.modified.push({
+						"x": x + i,
+						"y": y + j,
+						"z": z + k,
+						"id": clipboard[i][j][k].id,
+						"data": clipboard[i][j][k].data
+					});
+					
 					Level.setTile(x + i, y + j, z + k, clipboard[i][j][k].id, clipboard[i][j][k].data);
 					blockCount++;
 				}
@@ -3824,6 +3969,8 @@ function paste(terrain) {
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("paste 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3846,6 +3993,22 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 					switch(type) {
 						case "구":
 							if((i * i) + (j * j) + (k * k) <= (radius * radius)) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": Level.getTile(x + i, y + j, z + k),
+									"data": Level.getData(x + i, y + j, z + k)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": id,
+									"data": data
+								});
+								
 								Level.setTile(x + i, y + j, z + k, id, data);
 								blockCount++;
 							}
@@ -3853,6 +4016,23 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 						
 						case "반구":
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && j >= 0) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": Level.getTile(x + i, y + j, z + k),
+									"data": Level.getData(x + i, y + j, z + k)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": id,
+									"data": data
+								});
+								
+
 								Level.setTile(x + i, y + j, z + k, id, data);
 								blockCount++;
 							}
@@ -3860,6 +4040,23 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 						
 						case "빈구":
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && (i * i) + (j * j) + (k * k) >= (radius - 1) * (radius - 1)) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": Level.getTile(x + i, y + j, z + k),
+									"data": Level.getData(x + i, y + j, z + k)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": id,
+									"data": data
+								});
+								
+
 								Level.setTile(x + i, y + j, z + k, id, data);
 								blockCount++;
 							}
@@ -3867,6 +4064,23 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 						
 						case "빈반구":
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && (i * i) + (j * j) + (k * k) >= (radius - 1) * (radius - 1) && j >= 0) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": Level.getTile(x + i, y + j, z + k),
+									"data": Level.getData(x + i, y + j, z + k)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": id,
+									"data": data
+								});
+								
+
 								Level.setTile(x + i, y + j, z + k, id, data);
 								blockCount++;
 							}
@@ -3874,6 +4088,23 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 						
 						case "역반구":
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && j <= 0) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": Level.getTile(x + i, y + j, z + k),
+									"data": Level.getData(x + i, y + j, z + k)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": id,
+									"data": data
+								});
+								
+
 								Level.setTile(x + i, y + j, z + k, id, data);
 								blockCount++;
 							}
@@ -3881,6 +4112,23 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 						
 						case "역빈반구":
 							if((i * i) + (j * j) + (k * k) <= (radius * radius) && (i * i) + (j * j) + (k * k) >= (radius - 1) * (radius - 1) && j <= 0) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": Level.getTile(x + i, y + j, z + k),
+									"data": Level.getData(x + i, y + j, z + k)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + j,
+									"z": z + k,
+									"id": id,
+									"data": data
+								});
+								
+
 								Level.setTile(x + i, y + j, z + k, id, data);
 								blockCount++;
 							}
@@ -3901,6 +4149,8 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("createSphere 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3917,16 +4167,48 @@ function createCircle(type, x, y, z, id, data, radius, terrain) {
 		});
 		
 		var blockCount  = 0;
-		for(var i = -radius + 1; i < radius; i++) for(var j = -radius + 1; j < radius; j++){
+		for(var i = -radius + 1; i < radius; i++) for(var j = -radius + 1; j < radius; j++) {
 			switch(type) {
 					case "원":
 					if((i * i) + (j * j) <= (radius * radius)) {
+						terrain.origin.push({
+							"x": x + i,
+							"y": y,
+							"z": z + j,
+							"id": Level.getTile(x + i, y, z + j),
+							"data": Level.getData(x + i, y, z + j)
+						});
+						
+						terrain.modified.push({
+							"x": x + i,
+							"y": y,
+							"z": z + j,
+							"id": id,
+							"data": data
+						});
+						
 						Level.setTile(x + i, y, z + j, id, data);
 						blockCount++;
 					}
 					break;
 				case "빈원":
 					if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
+						terrain.origin.push({
+							"x": x + i,
+							"y": y,
+							"z": z + j,
+							"id": Level.getTile(x + i, y, z + j),
+							"data": Level.getData(x + i, y, z + j)
+						});
+						
+						terrain.modified.push({
+							"x": x + i,
+							"y": y,
+							"z": z + j,
+							"id": id,
+							"data": data
+						});
+						
 						Level.setTile(x + i, y, z + j, id, data);
 						blockCount++;	backupArray[backupWorldNumber][backupIndex[backupWorldNumber] + 1].push([x + i, y, z + j, id, data]);
 					}
@@ -3945,6 +4227,8 @@ function createCircle(type, x, y, z, id, data, radius, terrain) {
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("createCircle 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3967,6 +4251,22 @@ function createCylinder(type, x, y, z, id, data, radius, height, terrain) {
 					switch(type) {
 						case "원기둥":
 							if((i * i) + (j * j) <= (radius * radius)) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + h,
+									"z": z + j,
+									"id": Level.getTile(x + i, y + h, z + j),
+									"data": Level.getData(x + i, y + h, z + j)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + h,
+									"z": z + j,
+									"id": id,
+									"data": data
+								});
+								
 								Level.setTile(x + i, y + h, z + j, id, data);
 								blockCount++;
 							}
@@ -3974,6 +4274,22 @@ function createCylinder(type, x, y, z, id, data, radius, height, terrain) {
 						
 						case "빈원기둥":
 							if((i * i) + (j * j) <= (radius * radius) && (i * i) + (j * j) >= ((radius - 1) * (radius - 1))) {
+								terrain.origin.push({
+									"x": x + i,
+									"y": y + h,
+									"z": z + j,
+									"id": Level.getTile(x + i, y + h, z + j),
+									"data": Level.getData(x + i, y + h, z + j)
+								});
+								
+								terrain.modified.push({
+									"x": x + i,
+									"y": y + h,
+									"z": z + j,
+									"id": id,
+									"data": data
+								});
+								
 								Level.setTile(x + i, y + h, z + j, id, data);
 								blockCount++;
 							}
@@ -3994,6 +4310,8 @@ function createCylinder(type, x, y, z, id, data, radius, height, terrain) {
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("createCylinder 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -4030,6 +4348,22 @@ function cover(minPoint, maxPoint, id, data, terrain) {
 					var topBlock = Level.getTile(x, y + 1, z);
 					
 					if(block != 0 && topBlock == 0) {
+						terrain.origin.push({
+							"x": x,
+							"y": y + 1,
+							"z": z,
+							"id": topBlock,
+							"data": Level.getData(x, y + 1, z)
+						});
+						
+						terrain.modified.push({
+							"x": x,
+							"y": y + 1,
+							"z": z,
+							"id": id,
+							"data": data
+						});
+						
 						Level.setTile(x, ++y, z, id, data);
 						blockCount++;
 						//break;
@@ -4049,6 +4383,8 @@ function cover(minPoint, maxPoint, id, data, terrain) {
 				progressDialog = null;
 			}
 		});
+		
+		return terrain;
 	} catch(e) {
 		toast("cover 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -4152,6 +4488,8 @@ function redo() {
 		
 		blockCount++;
 	}
+	
+	clientMessage(ChatColor.GREEN + blockCount + "개의 블럭이 복원되었습니다.");
 	
 	//프로그래스 다이얼로그 종료
 	CTX.runOnUiThread(new Runnable() {
