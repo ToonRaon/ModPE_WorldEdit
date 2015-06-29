@@ -2148,6 +2148,14 @@ function chooseItemOnGUI(command) {
 
 function commandHandler(command) {
 	
+	//프로그래스 다이얼로그 시작
+	var progressDialog;
+	CTX.runOnUiThread(new Runnable() {
+		run: function() {
+			progressDialog = ProgressDialog.show(CTX, "작업 수행 중... (" + command + ")", "잠시만 기다려주세요...", true, false);
+		}
+	});
+	
 	var terrain = { "origin": new Array(), "modified": new Array() };
 	
 	try {
@@ -2262,6 +2270,14 @@ function commandHandler(command) {
 	}
 	
 	backup(currentWorldDir, terrain);
+	
+	//프로그래스 다이얼로그 종료
+	CTX.runOnUiThread(new Runnable() {
+		run: function() {
+			progressDialog.dismiss();
+			progressDialog = null;
+		}
+	});
 }
 
 function makeGUIWindow() {
@@ -3458,14 +3474,6 @@ function fill(minPoint, maxPoint, id, data, terrain) {
 	try {
 		var blockCount = 0;
 		
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "채우기 작업 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
 				for(var z = minPoint.z; z <= maxPoint.z; z++) {
@@ -3499,14 +3507,6 @@ function fill(minPoint, maxPoint, id, data, terrain) {
 		if(chunk_x >= 4 || chunk_z >= 4)
 			clientMessage(ChatColor.RED + "[경고!] 넓은 영역을 에딧하여 청크 오류로 맵 저장이 되지 않을 수도 있습니다.");
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("fill 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -3516,14 +3516,6 @@ function fill(minPoint, maxPoint, id, data, terrain) {
 function wall(minPoint, maxPoint, id, data, terrain) {
 	try {
 		var blockCount = 0;
-		
-		//프로그래스 다이얼로그 시작 
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "벽을 생성 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
 		
 		for(var y = minPoint.y; y <= maxPoint.y; y++) {
 			for(var z = minPoint.z; ; z = maxPoint.z) {
@@ -3585,14 +3577,6 @@ function wall(minPoint, maxPoint, id, data, terrain) {
 		
 		preventFolding(); //끼임 방지
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("wall 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -3601,14 +3585,6 @@ function wall(minPoint, maxPoint, id, data, terrain) {
 
 function replace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "블럭을 바꾸는 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
@@ -3641,14 +3617,6 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 		
 		preventFolding();
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("replace 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -3657,15 +3625,6 @@ function replace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 
 function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "벽 바꾸기를 실행 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount = 0;
 		for(var y = minPoint.y; y <= maxPoint.y; y++) {
 			for(var z = minPoint.z; ; z = maxPoint.z) {
@@ -3731,15 +3690,6 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain
 		
 		preventFolding();
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
-		
 		return terrain;
 	} catch(e) {
 		toast("wallReplace 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -3748,14 +3698,6 @@ function wallReplace(minPoint, maxPoint, fromId, fromData, toId, toData, terrain
 
 function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "남기기 작업을 실행 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
@@ -3790,14 +3732,6 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, 
 		
 		preventFolding();
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("preserve 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -3806,14 +3740,6 @@ function preserve(minPoint, maxPoint, preservedId, preservedData, toId, toData, 
 
 function drain(minPoint, maxPoint, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "액체 블럭을 흡수 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var y = minPoint.y; y <= maxPoint.y; y++) {
@@ -3845,14 +3771,6 @@ function drain(minPoint, maxPoint, terrain) {
 		
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("drain 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -3861,14 +3779,6 @@ function drain(minPoint, maxPoint, terrain) {
 
 function copy(minPoint, maxPoint) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "지정된 역역을 복사 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var length = {x: (maxPoint.x - minPoint.x + 1), y: (maxPoint.y - minPoint.y + 1), z: (maxPoint.z - minPoint.z + 1)};
 		
 		var blockCount = 0;
@@ -3888,14 +3798,6 @@ function copy(minPoint, maxPoint) {
 		}
 		
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 복사되었습니다.");
-		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
 	} catch(e) {
 		toast("copy 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
@@ -3907,14 +3809,6 @@ function paste(terrain) {
 			toast("클립보드에 저장된 블럭이 없습니다.", 0);
 			return;
 		}
-		
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "저장된 블럭을 붙여넣는 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
 		
 		var x = Math.floor(Player.getX());
 		var y = Math.floor(Player.getY() - 1);
@@ -3962,14 +3856,6 @@ function paste(terrain) {
 		
 		preventFolding();
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("paste 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -3978,14 +3864,6 @@ function paste(terrain) {
 
 function createSphere(type, x, y, z, id, data, radius, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount  = 0;
 		for(var i = -radius + 1; i < radius; i++) {
 			for(var j = -radius + 1; j < radius; j++) {
@@ -4142,14 +4020,6 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 		
 		preventFolding();
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("createSphere 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -4158,14 +4028,6 @@ function createSphere(type, x, y, z, id, data, radius, terrain) {
 
 function createCircle(type, x, y, z, id, data, radius, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount  = 0;
 		for(var i = -radius + 1; i < radius; i++) for(var j = -radius + 1; j < radius; j++) {
 			switch(type) {
@@ -4220,14 +4082,6 @@ function createCircle(type, x, y, z, id, data, radius, terrain) {
 		
 		preventFolding();
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("createCircle 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -4236,14 +4090,6 @@ function createCircle(type, x, y, z, id, data, radius, terrain) {
 
 function createCylinder(type, x, y, z, id, data, radius, height, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, josa(type, "을") + " 생성중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount  = 0;
 		for(var h = 0; h < height; h++) {
 			for(var i = -radius + 1; i < radius; i++) {
@@ -4303,14 +4149,6 @@ function createCylinder(type, x, y, z, id, data, radius, height, terrain) {
 		
 		preventFolding();
 		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
-		
 		return terrain;
 	} catch(e) {
 		toast("createCylinder 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
@@ -4332,14 +4170,6 @@ function getAreaLength(minPoint, maxPoint) {
 
 function cover(minPoint, maxPoint, id, data, terrain) {
 	try {
-		//프로그래스 다이얼로그 시작
-		var progressDialog;
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog = ProgressDialog.show(CTX, "지정된 영역을 덮는 중입니다...", "잠시만 기다려주세요...", true, false);
-			}
-		});
-		
 		var blockCount = 0;
 		for(var x = minPoint.x; x <= maxPoint.x; x++) {
 			for(var z = minPoint.z; z <= maxPoint.z; z++) {
@@ -4375,14 +4205,6 @@ function cover(minPoint, maxPoint, id, data, terrain) {
 		clientMessage(ChatColor.GREEN + "총 " + blockCount + "개의 블럭이 성공적으로 바뀌었습니다.");
 		
 		preventFolding();
-		
-		//프로그래스 다이얼로그 종료
-		CTX.runOnUiThread(new Runnable() {
-			run: function() {
-				progressDialog.dismiss();
-				progressDialog = null;
-			}
-		});
 		
 		return terrain;
 	} catch(e) {
