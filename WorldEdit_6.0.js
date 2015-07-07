@@ -2205,11 +2205,11 @@ function commandHandler(command) {
 				break;
 			
 			case "복사":
-				copy(minPoint, maxPoint);
+				copy(minPoint, maxPoint, clipboard);
 				break;
 			
 			case "붙여넣기":
-				terrain = paste(terrain);
+				terrain = paste(clipboard, terrain);
 				break;
 			
 			case "구":
@@ -3777,7 +3777,7 @@ function drain(minPoint, maxPoint, terrain) {
 	}
 }
 
-function copy(minPoint, maxPoint) {
+function copy(minPoint, maxPoint, clipboard) {
 	try {
 		var length = {x: (maxPoint.x - minPoint.x + 1), y: (maxPoint.y - minPoint.y + 1), z: (maxPoint.z - minPoint.z + 1)};
 		
@@ -3803,7 +3803,7 @@ function copy(minPoint, maxPoint) {
 	}
 }
 
-function paste(terrain) {
+function paste(clipboard, terrain) {
 	try {
 		if(clipboard == null) {
 			toast("클립보드에 저장된 블럭이 없습니다.", 0);
