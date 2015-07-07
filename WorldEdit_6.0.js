@@ -3503,7 +3503,7 @@ function fill(minPoint, maxPoint, id, data, terrain) {
 		
 		preventFolding(); //끼임 방지
 		
-		var chunk_x = parseInt(maxPoint.x - minPoint.x), chunk_z = parseInt(maxPoint.z - minPoint.z);
+		var chunk_x = parseInt((maxPoint.x - minPoint.x) / 16), chunk_z = parseInt((maxPoint.z - minPoint.z) / 16);
 		if(chunk_x >= 4 || chunk_z >= 4)
 			clientMessage(ChatColor.RED + "[경고!] 넓은 영역을 에딧하여 청크 오류로 맵 저장이 되지 않을 수도 있습니다.");
 		
