@@ -508,7 +508,7 @@ function procCmd(command) {
 		toast(e, 1);
 	}
 }
-
+/*
 function startDestroyBlock(x, y, z, side) {
 	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
 			return;
@@ -520,8 +520,8 @@ function startDestroyBlock(x, y, z, side) {
 	if(item == 271) //나무도끼
 		setPoint(x, y, z, secondPoint, block, blockData);
 }
-
-function destroyBlock() {
+*/
+function destroyBlock(x, y, z) {
 	if(!isScriptable) //파일 누락 등의 이유로 스크립트 사용불가 상태
 			return;
 	
@@ -529,6 +529,14 @@ function destroyBlock() {
 	
 	if(item == 271) //나무도끼
 		preventDefault();
+	
+	//-- 0.11.0에서 startDestroyBlock이 먹히지 않는 버그 땜빵 --//
+	//var item = Player.getCarriedItem();
+	var block = Level.getTile(x, y, z);
+	var blockData = Level.getData(x, y, z);
+	
+	if(item == 271) //나무도끼
+		setPoint(x, y, z, secondPoint, block, blockData);
 }
 
 function modTick() {
@@ -557,12 +565,16 @@ function testingButton() {
 			//TO DO WHAT YOU WANT TO TEST
 			
 			toast("the button is pressed!");
-			
-			if(funcWindow == null)
-				makeFuncWindow();
-			else {
-				closeWindow(funcWindow);
-				funcWindow = null;
+			try {
+				makeInGameOptionWindow();
+				
+				/*
+				var mBitmap = new Bitmap.createBitmap( new BitmapFactory.decodeFile(GUI_PATH + "/func_layout_title_num.png"), 50 * CURRENT_MAJOR_VERSION, 0, 50, 55 );
+				var c = mBitmap.getPixel(5, 5);
+				toast(Color.red(c) + ", " + Color.green(c) + ", " + Color.blue(c));
+				*/
+			} catch(e) {
+				toast(e);
 			}
 		}
 	};
@@ -580,12 +592,24 @@ function testingButton() {
 	
 	tLayout.addView(tButton);
 	
-	tText = new TextView(CTX);
-	tText.setText("this is a textview for testing");
-	tText.setBackgroundColor(Color.argb(128, 128, 128, 128));
-	tLayout.addView(tText);
+	var sb = makeMinecrafticSeekBar(50, 100, dip2px(20), dip2px(30), dip2px(200), -2);
+	
+	tLayout.addView(sb);
+	
+	/*
+	tText = new ImageView(CTX);
+	
+	var buf = new Array();
+	var is = ModPE.openInputStreamFromTexturePack("images/gui/title.png");
+	var bm = new BitmapFactory.decodeStream(is);
+	
+	tText.setImageBitmap(bm);
+	
+	tLayout.addView(tText, new LinearLayout.LayoutParams(dip2px(300), dip2px(300)));
+	*/
 	
 	var tWindow = new PopupWindow(tLayout, -2, -2);
+	//tWindow.setTouchable(false);
 	showWindow(tWindow, Gravity.LEFT | Gravity.TOP, 0, 0);
 }
 //testingButton();
@@ -624,7 +648,7 @@ function initialize() {
 					checkVersion();
 				}
 				
-				if(Level.getWorldDir() != null) //게임에 이미 접속
+				if(currentWorldDir != null) //게임에 이미 접속
 					newLevel();
 			} catch(e) {
 				toast("initialize 과정에서 오류가 발생하였습니다.\n" + e, 1);
