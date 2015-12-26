@@ -1796,7 +1796,6 @@ function makeFuncButtons(layout) {
 		{ "text": "엔티티 스폰", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "엔티티 관리", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "아이템 편집", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "아이템 편집", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },2
 		{ "text": "게임 속도", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "옵션", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT}
 	];
@@ -2505,13 +2504,15 @@ function getAllImageFiles(path) {
 				var j = 0;
 				
 				while(Item.getName(i, j, true).indexOf("Missing") == -1) {
-					if(j > 255) //예외상황에서 과도한 무한루프 방지
-						break;
+					if(j > 255) break; //예외상황에서 과도한 무한루프 방지
 					
 					files.push(i + "-" + j + ".png");
 					
 					j++;
-					if(j != 0 && Item.getName(i, j, true) == Item.getName(i, 0, true)) break; //모든 데이터 얻은 후 반복문 탈출
+					//예외처리
+					if(i == 373 && j == 36) break; // 373이 포션인데 373-36을 getName하려고 하면 팅김
+					if(i == 438 && j == 36) break; // 373이 투척포션인데 373-36을 getName하려고 하면 팅김
+					if(j != 0 && Item.getName(i, j, true).equals(Item.getName(i, 0, true))) break; //모든 데이터 얻은 후 반복문 탈출
 				}
 			}
 		}
