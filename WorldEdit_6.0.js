@@ -220,6 +220,8 @@ var getScreenSize = {
 	}
 }
 
+var stackHeight = 0;
+
 var commands = [
 	"채우기",
 	"벽",
@@ -242,7 +244,10 @@ var commands = [
 	"빈 원기둥",
 	"길이",
 	"덮기",
-	"회전 90"
+	"회전 90",
+	"회전 180",
+	"회전 270",
+	"쌓기"
 ];
 
 var resourceLocalFilesNameList = new Array(); //로컬 리소스 파일들의 이름만 저장할 배열
@@ -488,6 +493,16 @@ function procCmd(command) {
 					commandHandler(command[0] + degree.toString());
 				}
 				break;
+				
+			case "쌓기":
+				if(command[1] == "" || command[1] == undefined) { //인수 미설정
+					clientMessage(ChatColor.GREEN + "[HELP] /쌓기 <높이>");
+					return;
+				} else {
+					stackHeight = parseInt(command[1]);
+					
+					commandHandler(command[0]);
+				}
 		}
 	} catch(e) {
 		toast(e, 1);
@@ -1105,6 +1120,10 @@ function toast(message, duration) {
 		run: function() {
 			if(duration == null)
 				duration = 0;
+			
+			if(message == null)
+				message = "undefined";
+			
 			new Toast(CTX).makeText(CTX, message.toString(), duration).show();
 		}
 	}));
@@ -1777,6 +1796,7 @@ function makeFuncButtons(layout) {
 		{ "text": "엔티티 스폰", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "엔티티 관리", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "아이템 편집", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "아이템 편집", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },2
 		{ "text": "게임 속도", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "옵션", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT}
 	];
@@ -2136,7 +2156,22 @@ function chooseItemOnGUI(command) {
 				break;
 			
 			case "회전90":
+			case "회전180":
+			case "회전270":
 				commandDetector = true;
+				break;
+			
+			case "쌓기":
+				var stackHeightDialog = stackHeightSetting();
+				stackHeightDialog.setOnDismissListener(new PopupWindow.OnDismissListener({
+					onDismiss: function() {
+						if(stackHeight == null) {
+							return;
+						}
+						
+						commandDetector = true;
+					}
+				}));
 				break;
 		}
 		
@@ -2255,14 +2290,16 @@ function commandHandler(command) {
 				rotate(90);
 				break;
 			
-			//This can be called by procCmd()
 			case "회전180":
 				rotate(180);
 				break;
 				
-			//This can be called by procCmd()
 			case "회전270":
 				rotate(270);
+				break;
+				
+			case "쌓기":
+				stack(minPoint, maxPoint, stackHeight, terrain);
 				break;
 		}
 	} catch(e) {
@@ -2647,6 +2684,54 @@ function radiusSetting() {
 			}
 		}
 	}));
+}
+
+function stackHeightSetting() {
+	var dialog;
+	
+	CTX.runOnUiThread(new Runnable({
+		run: function() {
+			try {
+				stackHeight = "";
+				
+				var editText = new EditText(CTX);
+				editText.setHint("쌓아올릴 높이를 입력하세요.");
+				editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+				
+				var listener = new DialogInterface.OnClickListener({
+					onClick: function(dialog, which) {
+						switch(which) {
+							case DialogInterface.BUTTON_POSITIVE:
+								if(editText.getText() + "" == "") {
+									toast("높이가 설정되지않았습니다.", 0);
+									closeWindow(GUIWindow);
+								}
+								
+								stackHeight = parseInt(editText.getText() + "");
+								toast(stackHeight);
+								break;
+							
+							case DialogInterface.BUTTON_NEGATIVE:
+								closeWindow(GUIWindow);
+								break;
+						}
+					}
+				});
+				
+				dialog = new AlertDialog.Builder(CTX);
+				dialog.setTitle("쌓아올릴 높이를 설정하세요.");
+				dialog.setView(editText);
+				dialog.setPositiveButton("설정", listener);
+				dialog.setNegativeButton("닫기", listener);
+				dialog.setCancelable(false);
+				dialog.show();
+			} catch(e) {
+				toast("쌓기 높이 설정 다이얼로그를 생성하는 과정에서 문제가 발생했습니다.\n" + e, 1);
+			}
+		}
+	}));
+	
+	return dialog;
 }
 
 function cylinderSetting() {
@@ -3823,9 +3908,6 @@ function paste(clipboard, terrain) {
 		if(cos == -1)
 			z = z - clipboard[0][0].length + 1;
 		
-		var firstPoint = {x: x, y: y, z: z};
-		var secondPoint = {x: (x + clipboard.length - 1), y: (y + clipboard[0].length - 1), z: (z + clipboard[0][0].length - 1)};
-		
 		var blockCount = 0;
 		for (var i = 0; i < clipboard.length; i++) {
 			for (var j = 0; j < clipboard[0].length; j++) {
@@ -3860,6 +3942,49 @@ function paste(clipboard, terrain) {
 	} catch(e) {
 		toast("paste 명령어 실행과정에서 오류가 발생했습니다.\n" + e, 1);
 	}
+}
+
+function stack(minPoint, maxPoint, height, terrain) {
+	//영역 복사
+	var clipboard = new Array();
+	copy(minPoint, maxPoint, clipboard); //CBR
+	
+	var x = minPoint.x;
+	var y = minPoint.y;
+	var z = minPoint.z;
+	
+	var blockCount = 0;
+	
+	//높이
+	for(var h = 0; h < height; h++) {
+		//붙여넣기
+		for (var i = 0; i < clipboard.length; i++) {
+			for (var j = 0; j < clipboard[0].length; j++) {
+				for (var k = 0; k < clipboard[0][0].length; k++) {
+					terrain.origin.push({
+						"x": x + i,
+						"y": y + j,
+						"z": z + k,
+						"id": Level.getTile(x + i, y + j, z + k),
+						"data": Level.getData(x + i, y + j, z + k)
+					});	
+					
+					terrain.modified.push({
+						"x": x + i,
+						"y": y + j,
+						"z": z + k,
+						"id": clipboard[i][j][k].id,
+						"data": clipboard[i][j][k].data
+					});
+					
+					Level.setTile(x + i, y + j, z + k, clipboard[i][j][k].id, clipboard[i][j][k].data);
+					blockCount++;
+				}
+			}
+		}
+	}
+	
+	return terrain;
 }
 
 function createSphere(type, x, y, z, id, data, radius, terrain) {
