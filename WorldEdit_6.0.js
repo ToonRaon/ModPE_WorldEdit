@@ -1821,7 +1821,8 @@ function makeFuncButtons(layout) {
 		{ "text": "엔티티 관리", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "아이템 편집", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "게임 속도", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "옵션", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT}
+		{ "text": "옵션", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "GUI 종료", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT }
 	];
 	
 	//버튼 추가
@@ -1888,19 +1889,23 @@ function makeMinecrafticButton(text, fontSize, width, height) {
 	});
 	mcButton.setOnClickListener(new OnClickListener() {
 		onClick: function(view) {
-			buttonHander(view);
+			buttonHandler(view);
 		}
 	});
 	
 	return mcButton;
 }
 
-function buttonHander(view) {
+function buttonHandler(view) {
 	var text = view.getText() + "";
 	
 	switch(text) {
 		case "옵션":
 			showInGameOptionWindow();
+			break;
+		
+		case "GUI 종료":
+			leaveGame();
 			break;
 	}
 }
