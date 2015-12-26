@@ -1900,6 +1900,18 @@ function buttonHandler(view) {
 	var text = view.getText() + "";
 	
 	switch(text) {
+		case "지점 1 설정":
+		case "지점 2 설정":
+			var x = parseInt(Player.getX());
+			var y = parseInt(Player.getY()) - 1;
+			var z = parseInt(Player.getZ());
+			
+			var block = Level.getTile(x, y, z);
+			var blockData = Level.getData(x, y, z);
+			
+			setPoint(x, y, z, (text.equals("지점 1 설정") ? firstPoint : secondPoint), block, blockData);
+			break;
+		
 		case "옵션":
 			showInGameOptionWindow();
 			break;
