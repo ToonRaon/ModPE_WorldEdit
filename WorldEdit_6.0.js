@@ -648,7 +648,7 @@ function initialize() {
 					checkVersion();
 				}
 				
-				if(currentWorldDir != null) //게임에 이미 접속
+				if(Level.getWorldDir() != null) //게임에 이미 접속
 					newLevel();
 			} catch(e) {
 				toast("initialize 과정에서 오류가 발생하였습니다.\n" + e, 1);
@@ -1912,6 +1912,11 @@ function buttonHandler(view) {
 			setPoint(x, y, z, (text.equals("지점 1 설정") ? firstPoint : secondPoint), block, blockData);
 			break;
 		
+		case "아이템 리스트":
+			canItemSelect = true;
+			showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+			break;
+				
 		case "옵션":
 			showInGameOptionWindow();
 			break;
