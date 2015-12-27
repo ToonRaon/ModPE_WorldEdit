@@ -1814,12 +1814,11 @@ function makeFuncButtons(layout) {
 		{ "text": "지점 2 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "시간 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "아이템 리스트", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "시간 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "튜토리얼", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "스폰지역 설정", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "엔티티 스폰", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "엔티티 관리", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
-		{ "text": "아이템 편집", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
+		{ "text": "아이템 변경/추가", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "게임 속도", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "옵션", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT },
 		{ "text": "GUI 종료", "fontSize": FONT_SIZE, "width": WIDTH,  "height": HEIGHT }
@@ -1915,8 +1914,46 @@ function buttonHandler(view) {
 		case "아이템 리스트":
 			canItemSelect = true;
 			showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+			canItemSelect = false;
 			break;
-				
+		
+		
+		case "아이템 변경/추가":
+			canItemSelect = true;
+			showWindow(GUIWindow, Gravity.CENTER, 0, 0);
+			GUIWindow.setOnDismissListener(new PopupWindow.OnDismissListener({
+				onDismiss: function() {
+					
+					if(selectedItemId != null) {
+						
+						simpleEditTextDialog("아이템 개수", "아이템 개수를 입력하세요.", 1, InputType.TYPE_CLASS_NUMBER, "설정", "취소", true);
+						
+						simpleEditTextBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							onDismiss: function() {
+								toast("aaaaaaaaa");
+								
+								var itemCount = 1;
+								
+								if(!globalText.equals("")) {
+									itemCount = parseInt(globalText);
+								}
+								
+								giveItem(selectedItemId, itemCount, selectedItemData);
+								toast(selectedItemId + " " + itemCount + " " + selectedItemData);
+								
+								selectedItemId = null;
+								selectedItemData = null;
+							}
+						});
+						
+					}
+					
+					GUIWindow.setOnDismissListener(null);
+				}
+			}));
+			canItemSelect = false;
+			break;
+		
 		case "옵션":
 			showInGameOptionWindow();
 			break;
@@ -2537,6 +2574,11 @@ function getAllImageFiles(path) {
 		
 		files.push("");
 		
+		//테스트용
+		files.push("1-0.png");
+		files.push("35-0.png");
+		return files;
+		
 		for each(var i in list) {
 			if(i == ".nomedia" || i == "no_image.png") continue;
 			files.push(i + "");
@@ -2831,6 +2873,54 @@ function cylinderSetting() {
 				dialog.show();
 			} catch(e) {
 				toast("원기둥 설정 다이얼로그를 생성하는 과정에서 문제가 발생했습니다.\n" + e, 1);
+			}
+		}
+	}));
+}
+
+var globalText = "";
+var simpleEditTextBuilder = null;
+function simpleEditTextDialog(title, hint, value, inputType, positiveText, negativeText, cancelable) { //타이틀, 에딧 텍스트 1개, 버튼 2개로 이루어진 단순한 다이얼로그 - 에딧 텍스트의 값을 globalText로 넘긴다.
+	CTX.runOnUiThread(new Runnable({
+		run: function() {
+			try {
+				globalText = "";
+				
+				var editText = new EditText(CTX);
+				editText.setHint(hint + "");
+				if(inputType != null) {
+					editText.setInputType(inputType);
+				}
+				if(value != null) {
+					editText.setText(value + "");
+				}
+				
+				var listener = new DialogInterface.OnClickListener({
+					onClick: function(dialog, which) {
+						switch(which) {
+							case DialogInterface.BUTTON_POSITIVE:
+								if(editText.getText() + "" == "") {
+									toast("설정되지않았습니다.", 0);
+								}
+								globalText = editText.getText() + "";
+								break;
+							
+							case DialogInterface.BUTTON_NEGATIVE:
+								break;
+						}
+					}
+				});
+				
+				builder = new AlertDialog.Builder(CTX);
+				builder.setTitle(title + "");
+				builder.setView(editText);
+				builder.setPositiveButton(positiveText + "", listener);
+				builder.setNegativeButton(negativeText + "", listener);
+				builder.setCancelable(cancelable);
+				simpleEditTextBuilder = builder.create();
+				simpleEditTextBuilder.show();
+			} catch(e) {
+				toast("simpleEditTextDialog를 생성하는 과정에서 문제가 발생했습니다.\n" + e, 1);
 			}
 		}
 	}));
@@ -4546,5 +4636,18 @@ function rotate(degree, init) {
 		}
 	} catch(e) {
 		toast("회전 하는 과정에서 오류가 발생했습니다.\n" + e, 1);
+	}
+}
+
+function giveItem(id, count, data) { //단순히 Entity.setCarriedItem()을 하면 아이템을 쥐고 있지 않은 경우 아무 일도 일어나지 않는 문제 방지
+	if(id == null || count == null || data == null) {
+		toast("giveItem 인자 부족");
+		return;
+	}
+	
+	if(Player.getCarriedItem() != 0) { //아이템 들고 있는 경우
+		Entity.setCarriedItem(Player.getEntity(), id, count, data);
+	} else { //아이템이 없는 경우
+		Player.addItemInventory(id, count, data);
 	}
 }
