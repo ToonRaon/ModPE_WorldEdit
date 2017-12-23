@@ -1,7 +1,7 @@
 /**
  * 월드에딧 스크립트 6.0
  * 제작 : 툰라온
- * 무단 수정 및 2차 배포 금지
+ * 무단 수정 및 2차 배포 "가능"
  * Github : https://github.com/ToonRaon/ModPE_WorldEdit
  */
  
